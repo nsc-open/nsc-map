@@ -1,0 +1,45 @@
+.draggable {
+  position: absolute;
+  z-index: 50;
+  display: inline-block;
+  border-radius: 2px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+}
+
+.layout {
+  display: flex;
+}
+
+.layoutHorizontal {
+  composes: layout;
+  flex-direction: row;
+  min-width: 100px;
+}
+
+.layoutVertical {
+  composes: layout;
+  flex-direction: column;
+  min-height: 100px;
+}
+
+.handler {
+  cursor: move;
+}
+
+.handlerHorizontal {
+  composes: handler;
+  padding: 6px 8px;
+  border-right: 1px solid #e8e8e8;
+}
+
+.handlerVertical {
+  composes: handler;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+
+.main {
+  padding: 6px 8px;
+}

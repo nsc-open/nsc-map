@@ -21,5 +21,15 @@
   "bugs": {
     "url": "https://github.com/nsc-open/nsc-map/issues"
   },
-  "homepage": "https://github.com/nsc-open/nsc-map#readme"
+  "homepage": "https://github.com/nsc-open/nsc-map#readme",
+  "dependencies": {
+    "antd": "^3.11.6",
+    "esri-loader-react": "^2.0.3",
+    "esri-module-loader": "^2.0.1",
+    "prop-types": "^15.6.2",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-draggable": "^3.1.1",
+    "react-resizable": "^1.7.5"
+  }
 }

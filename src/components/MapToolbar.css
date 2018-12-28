@@ -1,0 +1,15 @@
+.tool {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.tool:hover {
+  background: #e8e8e8;
+}
+
+.activeTool {
+  composes: tool;
+  background: lightgrey;
+}
