@@ -9,6 +9,7 @@
   "dependencies": {
     "dva": "^2.4.1",
     "react": "^16.2.0",
+    "react-arcgis": "^3.3.3",
     "react-dom": "^16.2.0"
   },
   "devDependencies": {
