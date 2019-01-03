@@ -2,6 +2,51 @@ import { Component } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
 
+const HIGHLIGHT_SYMBOLS = {
+  point: {
+    type: 'simple-marker',
+    style: 'circle',
+    color: 'lightblue',
+    size: '8px',
+    outline: {
+      color: 'lightblue',
+      width: 3
+    }
+  },
+  multipoint: {
+    type: 'simple-marker',
+    style: 'circle',
+    color: 'lightblue',
+    size: '8px',
+    outline: {
+      color: 'lightblue',
+      width: 3
+    }
+  },
+  polyline: {
+    type: 'simle-line',
+    color: 'lightblue',
+    width: 3
+  },
+  polygon: {
+    type: "simple-fill",
+    color: [6, 253, 255, .5],
+    outline: {
+      type: 'simle-line',
+      color: 'lightblue',
+      width: 1
+    }
+  },
+  extent: {
+    type: "simple-fill",
+    color: [6, 253, 255, .5],
+    outline: {
+      type: 'simle-line',
+      color: 'lightblue',
+      width: 1
+    }
+  }
+}
 /*
 <GraphicsLayer>
   <Graphic selected highlightSymbol={} />
@@ -83,14 +128,7 @@ class Graphic extends Component {
     }
 
     this.originalSymbol = graphic.symbol
-    graphic.symbol = {
-      type: "simple-fill", // autocasts as new SimpleFillSymbol()
-      color: [227, 227, 79, 0.8],
-      outline: { // autocasts as new SimpleLineSymbol()
-        color: [255, 255, 255],
-        width: 2
-      }
-    }
+    graphic.symbol = highlightSymbol || HIGHLIGHT_SYMBOLS[graphic.geometry.type]
   }
 
   clearHighlight () {
