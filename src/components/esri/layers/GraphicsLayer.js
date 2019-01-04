@@ -55,8 +55,13 @@ class GraphicsLayer extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { selectedKeys } = this.props
+    const { selectedKeys, graphicsLayerProperties } = this.props
+    const { layer } = this.state
+
     // update graphicsLayer properties
+    if (graphicsLayerProperties !== prevProps.graphicsLayerProperties) {
+      layer.set(graphicsLayerProperties)
+    }
 
     // handle selection
     if (selectedKeys !== prevProps.selectedKeys) {
@@ -66,8 +71,10 @@ class GraphicsLayer extends Component {
   }
 
   bindEvents () {
-    const { view } = this.props
-    this.eventHandlers = [view.on('click', this.clickHandler)]
+    const { view, allowPointerSelection } = this.props
+    if (allowPointerSelection) {
+      this.eventHandlers.push(view.on('click', this.clickHandler))
+    }
   }
 
   unbindEvents () {
@@ -116,16 +123,13 @@ class GraphicsLayer extends Component {
 
 GraphicsLayer.propTypes = {
   children: PropTypes.oneOfType([
-    PropTypes.arrayOf(Graphic),
-    PropTypes.instanceOf(Graphic)
+    PropTypes.arrayOf(PropTypes.element),
+    PropTypes.element
   ]),
-  graphicsLayerProperties: PropTypes.object.isRequired,
+  graphicsLayerProperties: PropTypes.object,
 
   // graphic selection related
-  allowMapSelection: PropTypes.oneOf([
-    PropTypes.bool,
-    PropTypes.array // ['point-select', 'box-select']
-  ]),
+  allowPointerSelection: PropTypes.bool,
   selectedKeys: PropTypes.array,
   onSelectionChange: PropTypes.func // (selectedKeys, selectedGraphics) => {}
 }
@@ -133,7 +137,7 @@ GraphicsLayer.propTypes = {
 GraphicsLayer.defaultProps = {
   children: [],
   graphicsLayerProperties: null,
-  allowMapSelection: ['point-select', 'box-select'],
+  allowPointerSelection: true,
   selectedKeys: [],
   onSelectionChange: null
 }
