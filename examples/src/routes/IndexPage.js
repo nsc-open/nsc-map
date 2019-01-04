@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
 import GraphicsLayer from 'nsc-map/components/esri/layers/GraphicsLayer'
+import FeatureLayer from 'nsc-map/components/esri/layers/FeatureLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
 
 // Create a polygon geometry
@@ -37,7 +38,7 @@ const json2 = {"geometry":{"x":1.3358120593844913E7,"y":5310771.453513213,"spati
 export default class extends Component {
   state = {
     n: 0,
-    selectedKeys: ['1']
+    selectedKeys: []
   }
 
   componentDidMount () {
@@ -54,10 +55,7 @@ export default class extends Component {
           selectedKeys={selectedKeys}
           onSelectionChange={selectedKeys => this.setState({ selectedKeys })}
         >
-          <Graphic
-            key="1"
-            graphicProperties={graphicProperties}
-          />
+          
           <Graphic
             key="2"
             geometryJson={json1}
@@ -67,6 +65,7 @@ export default class extends Component {
             geometryJson={json2}
           />
         </GraphicsLayer>
+        <FeatureLayer />
       </Map>
     )
   }
