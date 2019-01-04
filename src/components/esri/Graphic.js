@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
 import { HIGHLIGHT_SYMBOLS } from '../../constants/symbols'
 
+const loadModules = () => EsriModuleLoader.loadModules([
+  'esri/Graphic'
+])
 /*
 <GraphicsLayer>
   <Graphic selected highlightSymbol={} />
@@ -23,9 +26,7 @@ class Graphic extends Component {
 
   componentWillMount () {
     // load and add to graphicsLayer
-    EsriModuleLoader.loadModules([
-      'esri/Graphic'
-    ]).then(({ Graphic }) => {
+    loadModules().then(({ Graphic }) => {
       const { graphicProperties, geometryJson } = this.props
       let graphic
 
@@ -37,21 +38,44 @@ class Graphic extends Component {
         throw new Error('geometryJson and graphicProperties cannot to be empty at the same time')
       }
 
-      this.props.graphicsLayer.add(graphic)
+      this.add(graphic)
       this.setState({ graphic })
     })
   }
 
   componentWillUnmount () {
-    this.props.graphicsLayer.remove(this.state.graphic)
+    this.remove(this.state.graphic)
   }
 
   componentDidUpdate (prevProps) {
-    const { selected, graphicProperties } = this.props
+    const { selected, graphicProperties, geometryJson } = this.props
     const { graphic } = this.state
+
+    // if graphic updated by graphicProperties or geometryJson
+    // originalSymbol may need to be updated with new graphic symbol
+    const updateOriginalSymbol = (newGraphic) => {
+      if (this.originalSymbol) {
+        this.originalSymbol = newGraphic.symbol
+      }
+    }
+    
+    if (geometryJson !== prevProps.geometryJson) {
+      // need to create a new graphic
+      loadModules().then(({ Graphic }) => {
+        const newGraphic = Graphic.fromJSON(geometryJson)
+        this.remove(graphic)
+        this.add(newGraphic)
+        updateOriginalSymbol(newGraphic)
+        this.setState({ graphic: newGraphic }) // this will trigger componentDidUpdate again
+      })
+
+      // since setState will trigger componentDidUpdate() again, so no need to proceed code after
+      return
+    }
 
     if (graphicProperties !== prevProps.graphicProperties) {
       graphic.set(graphicProperties)
+      updateOriginalSymbol(graphic)
     }
 
     if (selected) {
@@ -75,8 +99,20 @@ class Graphic extends Component {
 
   clearHighlight () {
     const { graphic } = this.state
+    if (!this.originalSymbol) { // not highlighted yet
+      return
+    }
+
     graphic.symbol = this.originalSymbol
     this.originalSymbol = null
+  }
+
+  add (graphic) {
+    this.props.graphicsLayer.add(graphic)
+  }
+
+  remove (graphic) {
+    this.props.graphicsLayer.remove(graphic)
   }
 
   render () {
@@ -88,7 +124,7 @@ class Graphic extends Component {
 Graphic.propTypes = {
   selected: PropTypes.bool,
   highlightSymbol: PropTypes.object,
-  geometryJson: PropTypes.object,     // geometryJson will only be handled for the initial rendering
+  geometryJson: PropTypes.object,
   graphicProperties: PropTypes.object // if geometryJson passed, graphicProperties will be ignored
 }
 
