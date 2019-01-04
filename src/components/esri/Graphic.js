@@ -27,7 +27,7 @@ class Graphic extends Component {
   }
 
   componentWillMount () {
-    // load and add to graphicsLayer
+    // load and add to graphicsLayer/featureLayer
     loadModules().then(({ Graphic }) => {
       const { graphicProperties, geometryJson } = this.props
       let graphic
@@ -110,11 +110,38 @@ class Graphic extends Component {
   }
 
   add (graphic) {
-    this.props.graphicsLayer.add(graphic)
+    const { layer } = this.props
+    if (layer.type === 'graphics') {
+      layer.add(graphic)  
+    } else if (layer.type === 'feature') {
+      layer.applyEdits({
+        addFeatures: [graphic]
+      })
+    }
   }
 
   remove (graphic) {
-    this.props.graphicsLayer.remove(graphic)
+    const { layer } = this.props
+    if (layer.type === 'graphics') {
+      layer.remove(graphic)
+    } else if (layer.type === 'feature') {
+      layer.applyEdits({
+        deleteFeatures: [graphic]
+      })
+    }
+  }
+
+  update (graphic) {
+    const { layer } = this.props
+    if (layer.type === 'graphics') {
+      // find by key
+      // remove old one
+      // add new one
+    } else if (layer.type === 'feature') {
+      layer.applyEdits({
+        updateFeatures: [graphic]
+      })
+    }
   }
 
   render () {

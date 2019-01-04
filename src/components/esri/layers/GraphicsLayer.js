@@ -108,7 +108,7 @@ class GraphicsLayer extends Component {
     const { layer, selectedKeys } = this.state
 
     if (layer) {
-      const childProps = { graphicsLayer: layer } // pass graphicsLayer to direct children
+      const childProps = { layer } // pass graphicsLayer to direct children
       return Children.map(children, child => {
         const graphicKey = child.key
         addKey(child.props, graphicKey)

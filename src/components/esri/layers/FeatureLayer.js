@@ -33,10 +33,10 @@ const renderer = {
 
 /**
  * usage:
- *  <GraphicsLayer selectedKeys={[]}>
-      <Graphic key="" highlight highlightSymbol={} geometryJson={} />
-      <Graphic key="" graphicProperties={} />
-    </GraphicsLayer>
+ *  <FeatureLayer featureLayerProperties={} selectedKeys>
+ *    <Graphic />
+ *    <Graphic />
+ *  </FeatureLayer>
  */
 class FeatureLayer extends Component {
 
@@ -137,11 +137,15 @@ class FeatureLayer extends Component {
 }
 
 FeatureLayer.propTypes = {
-  allowPointerSelection: PropTypes.bool
+  allowPointerSelection: PropTypes.bool,
+  selectedKeys: PropTypes.arrayOf(PropTypes.string),
+  onSelectionChange: PropTypes.func
 }
 
 FeatureLayer.defaultProps = {
-  allowPointerSelection: true
+  allowPointerSelection: true,
+  selectedKeys: [],
+  onSelectionChange: null
 }
 
 export default FeatureLayer
