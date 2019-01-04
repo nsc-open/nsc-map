@@ -1,7 +1,6 @@
 import React, { Component, Children } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
-import Graphic from '../Graphic'
 
 const addKey = (graphicProps, key) => {
   const _add = (graphic, key) => {
@@ -18,10 +17,11 @@ const addKey = (graphicProps, key) => {
 }
 
 /**
- * <GraphicsLayer>
- *  <Graphic selected />
- *  <Graphic />
- * </GraphicsLayer>
+ * usage:
+ *  <GraphicsLayer selectedKeys={[]}>
+      <Graphic key="" highlight highlightSymbol={} geometryJson={} />
+      <Graphic key="" graphicProperties={} />
+    </GraphicsLayer>
  */
 class GraphicsLayer extends Component {
 

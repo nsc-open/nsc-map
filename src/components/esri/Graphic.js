@@ -6,12 +6,14 @@ import { HIGHLIGHT_SYMBOLS } from '../../constants/symbols'
 const loadModules = () => EsriModuleLoader.loadModules([
   'esri/Graphic'
 ])
-/*
-<GraphicsLayer selectedKeys={[]}>
-  <Graphic key="" highlight highlightSymbol={} />
-  <Graphic key="" />
-</GraphicsLayer>
-*/
+
+/**
+ * usage:
+ *  <GraphicsLayer selectedKeys={[]}>
+      <Graphic key="" highlight highlightSymbol={} geometryJson={} />
+      <Graphic key="" graphicProperties={} />
+    </GraphicsLayer>
+ */
 class Graphic extends Component {
   constructor (props) {
     super(props)
