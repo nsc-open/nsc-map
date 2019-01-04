@@ -1,6 +1,7 @@
 import React, { Component, Children } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
+import { addKey } from './utils'
 
 var features = [{
   geometry: {
@@ -33,7 +34,7 @@ const renderer = {
 
 /**
  * usage:
- *  <FeatureLayer featureLayerProperties={} selectedKeys>
+ *  <FeatureLayer featureLayerProperties={} selectedKeys onSelectionChange>
  *    <Graphic />
  *    <Graphic />
  *  </FeatureLayer>
@@ -128,8 +129,12 @@ class FeatureLayer extends Component {
     const { layer } = this.state
 
     if (layer) {
-      const childProps = {} // pass featureLayer to direct children
-      return Children.map(children, child => React.cloneElement(child, childProps))
+      const childProps = { layer } // pass graphicsLayer to direct children
+      return Children.map(children, child => {
+        const graphicKey = child.key
+        addKey(child.props, graphicKey)
+        return React.cloneElement(child, childProps)
+      })
     } else {
       return null
     }
