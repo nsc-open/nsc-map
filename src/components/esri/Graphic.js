@@ -1,52 +1,8 @@
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
+import { HIGHLIGHT_SYMBOLS } from '../../constants/symbols'
 
-const HIGHLIGHT_SYMBOLS = {
-  point: {
-    type: 'simple-marker',
-    style: 'circle',
-    color: 'lightblue',
-    size: '8px',
-    outline: {
-      color: 'lightblue',
-      width: 3
-    }
-  },
-  multipoint: {
-    type: 'simple-marker',
-    style: 'circle',
-    color: 'lightblue',
-    size: '8px',
-    outline: {
-      color: 'lightblue',
-      width: 3
-    }
-  },
-  polyline: {
-    type: 'simle-line',
-    color: 'lightblue',
-    width: 3
-  },
-  polygon: {
-    type: "simple-fill",
-    color: [6, 253, 255, .5],
-    outline: {
-      type: 'simle-line',
-      color: 'lightblue',
-      width: 1
-    }
-  },
-  extent: {
-    type: "simple-fill",
-    color: [6, 253, 255, .5],
-    outline: {
-      type: 'simle-line',
-      color: 'lightblue',
-      width: 1
-    }
-  }
-}
 /*
 <GraphicsLayer>
   <Graphic selected highlightSymbol={} />
@@ -56,6 +12,9 @@ const HIGHLIGHT_SYMBOLS = {
 class Graphic extends Component {
   constructor (props) {
     super(props)
+    // because of componentDidUpdate() won't be triggered for the initial rendering
+    // so set graphic as state will solve this problem, once graphic is created and setState, component will trigger componentDidUpdate() automatically
+    // otherwise, hightlight logic needs to be there in componentWillMount() for one more time
     this.state = {
       graphic: null
     }
@@ -67,34 +26,17 @@ class Graphic extends Component {
     EsriModuleLoader.loadModules([
       'esri/Graphic'
     ]).then(({ Graphic }) => {
-      // Create a polygon geometry
-      const polygon = {
-        type: "polygon", // autocasts as new Polygon()
-        rings: [
-        [-64.78, 32.3],
-        [-66.07, 18.45],
-        [-80.21, 25.78],
-        [-64.78, 32.3]
-        ]
-      };
+      const { graphicProperties, geometryJson } = this.props
+      let graphic
 
-      // Create a symbol for rendering the graphic
-      const fillSymbol = {
-        type: "simple-fill", // autocasts as new SimpleFillSymbol()
-        color: [227, 139, 79, 0.8],
-        outline: { // autocasts as new SimpleLineSymbol()
-        color: [255, 255, 255],
-        width: 1
-        }
-      };
+      if (geometryJson) {
+        graphic = Graphic.fromJSON(geometryJson)
+      } else if (graphicProperties) {
+        graphic = new Graphic(graphicProperties)
+      } else {
+        throw new Error('geometryJson and graphicProperties cannot to be empty at the same time')
+      }
 
-      // Add the geometry and symbol to a new graphic
-      const graphic = new Graphic({
-        geometry: polygon,
-        symbol: fillSymbol
-      });
-
-      
       this.props.graphicsLayer.add(graphic)
       this.setState({ graphic })
     })
@@ -145,14 +87,16 @@ class Graphic extends Component {
 
 Graphic.propTypes = {
   selected: PropTypes.bool,
-  highlightSymbol: PropTypes.object.isRequired,
-  graphicProperties: PropTypes.object
+  highlightSymbol: PropTypes.object,
+  geometryJson: PropTypes.object,     // geometryJson will only be handled for the initial rendering
+  graphicProperties: PropTypes.object // if geometryJson passed, graphicProperties will be ignored
 }
 
 Graphic.defaultProps = {
   selected: false,
-  highlightSymbol: {},
-  graphicProperties: {}
+  highlightSymbol: null,
+  geometryJson: null,
+  graphicProperties: null
 }
 
 export default Graphic
