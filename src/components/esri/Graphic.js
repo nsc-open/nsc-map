@@ -7,9 +7,9 @@ const loadModules = () => EsriModuleLoader.loadModules([
   'esri/Graphic'
 ])
 /*
-<GraphicsLayer>
-  <Graphic selected highlightSymbol={} />
-  <Graphic />
+<GraphicsLayer selectedKeys={[]}>
+  <Graphic key="" highlight highlightSymbol={} />
+  <Graphic key="" />
 </GraphicsLayer>
 */
 class Graphic extends Component {
@@ -48,7 +48,7 @@ class Graphic extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { selected, graphicProperties, geometryJson } = this.props
+    const { highlight, graphicProperties, geometryJson } = this.props
     const { graphic } = this.state
 
     // if graphic updated by graphicProperties or geometryJson
@@ -78,7 +78,7 @@ class Graphic extends Component {
       updateOriginalSymbol(graphic)
     }
 
-    if (selected) {
+    if (highlight) {
       this.highlight()
     } else {
       this.clearHighlight()
@@ -122,14 +122,14 @@ class Graphic extends Component {
 }
 
 Graphic.propTypes = {
-  selected: PropTypes.bool,
+  highlight: PropTypes.bool,
   highlightSymbol: PropTypes.object,
   geometryJson: PropTypes.object,
   graphicProperties: PropTypes.object // if geometryJson passed, graphicProperties will be ignored
 }
 
 Graphic.defaultProps = {
-  selected: false,
+  highlight: false,
   highlightSymbol: null,
   geometryJson: null,
   graphicProperties: null
