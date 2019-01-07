@@ -55,37 +55,33 @@ class FeatureLayer extends Component {
       'FeatureLayer',
       'esri/widgets/Sketch/SketchViewModel'
     ]).then(({ FeatureLayer, SketchViewModel }) => {
-      const { map } = this.props
       const layer = new FeatureLayer({
-        source: features,
-        geometryType: 'polygon',
-        fields: [{
-          name: 'ObjectID',
-          alias: 'ObjectID',
-          type: 'oid'
-        }],
-        objectIdField: 'ObjectID',
-        renderer: renderer
+        // source: features,
+        // geometryType: 'polygon',
+        url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0",
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "simple-marker",
+            color: [255, 255, 255, 0.6],
+            size: 4,
+            outline: {
+              color: [0, 0, 0, 0.4],
+              width: 0.5
+            }
+          }
+        }
       })
-      map.add(layer)
+      this.addLayer(layer)
 
       this.bindEvents()
-      this.setState({ layer })
-
-      setTimeout(() => {
-        var sketch = new SketchViewModel({
-          view: this.props.view,
-          layer: layer
-        })
-        console.log('sketch', sketch)
-      }, 5000)
-      
+      this.setState({ layer }) 
     })
   }
 
   componentWillUnmount () {
     this.unbindEvents()
-    this.props.map.remove(this.state.layer)
+    this.removeLayer(this.state.layer)
   }
 
   componentDidUpdate (prevProps) {
@@ -119,6 +115,25 @@ class FeatureLayer extends Component {
     this.eventHandlers.forEach(h => h.remove())
   }
 
+  addLayer (layer) {
+    console.log('FeatureLayer addLayer')
+    const { map, parentLayer } = this.props
+    if (parentLayer) {
+      parentLayer.add(layer)
+    } else {
+      map.add(layer)
+    }
+  }
+
+  removeLayer (layer) {
+    const { map, parentLayer } = this.props
+    if (parentLayer) {
+      parentLayer.remove(layer)
+    } else {
+      map.remove(layer)
+    }
+  }
+
   getGraphicKeys (graphics = []) {
     return graphics.map(g => g.attributes.key)
   }
@@ -129,6 +144,7 @@ class FeatureLayer extends Component {
     const { layer } = this.state
 
     if (layer) {
+      console.log('FeatureLayer render has layer')
       const childProps = { layer } // pass graphicsLayer to direct children
       return Children.map(children, child => {
         const graphicKey = child.key
@@ -142,12 +158,16 @@ class FeatureLayer extends Component {
 }
 
 FeatureLayer.propTypes = {
+  map: PropTypes.object.isRequired,
+  parentLayer: PropTypes.object,
   allowPointerSelection: PropTypes.bool,
   selectedKeys: PropTypes.arrayOf(PropTypes.string),
   onSelectionChange: PropTypes.func
 }
 
 FeatureLayer.defaultProps = {
+  map: undefined,
+  parentLayer: undefined,
   allowPointerSelection: true,
   selectedKeys: [],
   onSelectionChange: null

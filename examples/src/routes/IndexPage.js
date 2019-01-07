@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
 import GraphicsLayer from 'nsc-map/components/esri/layers/GraphicsLayer'
 import FeatureLayer from 'nsc-map/components/esri/layers/FeatureLayer'
+import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
 
 // Create a polygon geometry
@@ -51,6 +52,7 @@ export default class extends Component {
     const { selectedKeys, n } = this.state
     return (
       <Map>
+        {/*
         <GraphicsLayer
           selectedKeys={selectedKeys}
           onSelectionChange={selectedKeys => this.setState({ selectedKeys })}
@@ -66,6 +68,9 @@ export default class extends Component {
           />
         </GraphicsLayer>
         <FeatureLayer />
+       */}
+
+        <GroundObjectsLayer />
       </Map>
     )
   }
