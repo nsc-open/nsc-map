@@ -2,41 +2,13 @@ import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 import EsriModuleLoader from 'esri-module-loader';
 import { addKey } from './utils';
-var features = [{
-  geometry: {
-    type: "polygon",
-    // autocasts as new Polygon()
-    rings: [[-64.78, 32.3], [-66.07, 18.45], [-80.21, 25.78], [-64.78, 32.3]]
-  },
-  attributes: {
-    ObjectID: 1,
-    DepArpt: "KATL",
-    MsgTime: Date.now(),
-    FltId: "UAL1"
-  }
-}];
-const renderer = {
-  type: "simple",
-  // autocasts as new SimpleRenderer()
-  symbol: {
-    type: "simple-fill",
-    // autocasts as new SimpleFillSymbol()
-    color: [227, 139, 79, 0.8],
-    outline: {
-      // autocasts as new SimpleLineSymbol()
-      color: [255, 255, 255],
-      width: 1
-    }
-  }
-  /**
-   * usage:
-   *  <FeatureLayer featureLayerProperties={} selectedKeys onSelectionChange>
-   *    <Graphic />
-   *    <Graphic />
-   *  </FeatureLayer>
-   */
-
-};
+/**
+ * usage:
+ *  <FeatureLayer featureLayerProperties={} selectedKeys onSelectionChange>
+ *    <Graphic />
+ *    <Graphic />
+ *  </FeatureLayer>
+ */
 
 class FeatureLayer extends Component {
   constructor(props) {
@@ -49,27 +21,14 @@ class FeatureLayer extends Component {
   }
 
   componentWillMount() {
+    console.log('FeatureLayer willmount');
     EsriModuleLoader.loadModules(['FeatureLayer', 'esri/widgets/Sketch/SketchViewModel']).then(({
-      FeatureLayer,
-      SketchViewModel
+      FeatureLayer
     }) => {
-      const layer = new FeatureLayer({
-        // source: features,
-        // geometryType: 'polygon',
-        url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0",
-        renderer: {
-          type: "simple",
-          symbol: {
-            type: "simple-marker",
-            color: [255, 255, 255, 0.6],
-            size: 4,
-            outline: {
-              color: [0, 0, 0, 0.4],
-              width: 0.5
-            }
-          }
-        }
-      });
+      const {
+        featureLayerProperties
+      } = this.props;
+      const layer = new FeatureLayer(featureLayerProperties);
       this.addLayer(layer);
       this.bindEvents();
       this.setState({
@@ -119,15 +78,16 @@ class FeatureLayer extends Component {
   }
 
   addLayer(layer) {
-    console.log('FeatureLayer addLayer');
     const {
       map,
       parentLayer
     } = this.props;
 
     if (parentLayer) {
+      console.log('FeatureLayer parentLayer.add(layer)');
       parentLayer.add(layer);
     } else {
+      console.log('FeatureLayer map.add(layer)');
       map.add(layer);
     }
   }
@@ -177,8 +137,10 @@ class FeatureLayer extends Component {
 }
 
 FeatureLayer.propTypes = {
-  map: PropTypes.object.isRequired,
+  map: PropTypes.object,
   parentLayer: PropTypes.object,
+  featureLayerPropperties: PropTypes.object,
+  // isRequired
   allowPointerSelection: PropTypes.bool,
   selectedKeys: PropTypes.arrayOf(PropTypes.string),
   onSelectionChange: PropTypes.func
@@ -186,6 +148,7 @@ FeatureLayer.propTypes = {
 FeatureLayer.defaultProps = {
   map: undefined,
   parentLayer: undefined,
+  featureLayerPropperties: undefined,
   allowPointerSelection: true,
   selectedKeys: [],
   onSelectionChange: null

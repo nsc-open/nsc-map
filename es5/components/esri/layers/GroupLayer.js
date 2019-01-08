@@ -15,12 +15,14 @@ class GroupLayer extends Component {
   }
 
   componentWillMount() {
+    console.log('GroupLayer willmount');
     EsriModuleLoader.loadModules(['esri/layers/GroupLayer']).then(({
       GroupLayer
     }) => {
       const {
         map
       } = this.props;
+      console.log('map true?', !!map);
       const layer = new GroupLayer();
       map.add(layer);
       console.log('GroupLayer map.add(layer)');
@@ -44,14 +46,16 @@ class GroupLayer extends Component {
       layer
     } = this.state;
 
-    if (layer) {
+    if (layer && children) {
       console.log('GroupLayer render');
       return Children.map(children, child => {
-        return React.cloneElement(child, _objectSpread({
+        const childProps = _objectSpread({}, child.props, {
           map,
           view,
           parentLayer: layer
-        }, child.props));
+        });
+
+        return React.cloneElement(child, childProps);
       });
     } else {
       console.log('GroupLayer render null', this.props);
@@ -62,7 +66,7 @@ class GroupLayer extends Component {
 }
 
 GroupLayer.propTypes = {
-  map: PropTypes.object.isRequired
+  map: PropTypes.object
 };
 GroupLayer.defaultTypes = {
   map: undefined
