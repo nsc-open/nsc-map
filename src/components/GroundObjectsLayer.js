@@ -4,6 +4,22 @@ import EsriModuleLoader from 'esri-module-loader'
 import GroupLayer from './esri/layers/GroupLayer'
 import FeatureLayer from './esri/layers/FeatureLayer'
 
+const onlineFeatureLayerProperties = {
+  url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0",
+  renderer: {
+    type: "simple",
+    symbol: {
+      type: "simple-marker",
+      color: [255, 255, 255, 0.6],
+      size: 4,
+      outline: {
+        color: [0, 0, 0, 0.4],
+        width: 0.5
+      }
+    }
+  }
+}
+
 // is a combination of GraphicsLayer and Annotation Layer
 /**
  * <GroundObjectsLayer>
@@ -71,9 +87,11 @@ class GroundObjectsLayer extends Component {
 
     return (
       <GroupLayer map={map}>
+        {/*
         <FeatureLayer key="polygonsFeatureLayer"></FeatureLayer>
         <FeatureLayer key="linesFeatureLayer"></FeatureLayer>
-        <FeatureLayer key="pointsFeatureLayer"></FeatureLayer>
+        */}
+        <FeatureLayer key="pointsFeatureLayer" featureLayerProperties={onlineFeatureLayerProperties}></FeatureLayer>
       </GroupLayer>
     )
   }

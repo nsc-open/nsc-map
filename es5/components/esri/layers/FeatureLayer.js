@@ -28,9 +28,10 @@ class FeatureLayer extends Component {
       const {
         featureLayerProperties
       } = this.props;
+      console.log('FeatureLayer new FeatureLayer()', featureLayerProperties);
       const layer = new FeatureLayer(featureLayerProperties);
-      this.addLayer(layer);
-      this.bindEvents();
+      this.addLayer(layer); // this.bindEvents()
+
       this.setState({
         layer
       });
@@ -110,7 +111,6 @@ class FeatureLayer extends Component {
   }
 
   render() {
-    console.log('FeatureLayer render');
     const {
       children = []
     } = this.props;
@@ -130,6 +130,7 @@ class FeatureLayer extends Component {
         return React.cloneElement(child, childProps);
       });
     } else {
+      console.log('FeatureLayer render null');
       return null;
     }
   }

@@ -3,8 +3,9 @@ import { Map } from 'react-arcgis'
 import GraphicsLayer from 'nsc-map/components/esri/layers/GraphicsLayer'
 import FeatureLayer from 'nsc-map/components/esri/layers/FeatureLayer'
 import GroupLayer from 'nsc-map/components/esri/layers/GroupLayer'
-import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
+import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
+import GroundObject from 'nsc-map/components/GroundObject'
 
 // Create a polygon geometry
 const polygon = {
@@ -104,10 +105,17 @@ export default class extends Component {
         </GraphicsLayer>
         <FeatureLayer />
        */}
+
+       {/*
        <GroupLayer>
          <FeatureLayer featureLayerProperties={onlineFeatureLayerProperties} />
          <FeatureLayer featureLayerProperties={sourceFeatureLayerProperties} />
        </GroupLayer>
+       */}
+
+       <GroundObjectsLayer>
+         <GroundObject></GroundObject>
+       </GroundObjectsLayer>
       </Map>
     )
   }
