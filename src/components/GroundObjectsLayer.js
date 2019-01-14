@@ -38,34 +38,6 @@ class GroundObjectsLayer extends Component {
     }
   }
 
-  componentWillMount () {
-    EsriModuleLoader.loadModules([
-      'esri/layers/FeatureLayer',
-      'esri/layers/GroupLayer'
-    ]).then(({ FeatureLayer, GroupLayer }) => {
-      const { map } = this.props
-      const pointsFeatureLayer = new FeatureLayer()
-      const linesFeatureLayer = new FeatureLayer()
-      const polygonsFeatureLayer = new FeatureLayer()
-      const groupLayer = new GroupLayer({
-        layers: [polygonsFeatureLayer, linesFeatureLayer, pointsFeatureLayer]
-      })
-      
-      map.add(groupLayer)
-
-      this.setState({
-        groupLayer,
-        pointsFeatureLayer,
-        linesFeatureLayer,
-        polygonsFeatureLayer
-      })
-    })
-  }
-
-  componentWillUnmount () {
-    this.props.map.remove(this.state.groupLayer)
-  }
-
   add () {
 
   }
@@ -91,6 +63,28 @@ class GroundObjectsLayer extends Component {
         <FeatureLayer key="polygonsFeatureLayer"></FeatureLayer>
         <FeatureLayer key="linesFeatureLayer"></FeatureLayer>
         */}
+        <FeatureLayer
+          key="polygonsFeatureLayer"
+          featureLayerProperties={{
+            source: [],
+            geometryType: 'polygon',
+            objectIdField: 'ObjectID',
+            // fields: [{ name: 'ObjectID', alias: 'ObjectID', type: 'string' }],
+            renderer: {
+              type: "simple", // autocasts as new SimpleRenderer()
+              symbol: {
+                type: "simple-fill", // autocasts as new SimpleFillSymbol()
+                color: [227, 139, 79, 0.8],
+                outline: { // autocasts as new SimpleLineSymbol()
+                  color: [255, 255, 255],
+                  width: 1
+                }
+              }
+            }
+          }}
+        >
+          {children}
+        </FeatureLayer>
         <FeatureLayer key="pointsFeatureLayer" featureLayerProperties={onlineFeatureLayerProperties}></FeatureLayer>
       </GroupLayer>
     )

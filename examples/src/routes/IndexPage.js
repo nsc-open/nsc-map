@@ -114,7 +114,7 @@ export default class extends Component {
        */}
 
        <GroundObjectsLayer>
-         <GroundObject></GroundObject>
+         <GroundObject key="2" graphicProperties={graphicProperties} />
        </GroundObjectsLayer>
       </Map>
     )

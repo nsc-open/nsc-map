@@ -112,8 +112,10 @@ class Graphic extends Component {
   add (graphic) {
     const { layer } = this.props
     if (layer.type === 'graphics') {
+      console.log('Graphic.add as graphic')
       layer.add(graphic)  
     } else if (layer.type === 'feature') {
+      console.log('Graphic.add as feature')
       layer.applyEdits({
         addFeatures: [graphic]
       })
