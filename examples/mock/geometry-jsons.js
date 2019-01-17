@@ -4,8 +4,7 @@ export const polyline = {
     paths: [
       [-111.30, 52.68],
       [-98, 49.5],
-      [-93.94, 29.89],
-      [-64.78, 32.3]
+      [-93.94, 29.89]
     ]
   },
   symbol: {
@@ -15,7 +14,7 @@ export const polyline = {
   },
   attributes: {
     ObjectID: 'demo-polyline-001',
-    Name: "demo line",
+    Name: "line",
     Owner: "TransCanada"
   }
 }
@@ -32,7 +31,7 @@ export const point = {
   },
   attributes: {
     ObjectID: 'demo-point-001',
-    Name: "demo point",
+    Name: "point",
     Owner: "TransCanada"
   }
 }
@@ -57,7 +56,7 @@ export const polygon = {
   },
   attributes: {
     ObjectID: 'demo-polygon-001',
-    Name: "demo polygon",
+    Name: "gon",
     Owner: "TransCanada"
   }
 }
@@ -82,7 +81,7 @@ export const polygon1 = {
   },
   attributes: {
     ObjectID: 'demo-polygon-001',
-    Name: "demo polygon 1",
+    Name: "gon1",
     Owner: "TransCanada"
   }
 }
@@ -108,7 +107,7 @@ export const polygon2 = {
   },
   attributes: {
     ObjectID: 'demo-polygon-001',
-    Name: "demo polygon 2",
+    Name: "gon2",
     Owner: "TransCanada"
   }
 }

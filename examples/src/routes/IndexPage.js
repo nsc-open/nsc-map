@@ -70,10 +70,10 @@ export default class extends Component {
        */}
 
        <GroundObjectsLayer>
-         <GroundObject key="0" graphicProperties={polygon1} />
-         <GroundObject key="1" graphicProperties={polygon2} />
-         <GroundObject key="2" graphicProperties={polyline} />
-         <GroundObject key="3" graphicProperties={point} />
+         <GroundObject key="0" geometryJson={polygon1} />
+         <GroundObject key="1" geometryJson={polygon2} />
+         <GroundObject key="2" geometryJson={polyline} />
+         <GroundObject key="3" geometryJson={point} />
        </GroundObjectsLayer>
       </Map>
     )

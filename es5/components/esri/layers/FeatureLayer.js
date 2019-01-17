@@ -44,7 +44,7 @@ class FeatureLayer extends Component {
         symbol: {
           type: "text",
           // autocasts as new TextSymbol()
-          color: "green",
+          color: "red",
           haloColor: "black"
         },
         labelPlacement: "above-center",

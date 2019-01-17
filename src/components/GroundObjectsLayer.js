@@ -48,7 +48,7 @@ class GroundObjectsLayer extends Component {
 
     // TODO 这里如果 children数量很大上万条数据，怎么可以快一些或者 cache 计算结果
     Children.map(children, child => {
-      const { geometry } = child.props.graphicProperties
+      const { geometry } = child.props.geometryJson
       if (geometry.type === GEOMETRY_TYPE.POLYGON.key) {
         polygons.push(child)
       } else if (geometry.type === GEOMETRY_TYPE.POLYLINE.key) {
@@ -131,7 +131,7 @@ class GroundObjectsLayer extends Component {
 }
 
 GroundObjectsLayer.propTypes = {
-  map: PropTypes.object,
+  map: PropTypes.object
 }
 
 GroundObjectsLayer.defaultProps = {

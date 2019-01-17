@@ -49,7 +49,7 @@ class GroundObjectsLayer extends Component {
     Children.map(children, child => {
       const {
         geometry
-      } = child.props.graphicProperties;
+      } = child.props.geometryJson;
 
       if (geometry.type === GEOMETRY_TYPE.POLYGON.key) {
         polygons.push(child);
