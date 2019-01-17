@@ -8,3 +8,12 @@ export const P1 = {
     ]
   }
 }
+
+export const polyline1 = {
+  type: "polyline",
+  paths: [
+    [-111.30, 52.68],
+    [-98, 49.5],
+    [-93.94, 29.89]
+  ]
+}

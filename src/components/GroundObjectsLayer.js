@@ -1,24 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component, Children } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
 import GroupLayer from './esri/layers/GroupLayer'
 import FeatureLayer from './esri/layers/FeatureLayer'
-
-const onlineFeatureLayerProperties = {
-  url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/weather_stations_010417/FeatureServer/0",
-  renderer: {
-    type: "simple",
-    symbol: {
-      type: "simple-marker",
-      color: [255, 255, 255, 0.6],
-      size: 4,
-      outline: {
-        color: [0, 0, 0, 0.4],
-        width: 0.5
-      }
-    }
-  }
-}
+import { GEOMETRY_TYPE } from '../constants/geometry'
 
 // is a combination of GraphicsLayer and Annotation Layer
 /**
@@ -56,20 +41,33 @@ class GroundObjectsLayer extends Component {
     if (!map) {
       return null
     }
+    const points = []
+    const multipoints = []
+    const polylines = []
+    const polygons = []
+
+    // TODO 这里如果 children数量很大上万条数据，怎么可以快一些或者 cache 计算结果
+    Children.map(children, child => {
+      const { geometry } = child.props.graphicProperties
+      if (geometry.type === GEOMETRY_TYPE.POLYGON.key) {
+        polygons.push(child)
+      } else if (geometry.type === GEOMETRY_TYPE.POLYLINE.key) {
+        polylines.push(child)
+      } else if (geometry.type === GEOMETRY_TYPE.POINT.key) {
+        points.push(child)
+      } else if (geometry.type === GEOMETRY_TYPE.MULTIPOINT.key) {
+        multipoints.push(child)
+      }
+    })
 
     return (
       <GroupLayer map={map}>
-        {/*
-        <FeatureLayer key="polygonsFeatureLayer"></FeatureLayer>
-        <FeatureLayer key="linesFeatureLayer"></FeatureLayer>
-        */}
         <FeatureLayer
           key="polygonsFeatureLayer"
           featureLayerProperties={{
             source: [],
             geometryType: 'polygon',
             objectIdField: 'ObjectID',
-            // fields: [{ name: 'ObjectID', alias: 'ObjectID', type: 'string' }],
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {
@@ -83,9 +81,50 @@ class GroundObjectsLayer extends Component {
             }
           }}
         >
-          {children}
+          {polygons}
         </FeatureLayer>
-        <FeatureLayer key="pointsFeatureLayer" featureLayerProperties={onlineFeatureLayerProperties}></FeatureLayer>
+        <FeatureLayer
+          key="linesFeatureLayer"
+          featureLayerProperties={{
+            source: [],
+            geometryType: 'polyline',
+            objectIdField: 'ObjectID',
+            renderer: {
+              type: "simple", // autocasts as new SimpleRenderer()
+              symbol: {
+                type: "simple-line",  // autocasts as new SimpleLineSymbol()
+                color: "red",
+                width: "2px",
+                style: "short-dot"
+              }
+            }
+          }}
+        >
+          {polylines}
+        </FeatureLayer>
+        <FeatureLayer
+          key="pointsFeatureLayer"
+          featureLayerProperties={{
+            source: [],
+            geometryType: 'point',
+            objectIdField: 'ObjectID',
+            renderer: {
+              type: "simple", // autocasts as new SimpleRenderer()
+              symbol: {
+                type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
+                style: "square",
+                color: "blue",
+                size: "8px",  // pixels
+                outline: {  // autocasts as new SimpleLineSymbol()
+                  color: [ 255, 255, 0 ],
+                  width: 3  // points
+                }
+              }
+            }
+          }}
+        >
+          {points}
+        </FeatureLayer>
       </GroupLayer>
     )
   }
@@ -96,7 +135,10 @@ GroundObjectsLayer.propTypes = {
 }
 
 GroundObjectsLayer.defaultProps = {
-  map: null
+  map: null,
+  featureLayerProppertiesMapping: {
+    
+  }
 }
 
 export default GroundObjectsLayer

@@ -6,6 +6,7 @@ import GroupLayer from 'nsc-map/components/esri/layers/GroupLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
 import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
 import GroundObject from 'nsc-map/components/GroundObject'
+import { polyline, point } from 'mock/geometry-jsons'
 
 // Create a polygon geometry
 const polygon = {
@@ -114,7 +115,9 @@ export default class extends Component {
        */}
 
        <GroundObjectsLayer>
-         <GroundObject key="2" graphicProperties={graphicProperties} />
+         <GroundObject key="1" graphicProperties={graphicProperties} />
+         <GroundObject key="2" graphicProperties={polyline} />
+         <GroundObject key="3" graphicProperties={point} />
        </GroundObjectsLayer>
       </Map>
     )
