@@ -33,7 +33,8 @@ class GroundObjectsLayer extends Component {
     console.log('GroundObjectsLayer render', this.props);
     const {
       children,
-      map
+      map,
+      view
     } = this.props;
 
     if (!map) {
@@ -61,7 +62,8 @@ class GroundObjectsLayer extends Component {
       }
     });
     return React.createElement(GroupLayer, {
-      map: map
+      map: map,
+      view: view
     }, React.createElement(FeatureLayer, {
       key: "polygonsFeatureLayer",
       featureLayerProperties: {
@@ -136,6 +138,12 @@ GroundObjectsLayer.propTypes = {
 };
 GroundObjectsLayer.defaultProps = {
   map: null,
-  featureLayerProppertiesMapping: {}
+  featureLayerPropperties: [{
+    geometryType: 'polygon',
+    fields: [],
+    objectIdField: '',
+    labelingInfo: [],
+    renderer: {}
+  }]
 };
 export default GroundObjectsLayer;

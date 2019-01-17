@@ -19,20 +19,40 @@ class FeatureLayer extends Component {
     }
 
     this.eventHandlers = []
+    this.highlight = null
   }
 
   componentWillMount () {
     console.log('FeatureLayer willmount')
     EsriModuleLoader.loadModules([
       'FeatureLayer',
-      'esri/widgets/Sketch/SketchViewModel'
-    ]).then(({ FeatureLayer }) => {
+      'esri/widgets/Sketch/SketchViewModel',
+      'esri/layers/support/LabelClass'
+    ]).then(({ FeatureLayer, LabelClass }) => {
       const { featureLayerProperties } = this.props
       console.log('FeatureLayer new FeatureLayer()', featureLayerProperties)
+
+      featureLayerProperties.fields = [
+        { name: 'ObjectID', alias: 'ObjectID', type: 'string' },
+        { name: 'Name', alias: 'Name', type: 'string' }
+      ]
+      featureLayerProperties.labelingInfo = [{
+        symbol: {
+          type: "text",  // autocasts as new TextSymbol()
+          color: "green",
+          haloColor: "black",
+        },
+        labelPlacement: "above-center",
+        labelExpressionInfo: {
+          expression: "$feature.Name"
+        }
+      }]
+
       const layer = new FeatureLayer(featureLayerProperties)
+
       this.addLayer(layer)
 
-      // this.bindEvents()
+      this.bindEvents()
       this.setState({ layer }) 
     })
   }
@@ -58,9 +78,14 @@ class FeatureLayer extends Component {
           const selectedGraphics = results.filter(r => r.graphic.layer === layer).map(r => r.graphic)
           console.log('selected f', selectedGraphics)
 
+
           this.props.view.whenLayerView(layer).then(layerView => {
             console.log('layerView', layerView)
-            layerView.highlight(selectedGraphics)
+            if (this.highlight) {
+              console.log("remove")
+              this.highlight.remove()
+            }
+            this.highlight = layerView.highlight(selectedGraphics)
           })
 
         })

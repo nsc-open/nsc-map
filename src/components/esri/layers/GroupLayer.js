@@ -46,11 +46,13 @@ class GroupLayer extends Component {
 }
 
 GroupLayer.propTypes = {
-  map: PropTypes.object
+  map: PropTypes.object,
+  view: PropTypes.object,
 }
 
 GroupLayer.defaultTypes = {
-  map: undefined
+  map: undefined,
+  view: undefined
 }
 
 export default GroupLayer

@@ -37,7 +37,7 @@ class GroundObjectsLayer extends Component {
 
   render () {
     console.log('GroundObjectsLayer render', this.props)
-    const { children, map } = this.props
+    const { children, map, view } = this.props
     if (!map) {
       return null
     }
@@ -61,7 +61,7 @@ class GroundObjectsLayer extends Component {
     })
 
     return (
-      <GroupLayer map={map}>
+      <GroupLayer map={map} view={view}>
         <FeatureLayer
           key="polygonsFeatureLayer"
           featureLayerProperties={{
@@ -136,9 +136,13 @@ GroundObjectsLayer.propTypes = {
 
 GroundObjectsLayer.defaultProps = {
   map: null,
-  featureLayerProppertiesMapping: {
-    
-  }
+  featureLayerPropperties: [{
+    geometryType: 'polygon',
+    fields: [],
+    objectIdField: '',
+    labelingInfo: [],
+    renderer: {}
+  }]
 }
 
 export default GroundObjectsLayer

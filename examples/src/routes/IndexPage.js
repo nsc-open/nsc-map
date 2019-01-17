@@ -6,34 +6,8 @@ import GroupLayer from 'nsc-map/components/esri/layers/GroupLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
 import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
 import GroundObject from 'nsc-map/components/GroundObject'
-import { polyline, point } from 'mock/geometry-jsons'
+import { polyline, point, polygon1, polygon2 } from 'mock/geometry-jsons'
 
-// Create a polygon geometry
-const polygon = {
-  type: "polygon", // autocasts as new Polygon()
-  rings: [
-  [-64.78, 32.3],
-  [-66.07, 18.45],
-  [-80.21, 25.78],
-  [-64.78, 32.3]
-  ]
-};
-
-// Create a symbol for rendering the graphic
-const fillSymbol = {
-  type: "simple-fill", // autocasts as new SimpleFillSymbol()
-  color: [227, 139, 79, 0.8],
-  outline: { // autocasts as new SimpleLineSymbol()
-  color: [255, 255, 255],
-  width: 1
-  }
-};
-
-const graphicProperties = {
-  geometry: polygon,
-  symbol: fillSymbol,
-  attributes: null
-}
 
 const json1 = {"geometry":{"x":1.3358120593844913E7,"y":5310771.453513213,"spatialReference":{"wkid":102100}},"attributes":{"guid":"0ea639e8-a371-4949-b77b-2acdf5ad7e6b","name":"未命名","remark":"无","type":"point","movable":true,"editble":true,"visible":true},"symbol":{"color":[250,173,20,64],"outline":{"color":[250,173,20,255],"style":"esriSLSSolid","type":"esriSLS","width":1},"angle":0,"xoffset":0,"yoffset":0,"type":"esriSMS","size":10,"style":"esriSMSCircle"}}
 const json2 = {"geometry":{"x":1.3358120593844913E7,"y":5310771.453513213,"spatialReference":{"wkid":102100}},"attributes":{"guid":"0ea639e8-a371-4949-b77b-2acdf5ad7e6b","name":"未命名","remark":"无","type":"point","movable":true,"editble":true,"visible":true},"symbol":{"color":[250,173,20,64],"outline":{"color":[250,173,250,255],"style":"esriSLSSolid","type":"esriSLS","width":1},"angle":0,"xoffset":0,"yoffset":0,"type":"esriSMS","size":20,"style":"esriSMSCircle"}}
@@ -49,25 +23,6 @@ const onlineFeatureLayerProperties = {
       outline: {
         color: [0, 0, 0, 0.4],
         width: 0.5
-      }
-    }
-  }
-}
-
-const sourceFeatureLayerProperties = {
-  source: [{
-    geometry: polygon
-  }],
-  objectIdField: 'ObjectID',
-  // fields: [{ name: 'ObjectID', alias: 'ObjectID', type: 'string' }],
-  renderer: {
-    type: "simple", // autocasts as new SimpleRenderer()
-    symbol: {
-      type: "simple-fill", // autocasts as new SimpleFillSymbol()
-      color: [227, 139, 79, 0.8],
-      outline: { // autocasts as new SimpleLineSymbol()
-        color: [255, 255, 255],
-        width: 1
       }
     }
   }
@@ -115,7 +70,8 @@ export default class extends Component {
        */}
 
        <GroundObjectsLayer>
-         <GroundObject key="1" graphicProperties={graphicProperties} />
+         <GroundObject key="0" graphicProperties={polygon1} />
+         <GroundObject key="1" graphicProperties={polygon2} />
          <GroundObject key="2" graphicProperties={polyline} />
          <GroundObject key="3" graphicProperties={point} />
        </GroundObjectsLayer>
