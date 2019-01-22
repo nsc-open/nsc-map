@@ -2,7 +2,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
-import EsriModuleLoader from 'esri-module-loader';
 import GroupLayer from './esri/layers/GroupLayer';
 import FeatureLayer from './esri/layers/FeatureLayer';
 import { GEOMETRY_TYPE } from '../constants/geometry';
@@ -13,6 +12,9 @@ import GraphicSelectionManager from './graphic-selection-manager/GraphicSelectio
  *  <GroundObject />
  *  <GroundObject />
  * </GroundObjectsLayer>
+ * 
+ * TODO:
+ *   1. mapping from GroundObject.key to graphic instance
  */
 
 class GroundObjectsLayer extends Component {
@@ -31,22 +33,37 @@ class GroundObjectsLayer extends Component {
       this.selectionManager.addLayer(layer);
     });
 
-    this.state = {
-      groupLayer: null,
-      pointsFeatureLayer: null,
-      linesFeatureLayer: null,
-      polygonsFeatureLayer: null
-    };
-    this.selectionManager = new GraphicSelectionManager({
-      view: props.view
+    this.state = {};
+    this.pointsFeatureLayer = null;
+    this.linesFeatureLayer = null;
+    this.polygonsFeatureLayer = null;
+    this.selectionManager = null;
+  }
+
+  componentWillMount() {
+    const {
+      view,
+      onSelectionChange
+    } = this.props;
+    const manager = new GraphicSelectionManager({
+      view
     });
+    manager.on('selectionChange', onSelectionChange);
+    manager.activate({
+      type: 'pointer'
+    });
+    this.selectionManager = manager;
+  }
+
+  componentWillUnmount() {
+    this.selectionManager.destroy();
+    this.selectionManager = null;
   }
 
   componentDidMount() {
     const {
       defaultSelectedKeys
     } = this.props;
-    window.x = this;
   }
 
   componentDidUpdate(prevProps) {
@@ -72,21 +89,6 @@ class GroundObjectsLayer extends Component {
       // select graphics by key
       selectionManager.select(selectedKeys); // TODO: key => graphic instance
     }
-  }
-
-  createSelectionManager() {
-    const {
-      view
-    } = this.props;
-    const manager = new GraphicSelectionManager({
-      view,
-      layers: [this.polygonsFeatureLayer]
-    });
-    manager.activate({
-      type: 'pointer',
-      multiSelect: true
-    });
-    this.selectionManager = manager;
   }
 
   render() {
@@ -219,6 +221,6 @@ GroundObjectsLayer.defaultProps = {
   allowMultipleSelection: false,
   defaultSelectedKeys: [],
   selectedKeys: [],
-  onSelectionChange: null
+  onSelectionChange: e => console.log('selectionChange', e)
 };
 export default GroundObjectsLayer;

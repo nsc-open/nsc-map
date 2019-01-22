@@ -47,6 +47,14 @@ class GraphicSelectionManager extends EventEmitter {
     }
   }
 
+  removeLayer (layer) {
+    const index = this.layers.indexOf(layer)
+    if (index > -1) {
+      this.layers = this.layers.filter((_, i) => i !== index)
+      this.highlights = this.highlights.filter((_, i) => i !== index)
+    }
+  }
+
   activate ({ type = SELECTOR_TYPE.POINTER, multiSelect = true }) {
     this.deactivate()
 
