@@ -29,7 +29,7 @@ class FeatureLayer extends Component {
       'esri/widgets/Sketch/SketchViewModel',
       'esri/layers/support/LabelClass'
     ]).then(({ FeatureLayer, LabelClass }) => {
-      const { featureLayerProperties } = this.props
+      const { featureLayerProperties, onLoad } = this.props
       console.log('FeatureLayer new FeatureLayer()', featureLayerProperties)
 
       featureLayerProperties.fields = [
@@ -52,8 +52,10 @@ class FeatureLayer extends Component {
 
       this.addLayer(layer)
 
-      this.bindEvents()
+      // this.bindEvents()
       this.setState({ layer }) 
+
+      onLoad(layer)
     })
   }
 
@@ -148,7 +150,8 @@ FeatureLayer.propTypes = {
   featureLayerPropperties: PropTypes.object, // isRequired
   allowPointerSelection: PropTypes.bool,
   selectedKeys: PropTypes.arrayOf(PropTypes.string),
-  onSelectionChange: PropTypes.func
+  onSelectionChange: PropTypes.func,
+  onLoad: PropTypes.func
 }
 
 FeatureLayer.defaultProps = {
@@ -157,7 +160,8 @@ FeatureLayer.defaultProps = {
   featureLayerPropperties: undefined,
   allowPointerSelection: true,
   selectedKeys: [],
-  onSelectionChange: null
+  onSelectionChange: null,
+  onLoad: layer => { console.log('FeatureLayer onLoad') }
 }
 
 export default FeatureLayer

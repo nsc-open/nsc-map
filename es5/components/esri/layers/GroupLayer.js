@@ -20,15 +20,17 @@ class GroupLayer extends Component {
       GroupLayer
     }) => {
       const {
-        map
+        map,
+        onLoad
       } = this.props;
-      console.log('map true?', !!map);
+      console.log(onLoad);
       const layer = new GroupLayer();
       map.add(layer);
       console.log('GroupLayer map.add(layer)');
       this.setState({
         layer
       });
+      onLoad(layer);
     });
   }
 
@@ -67,10 +69,14 @@ class GroupLayer extends Component {
 
 GroupLayer.propTypes = {
   map: PropTypes.object,
-  view: PropTypes.object
+  view: PropTypes.object,
+  onLoad: PropTypes.func
 };
-GroupLayer.defaultTypes = {
+GroupLayer.defaultProps = {
   map: undefined,
-  view: undefined
+  view: undefined,
+  onLoad: layer => {
+    console.log('GroupLayer onLoad');
+  }
 };
 export default GroupLayer;

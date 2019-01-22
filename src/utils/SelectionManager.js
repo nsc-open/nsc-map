@@ -13,6 +13,7 @@ const MODE = {
 
 class SelectionManager extends EventEmitter {
   constructor (options) {
+    super()
     this.comparator = (options && options.comparator) ? options.comparator : DEFAULT_COMPARATOR
     this.selectionMode = MODE.SINGLE
     this.selection = []
@@ -54,6 +55,10 @@ class SelectionManager extends EventEmitter {
     }
   }
 
+  includes (item) {
+    return this._includes(this.selection, item)
+  }
+
   select (selection) {
     selection = this._normalizeSelection(selection)
     const toAdd = selection.filter(s => !this._includes(this.selection, s))
@@ -86,25 +91,6 @@ class SelectionManager extends EventEmitter {
     this._setSelection({
       selection: newSelection,
       added: toAdd
-    })
-  }
-
-  toggle (selection) {
-    const toRemove = []
-    const toAdd = []
-
-    this._normalizeSelection(selection).forEach(s => {
-      if (this._includes(this.selection, s)) {
-        toRemove(s)
-      } else {
-        toAdd(s)
-      }
-    })
-
-    this._setSelection({
-      selection: [...this.selection.filter(s => !this._includes(toRemove, s)), ...toAdd],
-      added: toAdd,
-      removed: toRemove
     })
   }
 

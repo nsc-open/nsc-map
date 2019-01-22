@@ -5,6 +5,8 @@ import GroupLayer from './esri/layers/GroupLayer'
 import FeatureLayer from './esri/layers/FeatureLayer'
 import { GEOMETRY_TYPE } from '../constants/geometry'
 
+import GraphicSelectionManager from './graphic-selection-manager/GraphicSelectionManager'
+
 // is a combination of GraphicsLayer and Annotation Layer
 /**
  * <GroundObjectsLayer>
@@ -21,18 +23,40 @@ class GroundObjectsLayer extends Component {
       linesFeatureLayer: null,
       polygonsFeatureLayer: null
     }
+
+    this.selectionManager = null
   }
 
-  add () {
-
+  componentDidMount () {
+    const { defaultSelectedKeys } = this.props
+    window.x = this
   }
 
-  remove () {
+  componentDidUpdate (prevProps) {
+    const { selectedKeys, selectionMode, allowMultipleSelection } = this.props
+    const { selectionManager } = this
 
+    if (prevProps.selectionMode !== selectionMode) {
+      selectionManager.mode(selectionMode)
+    }
+
+    if (prevProps.allowMultipleSelection !== allowMultipleSelection) {
+      allowMultipleSelection
+        ? selectionManager.enableMultipleSelection()
+        : selectionManager.disableMultipleSelection()
+    }
+
+    if (prevProps.selectedKeys !== selectedKeys) {
+      selectionManager.select(selectedKeys)
+    }
+    
   }
 
-  update () {
-
+  createSelectionManager () {
+    const { view } = this.props
+    const manager = new GraphicSelectionManager({ view, layer: this.polygonsFeatureLayer })
+    manager.activate({ type: 'pointer', multiSelect: true })
+    this.selectionManager = manager
   }
 
   render () {
@@ -64,6 +88,7 @@ class GroundObjectsLayer extends Component {
       <GroupLayer map={map} view={view}>
         <FeatureLayer
           key="polygonsFeatureLayer"
+          onLoad={layer => this.polygonsFeatureLayer = layer}
           featureLayerProperties={{
             source: [],
             geometryType: 'polygon',
@@ -131,7 +156,14 @@ class GroundObjectsLayer extends Component {
 }
 
 GroundObjectsLayer.propTypes = {
-  map: PropTypes.object
+  map: PropTypes.object,
+
+  
+  selectionMode: PropTypes.string,
+  allowMultipleSelection: PropTypes.bool,
+  defaultSelectedKeys: PropTypes.array,
+  selectedKeys: PropTypes.array,      // keys of selected ground objects
+  onSelectionChange: PropTypes.func   // ({ selectedKeys, addedKeys, removedKeys }) => {}
 }
 
 GroundObjectsLayer.defaultProps = {
@@ -142,7 +174,13 @@ GroundObjectsLayer.defaultProps = {
     objectIdField: '',
     labelingInfo: [],
     renderer: {}
-  }]
+  }],
+
+  selectionMode: 'pointer',
+  allowMultipleSelection: false,
+  defaultSelectedKeys: [],
+  selectedKeys: [],
+  onSelectionChange: null
 }
 
 export default GroundObjectsLayer

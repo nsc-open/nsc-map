@@ -28,7 +28,8 @@ class FeatureLayer extends Component {
       LabelClass
     }) => {
       const {
-        featureLayerProperties
+        featureLayerProperties,
+        onLoad
       } = this.props;
       console.log('FeatureLayer new FeatureLayer()', featureLayerProperties);
       featureLayerProperties.fields = [{
@@ -53,11 +54,12 @@ class FeatureLayer extends Component {
         }
       }];
       const layer = new FeatureLayer(featureLayerProperties);
-      this.addLayer(layer);
-      this.bindEvents();
+      this.addLayer(layer); // this.bindEvents()
+
       this.setState({
         layer
       });
+      onLoad(layer);
     });
   }
 
@@ -173,7 +175,8 @@ FeatureLayer.propTypes = {
   // isRequired
   allowPointerSelection: PropTypes.bool,
   selectedKeys: PropTypes.arrayOf(PropTypes.string),
-  onSelectionChange: PropTypes.func
+  onSelectionChange: PropTypes.func,
+  onLoad: PropTypes.func
 };
 FeatureLayer.defaultProps = {
   map: undefined,
@@ -181,6 +184,9 @@ FeatureLayer.defaultProps = {
   featureLayerPropperties: undefined,
   allowPointerSelection: true,
   selectedKeys: [],
-  onSelectionChange: null
+  onSelectionChange: null,
+  onLoad: layer => {
+    console.log('FeatureLayer onLoad');
+  }
 };
 export default FeatureLayer;
