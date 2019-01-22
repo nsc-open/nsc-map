@@ -24,7 +24,7 @@ class GroundObjectsLayer extends Component {
       polygonsFeatureLayer: null
     }
 
-    this.selectionManager = null
+    this.selectionManager = new GraphicSelectionManager({ view: props.view })
   }
 
   componentDidMount () {
@@ -33,7 +33,7 @@ class GroundObjectsLayer extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { selectedKeys, selectionMode, allowMultipleSelection } = this.props
+    const { selectedKeys, selectionMode, allowMultipleSelection, children } = this.props
     const { selectionManager } = this
 
     if (prevProps.selectionMode !== selectionMode) {
@@ -47,16 +47,31 @@ class GroundObjectsLayer extends Component {
     }
 
     if (prevProps.selectedKeys !== selectedKeys) {
+      // select graphics by key
       selectionManager.select(selectedKeys)
+      
+      // TODO: key => graphic instance
     }
     
   }
 
   createSelectionManager () {
     const { view } = this.props
-    const manager = new GraphicSelectionManager({ view, layer: this.polygonsFeatureLayer })
+    const manager = new GraphicSelectionManager({ view, layers: [this.polygonsFeatureLayer] })
     manager.activate({ type: 'pointer', multiSelect: true })
     this.selectionManager = manager
+  }
+
+  layerLoadHandler = (layerType, layer) => {
+    if (layerType === 'points') {
+      this.pointsFeatureLayer = layer
+    } else if (layerType === 'lines') {
+      this.linesFeatureLayer = layer
+    } else if (layerType === 'polygon') {
+      this.polygonsFeatureLayer = layer
+    }
+
+    this.selectionManager.addLayer(layer)
   }
 
   render () {
@@ -88,7 +103,7 @@ class GroundObjectsLayer extends Component {
       <GroupLayer map={map} view={view}>
         <FeatureLayer
           key="polygonsFeatureLayer"
-          onLoad={layer => this.polygonsFeatureLayer = layer}
+          onLoad={layer => this.layerLoadHandler('polygons', layer)}
           featureLayerProperties={{
             source: [],
             geometryType: 'polygon',
@@ -110,6 +125,7 @@ class GroundObjectsLayer extends Component {
         </FeatureLayer>
         <FeatureLayer
           key="linesFeatureLayer"
+          onLoad={layer => this.layerLoadHandler('lines', layer)}
           featureLayerProperties={{
             source: [],
             geometryType: 'polyline',
@@ -129,6 +145,7 @@ class GroundObjectsLayer extends Component {
         </FeatureLayer>
         <FeatureLayer
           key="pointsFeatureLayer"
+          onLoad={layer => this.layerLoadHandler('points', layer)}
           featureLayerProperties={{
             source: [],
             geometryType: 'point',

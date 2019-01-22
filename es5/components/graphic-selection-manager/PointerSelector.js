@@ -16,7 +16,7 @@ class PointerSelector extends BaseSelector {
   _bindEvents() {
     const {
       view,
-      layer,
+      layers,
       selectionManager
     } = this.gsm;
 
@@ -24,7 +24,7 @@ class PointerSelector extends BaseSelector {
       view.hitTest(e).then(({
         results
       }) => {
-        const selectedGraphics = results.filter(r => r.graphic.layer === layer).map(r => r.graphic);
+        const selectedGraphics = results.filter(r => layers.includes(r.graphic.layer)).map(r => r.graphic);
 
         if (this._multipleMode) {
           selectedGraphics.forEach(graphic => {

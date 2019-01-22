@@ -9,14 +9,14 @@ import { SELECTOR_TYPE } from './constants'
 class GraphicSelectionManager extends EventEmitter {
   constructor ({
     view,
-    layer,
+    layers,
     graphicComparator = (g1, g2) => g1 === g2
   }) {
     super()
 
-    this.view = view              // map view
-    this.layer = layer
-    this.highlight = null
+    this.view = view            // map view
+    this.layers = layers || []
+    this.highlights = []        // each layer would have a highlight
     this.selectionManager = new SelectionManager({ comparator: graphicComparator })
 
     this._init()
@@ -28,14 +28,23 @@ class GraphicSelectionManager extends EventEmitter {
   }
 
   _selectionChangeHandler = ({ selection, added, removed }) => {
-    const { view, layer } = this
-    this.highlight && this.highlight.remove()
+    const { view, layers } = this
 
-    view.whenLayerView(layer).then(layerView => {
-      this.highlight = layerView.highlight(selection)
+    layers.forEach((layer, index) => {
+      this.highlights[index] && this.highlights[index].remove()
+
+      view.whenLayerView(layer).then(layerView => {
+        this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer))
+      })
     })
-
+  
     this.emit('selectionChange', ({ selection, added, removed }))
+  }
+
+  addLayer (layer) {
+    if (this.layers.indexOf(layer) === -1) {
+      this.layers.push(layer)
+    }
   }
 
   activate ({ type = SELECTOR_TYPE.POINTER, multiSelect = true }) {

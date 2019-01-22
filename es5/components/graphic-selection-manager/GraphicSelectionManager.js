@@ -11,7 +11,7 @@ import { SELECTOR_TYPE } from './constants';
 class GraphicSelectionManager extends EventEmitter {
   constructor({
     view: _view,
-    layer: _layer,
+    layers: _layers,
     graphicComparator = (g1, g2) => g1 === g2
   }) {
     super();
@@ -23,11 +23,13 @@ class GraphicSelectionManager extends EventEmitter {
     }) => {
       const {
         view,
-        layer
+        layers
       } = this;
-      this.highlight && this.highlight.remove();
-      view.whenLayerView(layer).then(layerView => {
-        this.highlight = layerView.highlight(selection);
+      layers.forEach((layer, index) => {
+        this.highlights[index] && this.highlights[index].remove();
+        view.whenLayerView(layer).then(layerView => {
+          this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer));
+        });
       });
       this.emit('selectionChange', {
         selection,
@@ -38,8 +40,9 @@ class GraphicSelectionManager extends EventEmitter {
 
     this.view = _view; // map view
 
-    this.layer = _layer;
-    this.highlight = null;
+    this.layers = _layers || [];
+    this.highlights = []; // each layer would have a highlight
+
     this.selectionManager = new SelectionManager({
       comparator: graphicComparator
     });
@@ -50,6 +53,12 @@ class GraphicSelectionManager extends EventEmitter {
   _init() {
     // inside of a specified selector, like PointerSelector, would operate selectionManager, which will emit events
     this.selectionManager.on('selectionChange', this._selectionChangeHandler);
+  }
+
+  addLayer(layer) {
+    if (this.layers.indexOf(layer) === -1) {
+      this.layers.push(layer);
+    }
   }
 
   activate({

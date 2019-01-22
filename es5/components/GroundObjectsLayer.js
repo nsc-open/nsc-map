@@ -1,3 +1,5 @@
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 import EsriModuleLoader from 'esri-module-loader';
@@ -16,13 +18,28 @@ import GraphicSelectionManager from './graphic-selection-manager/GraphicSelectio
 class GroundObjectsLayer extends Component {
   constructor(props) {
     super(props);
+
+    _defineProperty(this, "layerLoadHandler", (layerType, layer) => {
+      if (layerType === 'points') {
+        this.pointsFeatureLayer = layer;
+      } else if (layerType === 'lines') {
+        this.linesFeatureLayer = layer;
+      } else if (layerType === 'polygon') {
+        this.polygonsFeatureLayer = layer;
+      }
+
+      this.selectionManager.addLayer(layer);
+    });
+
     this.state = {
       groupLayer: null,
       pointsFeatureLayer: null,
       linesFeatureLayer: null,
       polygonsFeatureLayer: null
     };
-    this.selectionManager = null;
+    this.selectionManager = new GraphicSelectionManager({
+      view: props.view
+    });
   }
 
   componentDidMount() {
@@ -36,7 +53,8 @@ class GroundObjectsLayer extends Component {
     const {
       selectedKeys,
       selectionMode,
-      allowMultipleSelection
+      allowMultipleSelection,
+      children
     } = this.props;
     const {
       selectionManager
@@ -51,7 +69,8 @@ class GroundObjectsLayer extends Component {
     }
 
     if (prevProps.selectedKeys !== selectedKeys) {
-      selectionManager.select(selectedKeys);
+      // select graphics by key
+      selectionManager.select(selectedKeys); // TODO: key => graphic instance
     }
   }
 
@@ -61,7 +80,7 @@ class GroundObjectsLayer extends Component {
     } = this.props;
     const manager = new GraphicSelectionManager({
       view,
-      layer: this.polygonsFeatureLayer
+      layers: [this.polygonsFeatureLayer]
     });
     manager.activate({
       type: 'pointer',
@@ -107,7 +126,7 @@ class GroundObjectsLayer extends Component {
       view: view
     }, React.createElement(FeatureLayer, {
       key: "polygonsFeatureLayer",
-      onLoad: layer => this.polygonsFeatureLayer = layer,
+      onLoad: layer => this.layerLoadHandler('polygons', layer),
       featureLayerProperties: {
         source: [],
         geometryType: 'polygon',
@@ -129,6 +148,7 @@ class GroundObjectsLayer extends Component {
       }
     }, polygons), React.createElement(FeatureLayer, {
       key: "linesFeatureLayer",
+      onLoad: layer => this.layerLoadHandler('lines', layer),
       featureLayerProperties: {
         source: [],
         geometryType: 'polyline',
@@ -147,6 +167,7 @@ class GroundObjectsLayer extends Component {
       }
     }, polylines), React.createElement(FeatureLayer, {
       key: "pointsFeatureLayer",
+      onLoad: layer => this.layerLoadHandler('points', layer),
       featureLayerProperties: {
         source: [],
         geometryType: 'point',
