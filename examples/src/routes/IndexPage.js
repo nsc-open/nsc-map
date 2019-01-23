@@ -4,6 +4,7 @@ import GraphicsLayer from 'nsc-map/components/esri/layers/GraphicsLayer'
 import FeatureLayer from 'nsc-map/components/esri/layers/FeatureLayer'
 import GroupLayer from 'nsc-map/components/esri/layers/GroupLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
+import SketchPolyline from 'nsc-map/components/widgets/sketch/SketchPolyline'
 import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
 import GroundObject from 'nsc-map/components/GroundObject'
 import { polyline, point, polygon1, polygon2 } from 'mock/geometry-jsons'
@@ -75,6 +76,8 @@ export default class extends Component {
          <GroundObject key="2" geometryJson={polyline} />
          <GroundObject key="3" geometryJson={point} />
        </GroundObjectsLayer>
+
+       <SketchPolyline />
       </Map>
     )
   }
