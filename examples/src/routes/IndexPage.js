@@ -64,18 +64,13 @@ export default class extends Component {
        */}
 
        {/*
-       <GroupLayer>
-         <FeatureLayer featureLayerProperties={onlineFeatureLayerProperties} />
-         <FeatureLayer featureLayerProperties={sourceFeatureLayerProperties} />
-       </GroupLayer>
-       */}
-
-       <GroundObjectsLayer>
+      <GroundObjectsLayer>
          <GroundObject key="0" geometryJson={polygon1} />
          <GroundObject key="1" geometryJson={polygon2} />
          <GroundObject key="2" geometryJson={polyline} />
          <GroundObject key="3" geometryJson={point} />
        </GroundObjectsLayer>
+       */}
 
        <SketchPolyline />
       </Map>
