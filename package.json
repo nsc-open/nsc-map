@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/nsc-open/nsc-map#readme",
   "dependencies": {
+    "@turf/turf": "^5.1.6",
     "antd": "^3.11.6",
     "esri-loader-react": "^2.0.3",
     "esri-module-loader": "^2.0.1",

@@ -1,3 +1,5 @@
+import { toMecator } from 'nsc-map/utils/conversions'
+
 export const polyline = {
   geometry: {
     type: "polyline",  // autocasts as new Polyline()
@@ -5,7 +7,8 @@ export const polyline = {
       [-111.30, 52.68],
       [-98, 49.5],
       [-93.94, 29.89]
-    ]
+    ].map(p => toMecator(p)),
+    spatialReference: { wkid: 102100 }
   },
   symbol: {
     type: "simple-line",  // autocasts as SimpleLineSymbol()
@@ -40,11 +43,12 @@ export const polygon = {
   geometry: {
     type: "polygon", // autocasts as new Polygon()
     rings: [
-    [-64.78, 32.3],
-    [-66.07, 18.45],
-    [-80.21, 25.78],
-    [-64.78, 32.3]
-    ]
+      [-64.78, 32.3],
+      [-66.07, 18.45],
+      [-80.21, 25.78],
+      [-64.78, 32.3]
+    ].map(p => toMecator(p)),
+    spatialReference: { wkid: 102100 }
   },
   symbol: {
     type: "simple-fill", // autocasts as new SimpleFillSymbol()
@@ -69,7 +73,8 @@ export const polygon1 = {
     [-70.21, 15.78],
     [-54.78, 22.3],
     [-64.07, 32.3],
-    ]
+    ].map(p => toMecator(p)),
+    spatialReference: { wkid: 102100 }
   },
   symbol: {
     type: "simple-fill", // autocasts as new SimpleFillSymbol()
@@ -95,7 +100,8 @@ export const polygon2 = {
       [-66.07, 18.45],
       [-80.21, 25.78],
       [-64.78, 32.3]
-    ]
+    ].map(p => toMecator(p)),
+    spatialReference: { wkid: 102100 }
   },
   symbol: {
     type: "simple-fill", // autocasts as new SimpleFillSymbol()

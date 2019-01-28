@@ -1,8 +1,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import EsriModuleLoader from 'esri-module-loader'; // import turf from '@turf/turf'
-
-const turf = require('@turf/turf');
+import EsriModuleLoader from 'esri-module-loader';
+import { toMecator } from '../../../utils/conversions';
 
 const loadModules = () => EsriModuleLoader.loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer', 'esri/Graphic']); // point | multipoint | polyline | polygon | circle | rectangle | move | transform | reshape
 
@@ -25,25 +24,24 @@ export const CREATE_MODES = {
   // applicable for polygon, polyline, rectangle, circle
   CLICK: 'click' // applicable for point
 
-};
+  /**
+   * <Sketch view layer graphics={} tool="polyline" mode="freehand">
+   *  <Button icon="line">POLYLINE</Button>
+   * </Sketch>
+   * 
+   * It should be able to:
+   *   1. interupt (cancel/redo/undo) outside of this component
+   *   2. click event should not be mixed up with other map click events
+   * 
+   *
+   * SketchViewModel 使用的是 GraphicsLayer，如果想编辑 FeatureLayer，需要：
+   *   1. FeatureLayer 中选中逻辑，获取到选中的 graphic
+   *   2. 在 sketchViewModel 自己的 graphicsLayer 中复制一份上面的 graphic，并隐藏 FeatureLayer 中的 graphic
+   *   3. sketchViewModel.update([clonedGraphic])
+   *   4. 编辑完成后，featureLayer.applyEdits 来完成更新
+   */
 
-const toMecator = ([lng, lat]) => {
-  return turf.toMercator(turf.point([lng, lat])).geometry.coordinates;
 };
-
-const toWgs84 = ([x, y]) => {
-  return turf.toWgs84(turf.point([x, y]));
-};
-/**
- * <Sketch view layer graphics={} tool="polyline" mode="freehand">
- *  <Button icon="line">POLYLINE</Button>
- * </Sketch>
- * 
- * It should be able to:
- *   1. interupt (cancel/redo/undo) outside of this component
- *   2. click event should not be mixed up with other map click events
- */
-
 
 class Sketch extends Component {
   constructor(props) {
@@ -64,7 +62,7 @@ class Sketch extends Component {
       const g = new Graphic({
         geometry: {
           type: "polygon",
-          rings: [[-64.07, 32.3], [-70.21, 15.78], [-54.78, 22.3], [-64.07, 32.3]].map(p => toMecator(p)),
+          rings: [[-34.07, 32.3], [-20.21, 15.78], [-14.78, 22.3], [-34.07, 32.3]].map(p => toMecator(p)),
           spatialReference: {
             wkid: 102100 // 这里必须使用 大地坐标，如果使用 经纬度，在 svm.update 后，坐标会转换，导致坐标混乱
 
@@ -81,7 +79,6 @@ class Sketch extends Component {
       });
       layer.add(g);
       map.add(layer);
-      console.log('view,map, layer', view, map, layer);
       const svm = new SketchViewModel({
         view,
         layer,
@@ -109,23 +106,22 @@ class Sketch extends Component {
             svm.update([re.graphic], {
               tool: 'reshape'
             });
+            window.sketch = svm;
           }
         });
       });
-      /* svm.on('create', e => {
-        if (e.state === 'complete') {
-          console.log('create svm', e, view.graphics.items.length)
-          // svm.create("circle")
-        }
-      }) */
+      svm.on('create', e => {
+        console.log('create', e);
+        return;
 
+        if (e.state === 'complete') {
+          console.log('create svm', e, view.graphics.items.length); // svm.create("circle")
+        }
+      });
       svm.on('update', e => {
         console.log('update', e);
 
-        if (e.state === "cancel" || e.state === "complete") {
-          svm.update(e.graphics, {
-            tool: 'reshape'
-          });
+        if (e.state === "cancel" || e.state === "complete") {// svm.update(e.graphics, { tool: 'reshape' })
         }
       });
     });

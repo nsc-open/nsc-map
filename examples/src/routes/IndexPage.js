@@ -4,7 +4,7 @@ import GraphicsLayer from 'nsc-map/components/esri/layers/GraphicsLayer'
 import FeatureLayer from 'nsc-map/components/esri/layers/FeatureLayer'
 import GroupLayer from 'nsc-map/components/esri/layers/GroupLayer'
 import Graphic from 'nsc-map/components/esri/Graphic'
-import SketchPolyline from 'nsc-map/components/widgets/sketch/SketchPolyline'
+import Sketch from 'nsc-map/components/widgets/sketch/Sketch'
 import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
 import GroundObject from 'nsc-map/components/GroundObject'
 import { polyline, point, polygon1, polygon2 } from 'mock/geometry-jsons'
@@ -44,7 +44,9 @@ export default class extends Component {
   render () {
     const { selectedKeys, n } = this.state
     return (
-      <Map>
+      <Map
+        onLoad={(map, view)=> console.log('Map.onLoad()', map, view)}
+      >
         {/*
         <GraphicsLayer
           selectedKeys={selectedKeys}
@@ -63,16 +65,17 @@ export default class extends Component {
         <FeatureLayer />
        */}
 
-       {/*
+       
+      
       <GroundObjectsLayer>
          <GroundObject key="0" geometryJson={polygon1} />
          <GroundObject key="1" geometryJson={polygon2} />
          <GroundObject key="2" geometryJson={polyline} />
          <GroundObject key="3" geometryJson={point} />
        </GroundObjectsLayer>
-       */}
+       
 
-       <SketchPolyline />
+       <Sketch />
       </Map>
     )
   }

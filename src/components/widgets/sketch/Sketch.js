@@ -1,6 +1,7 @@
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
+import { toMecator } from '../../../utils/conversions'
 
 const loadModules = () => EsriModuleLoader.loadModules([
   'esri/widgets/Sketch/SketchViewModel',
@@ -35,6 +36,13 @@ export const CREATE_MODES = {
  * It should be able to:
  *   1. interupt (cancel/redo/undo) outside of this component
  *   2. click event should not be mixed up with other map click events
+ * 
+ *
+ * SketchViewModel 使用的是 GraphicsLayer，如果想编辑 FeatureLayer，需要：
+ *   1. FeatureLayer 中选中逻辑，获取到选中的 graphic
+ *   2. 在 sketchViewModel 自己的 graphicsLayer 中复制一份上面的 graphic，并隐藏 FeatureLayer 中的 graphic
+ *   3. sketchViewModel.update([clonedGraphic])
+ *   4. 编辑完成后，featureLayer.applyEdits 来完成更新
  */
 class Sketch extends Component {
   constructor (props) {
@@ -51,41 +59,56 @@ class Sketch extends Component {
         geometry: {
           type: "polygon",
           rings: [
-            [-54.78, 12.3],
-            [-46.07, 18.45],
-            [-60.21, 25.78],
-            [-54.78, 12.3]
-          ]
+            [-34.07, 32.3],
+            [-20.21, 15.78],
+            [-14.78, 22.3],
+            [-34.07, 32.3]
+          ].map(p => toMecator(p)),
+          spatialReference: { wkid: 102100 } // 这里必须使用 大地坐标，如果使用 经纬度，在 svm.update 后，坐标会转换，导致坐标混乱
         },
         symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          type: "simple-fill",
           color: [227, 139, 79, 0.8],
-          outline: { // autocasts as new SimpleLineSymbol()
-          color: [255, 255, 255],
-          width: 1
+          outline: {
+            color: [255, 255, 255],
+            width: 1
           }
         }
       })
 
       layer.add(g)
       map.add(layer)
+
       const svm = new SketchViewModel({
         view,
-        layer// : view.graphics
+        layer,
+        updateOnGraphicClick: false,
+        defaultUpdateOptions: { // set the default options for the update operations
+          toggleToolOnClick: false // only reshape operation will be enabled
+        }
       })
 
-      console.log('sketch', svm, view.graphics.items.length)
       // svm.create("rectangle")
-      
       view.on('click', e => {
+        console.log('-click-')
+        if (svm.state === "active") {
+          console.log('skip')
+          return;
+        }
+
         view.hitTest(e).then(r => {
-          const re = r.results.find(r => r.graphic.layer === layer)
-          console.log('find it', re.graphic)
-          svm.update([re.graphic], { tool: 'move', toggleToolOnClick: false })
+          const re = r.results.find(r => r.graphic.layer === svm.layer)
+          if (re) {
+            console.log('find it', re.graphic)
+            svm.update([re.graphic], { tool: 'reshape' })
+            window.sketch = svm
+          }
         })
       })
 
       svm.on('create', e => {
+        console.log('create', e)
+        return
         if (e.state === 'complete') {
           console.log('create svm', e, view.graphics.items.length)
           // svm.create("circle")
@@ -94,19 +117,12 @@ class Sketch extends Component {
 
       svm.on('update', e => {
         console.log('update', e)
-
-        const toolType = e.toolEventInfo.type;
-        if (toolType === 'move-stop') {
-          svm.complete()
-        } else if ((e.state === "cancel" || e.state === "complete")) {
-          svm.update({
-            tool: "move",
-            graphics: e.graphics,
-            toggleToolOnClick: false
-          })
+        if ((e.state === "cancel" || e.state === "complete"))  {
+          // svm.update(e.graphics, { tool: 'reshape' })
         }
-        
       })
+      
+      
     })
   }
 
