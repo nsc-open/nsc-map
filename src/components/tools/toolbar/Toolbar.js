@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import MapDraggable from '../../base/MapDraggable'
+import MapWidget from '../../base/MapWidget'
 import { Icon, Tooltip } from 'antd'
 // import styles from './Toolbar.css'
 
@@ -33,43 +34,62 @@ const styles = {
 }
 
 class Toolbar extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      activeToolKey: ''
+    }
+  }
+
   clickHandler = toolKey => {
-    this.props.onChange(toolKey)
+    // this.props.onChange(toolKey)
+    this.setState({ activeToolKey: toolKey })
+    console.log('select tool', toolKey)
   }
 
   render () {
-    const { map, view, tools = [], activeToolKey, defaultPosition } = this.props
+    const { map, view, tools = [], defaultPosition } = this.props
+    const { activeToolKey } = this.state
+    const activeTool = tools.find(t => t.key === activeToolKey)
     return (
-      <MapDraggable map={map} view={view} defaultPosition={defaultPosition}>
-        <div>
-          {tools.map((tool, index) => 
-            tool.render
-            ? tool.render()
-            : <div
-                key={index}
-                style={activeToolKey === tool.key ? styles.activeTool : styles.tool}
-                onClick={() => this.clickHandler(tool.key)}
-              >
-                <Tooltip title={tool.label}>
-                  <Icon type={tool.icon} />
-                </Tooltip>
-              </div> 
-          )}
-        </div>
-      </MapDraggable>
+      <div>
+        <MapDraggable map={map} view={view} defaultPosition={defaultPosition}>
+          <div>
+            {tools.map((tool, index) => 
+              tool.render
+              ? tool.render()
+              : <div
+                  key={index}
+                  style={activeToolKey === tool.key ? styles.activeTool : styles.tool}
+                  onClick={() => this.clickHandler(tool.key)}
+                >
+                  <Tooltip title={tool.label}>
+                    <Icon type={tool.icon} />
+                  </Tooltip>
+                </div> 
+            )}
+          </div>
+        </MapDraggable>
+
+        {activeTool && activeTool.optionsBar ?
+          <MapWidget map={map} view={view} draggable>
+            {activeTool.optionsBar}
+          </MapWidget>
+        : null}
+      </div>
     )
   }
 }
 
 Toolbar.propTypes = {
-  tools: PropTypes.array.isRequired, // [{ icon, key, label, render }],
+  tools: PropTypes.array.isRequired, // [{ icon, key, label, render, optionsBar }],
   activeToolKey: PropTypes.string,
   defaultPosition: PropTypes.object.isRequired,
   onChange: PropTypes.func
 }
 
 Toolbar.defaultProps = {
-  defaultPosition: { x: 10, y: 10 },
+  defaultPosition: { x: 100, y: 15 },
   onChange: (toolKey) => {}
 }
 

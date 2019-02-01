@@ -3,6 +3,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MapDraggable from '../../base/MapDraggable';
+import MapWidget from '../../base/MapWidget';
 import { Icon, Tooltip } from 'antd'; // import styles from './Toolbar.css'
 
 /**
@@ -34,12 +35,20 @@ const styles = {
 };
 
 class Toolbar extends Component {
-  constructor(...args) {
-    super(...args);
+  constructor(props) {
+    super(props);
 
     _defineProperty(this, "clickHandler", toolKey => {
-      this.props.onChange(toolKey);
+      // this.props.onChange(toolKey)
+      this.setState({
+        activeToolKey: toolKey
+      });
+      console.log('select tool', toolKey);
     });
+
+    this.state = {
+      activeToolKey: ''
+    };
   }
 
   render() {
@@ -47,10 +56,13 @@ class Toolbar extends Component {
       map,
       view,
       tools = [],
-      activeToolKey,
       defaultPosition
     } = this.props;
-    return React.createElement(MapDraggable, {
+    const {
+      activeToolKey
+    } = this.state;
+    const activeTool = tools.find(t => t.key === activeToolKey);
+    return React.createElement("div", null, React.createElement(MapDraggable, {
       map: map,
       view: view,
       defaultPosition: defaultPosition
@@ -62,22 +74,26 @@ class Toolbar extends Component {
       title: tool.label
     }, React.createElement(Icon, {
       type: tool.icon
-    }))))));
+    })))))), activeTool && activeTool.optionsBar ? React.createElement(MapWidget, {
+      map: map,
+      view: view,
+      draggable: true
+    }, activeTool.optionsBar) : null);
   }
 
 }
 
 Toolbar.propTypes = {
   tools: PropTypes.array.isRequired,
-  // [{ icon, key, label, render }],
+  // [{ icon, key, label, render, optionsBar }],
   activeToolKey: PropTypes.string,
   defaultPosition: PropTypes.object.isRequired,
   onChange: PropTypes.func
 };
 Toolbar.defaultProps = {
   defaultPosition: {
-    x: 10,
-    y: 10
+    x: 100,
+    y: 15
   },
   onChange: toolKey => {}
 };
