@@ -12,13 +12,13 @@
 }
 
 .layoutHorizontal {
-  composes: layout;
+  display: flex;
   flex-direction: row;
   min-width: 100px;
 }
 
 .layoutVertical {
-  composes: layout;
+  display: flex;
   flex-direction: column;
   min-height: 100px;
 }
@@ -28,13 +28,13 @@
 }
 
 .handlerHorizontal {
-  composes: handler;
+  cursor: move;
   padding: 6px 8px;
   border-right: 1px solid #e8e8e8;
 }
 
 .handlerVertical {
-  composes: handler;
+  cursor: move;
   padding: 4px 8px;
   border-bottom: 1px solid #e8e8e8;
 }
