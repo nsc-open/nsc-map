@@ -1,25 +1,22 @@
 import EventEmitter from 'eventemitter3';
 import EsriModuleLoader from 'esri-module-loader';
-/**
- * Use SketchViewModel to implement this measurement
- * events: ready | update
- */
 
-class AngleMeasurement extends EventEmitter {
+class AngleMeasurement2DViewModel {
   constructor({
     view
   }) {
-    super();
     this.view = view;
-    this.graphicsLayer = null;
+    this.measureLabel = '';
+    this.unit = '';
+    this.measurement = null;
     this.sketchViewModel = null;
+    this.graphicsLayer = null;
 
     this._init();
   }
 
   _init() {
-    EsriModuleLoader.loadModules(['esri/Graphic', 'esri/layers/GraphicsLayer', 'esri/widgets/Sketch/SketchViewModel']).then(({
-      Graphic,
+    EsriModuleLoader.loadModules(['esri/layers/GraphicsLayer', 'esri/widgets/Sketch/SketchViewModel']).then(({
       GraphicsLayer,
       SketchViewModel
     }) => {
@@ -35,13 +32,14 @@ class AngleMeasurement extends EventEmitter {
       this.view.map.add(graphicsLayer);
       this.graphicsLayer = graphicsLayer;
       this.sketchViewModel = sketchViewModel;
-      this.newMeasurement();
     });
   }
 
-  _bindEvents() {}
-
-  _unbindEvents() {}
+  destroy() {
+    this.view.map.remove(this.graphicsLayer);
+    this.sketchViewModel = null;
+    this.graphicsLayer = null;
+  }
 
   newMeasurement() {
     const {
@@ -56,13 +54,8 @@ class AngleMeasurement extends EventEmitter {
     });
   }
 
-  clearMeasurement() {// this.viewModel.clearMeasurement()
-  }
-
-  destroy() {// this.clearMeasurement()
-    // this.viewModel = null
-  }
+  clearMeasurement() {}
 
 }
 
-export default AngleMeasurement;
+export default AngleMeasurement2DViewModel;

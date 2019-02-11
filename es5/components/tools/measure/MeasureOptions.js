@@ -11,6 +11,7 @@ import { Radio, Button } from 'antd';
 import { getNamespace } from '../../../utils/InstanceManager';
 import DistanceMeasurement from '../../../core/measurements/2d/DistanceMeasurement';
 import AreaMeasurement from '../../../core/measurements/2d/AreaMeasurement';
+import AngleMeasurement from '../../../core/measurements/2d/AngleMeasurement';
 const {
   Button: RadioButton
 } = Radio;
@@ -95,6 +96,9 @@ class MeasureOptionsBar extends Component {
         break;
 
       case 'angle':
+        this.measurementTool = new AngleMeasurement({
+          view
+        });
         break;
 
       default:

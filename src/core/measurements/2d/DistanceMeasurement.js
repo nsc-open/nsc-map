@@ -2,6 +2,9 @@ import EventEmitter from 'eventemitter3'
 import EsriModuleLoader from 'esri-module-loader'
 
 /**
+ * Use DistanceMeasurement2DViewModel
+ * TODO: XXViewModel 的重复实例化会导致地图上反复添加新的 graphicsLayer
+ * 
  * events: ready | update
  */
 class DistanceMeasurement extends EventEmitter {
