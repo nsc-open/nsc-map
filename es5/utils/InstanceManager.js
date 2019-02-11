@@ -86,3 +86,4 @@ export const deleteNamespace = key => {
     NAMESPACES[key] = null;
   }
 };
+export const getNamespace = key => NAMESPACES[key];
