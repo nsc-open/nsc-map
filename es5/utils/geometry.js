@@ -1,6 +1,20 @@
+import * as turf from '@turf/turf';
+export const toMecator = ([lng, lat]) => {
+  return turf.toMercator(turf.point([lng, lat])).geometry.coordinates;
+};
+export const toWgs84 = ([x, y]) => {
+  return turf.toWgs84(turf.point([x, y])).geometry.coordinates;
+};
+export const isWgs84 = spatialReference => {
+  return spatialReference.wkid === 4326;
+};
+export const isMecator = spatialReference => {
+  return spatialReference.wkid === 102100;
+};
 /**
  * points of [x, y] in webmercator cooridnates
  */
+
 export const angle = (...args) => {
   let p1, p2, p3;
 
@@ -40,9 +54,34 @@ export const angle = (...args) => {
   const cc = (p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) * (p1.y - p3.y);
   return Math.acos((aa + bb - cc) / 2 / a / b) * 180 / Math.PI;
 };
-export const isWgs84 = spatialReference => {
-  return spatialReference.wkid === 4326;
+/**
+ * get angles of input polyline
+ * @param {Geometry} polyline
+ * @return {Array} return array of angles for each path
+ */
+
+export const polylineAngles = polyline => {
+  const {
+    paths = []
+  } = polyline;
+  let convertionRequired = false;
+
+  if (isWgs84(polyline.spatialReference)) {
+    convertionRequired = true;
+  }
+
+  return paths.map(path => path.map(pathAngles, convertionRequired));
 };
-export const isMecator = spatialReference => {
-  return spatialReference.wkid === 102100;
+export const pathAngles = (path = [], convertionRequired = false) => {
+  return path.map((point, index) => {
+    if (index === 0 || index === path.length - 1) {
+      return 0;
+    }
+
+    if (convertionRequired) {
+      point = toMecator(point);
+    }
+
+    return angle(path[index - 1], path[index], path[index + 1]);
+  });
 };
