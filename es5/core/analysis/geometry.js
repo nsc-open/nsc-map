@@ -1,5 +1,5 @@
 import * as geometryUtils from '../../utils/geometry';
-import { toMecator } from '../../utils/conversions';
+import { toMecator } from '../../utils/geometry';
 /**
  * get angles of input polyline
  * @param {Geometry} polyline

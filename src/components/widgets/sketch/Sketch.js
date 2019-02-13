@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 import EsriModuleLoader from 'esri-module-loader'
-import { toMecator } from '../../../utils/conversions'
+import { toMecator } from '../../../utils/geometry'
 
 const loadModules = () => EsriModuleLoader.loadModules([
   'esri/widgets/Sketch/SketchViewModel',

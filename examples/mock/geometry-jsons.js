@@ -1,4 +1,4 @@
-import { toMecator } from 'nsc-map/utils/conversions'
+import { toMecator } from 'nsc-map/utils/geometry'
 
 export const polyline = {
   geometry: {

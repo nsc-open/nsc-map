@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import EsriModuleLoader from 'esri-module-loader'
 import { createNamespace } from '../../../utils/InstanceManager'
-import { toMecator } from '../../../utils/conversions'
+import { toMecator } from '../../../utils/geometry'
 import { polylineAngles, pathAngles } from '../../analysis/geometry'
 import * as geometryUtils from '../../../utils/geometry'
 
