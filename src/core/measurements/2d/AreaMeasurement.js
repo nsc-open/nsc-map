@@ -11,10 +11,16 @@ import EsriModuleLoader from 'esri-module-loader'
 class AreaMeasurement extends EventEmitter {
   constructor ({ view }) {
     super()
+    this.viewModel = null
+    this.destroyed = false
 
     EsriModuleLoader.loadModules([
       'esri/widgets/AreaMeasurement2D/AreaMeasurement2DViewModel'
     ]).then(({ AreaMeasurement2DViewModel }) => {
+      if (this.destroyed) {
+        return
+      }
+
       this.viewModel = new AreaMeasurement2DViewModel({
         view,
         mode: 'planar',
@@ -41,12 +47,13 @@ class AreaMeasurement extends EventEmitter {
   }
 
   clearMeasurement () {
-    this.viewModel.clearMeasurement()
+    this.viewModel && this.viewModel.clearMeasurement()
   }
 
   destroy () {
     this.clearMeasurement()
     this.viewModel = null
+    this.destroyed = true
   }
 }
 
