@@ -1,5 +1,5 @@
 import BaseSelector from './BaseSelector'
-import Loader from 'esri-module-loader'
+import { loadModules } from 'esri-module-loader'
 import { SELECTOR_TYPE } from '../constants'
 
 class BoxSelector extends BaseSelector {
@@ -21,7 +21,7 @@ class BoxSelector extends BaseSelector {
   }
 
   _init () {
-    Loader.loadModules([
+    loadModules([
       'GraphicsLayer', 'Color', 'SimpleLineSymbol', 'Graphic', 'Polygon',
       'Extent', 'SpatialReference', 'geometryEngine'
     ]).then(modules => {

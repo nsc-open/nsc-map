@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import EsriModuleLoader from 'esri-module-loader';
+import { loadModules } from 'esri-module-loader';
 /**
  * Use DistanceMeasurement2DViewModel
  * TODO: XXViewModel 的重复实例化会导致地图上反复添加新的 graphicsLayer
@@ -14,7 +14,7 @@ class DistanceMeasurement extends EventEmitter {
     super();
     this.viewModel = null;
     this.destroyed = false;
-    EsriModuleLoader.loadModules(['esri/widgets/DistanceMeasurement2D/DistanceMeasurement2DViewModel']).then(({
+    loadModules(['esri/widgets/DistanceMeasurement2D/DistanceMeasurement2DViewModel']).then(({
       DistanceMeasurement2DViewModel
     }) => {
       if (this.destroyed) {

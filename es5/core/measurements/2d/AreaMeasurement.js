@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import EsriModuleLoader from 'esri-module-loader';
+import { loadModules } from 'esri-module-loader';
 /**
  * Use AreaMeasurement2DViewModel
  * TODO: XXViewModel 的重复实例化会导致地图上反复添加新的 graphicsLayer
@@ -15,7 +15,7 @@ class AreaMeasurement extends EventEmitter {
     super();
     this.viewModel = null;
     this.destroyed = false;
-    EsriModuleLoader.loadModules(['esri/widgets/AreaMeasurement2D/AreaMeasurement2DViewModel']).then(({
+    loadModules(['esri/widgets/AreaMeasurement2D/AreaMeasurement2DViewModel']).then(({
       AreaMeasurement2DViewModel
     }) => {
       if (this.destroyed) {

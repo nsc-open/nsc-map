@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import EsriModuleLoader from 'esri-module-loader'
+import { loadModules } from 'esri-module-loader'
 
 /**
  * Use DistanceMeasurement2DViewModel
@@ -13,7 +13,7 @@ class DistanceMeasurement extends EventEmitter {
     this.viewModel = null
     this.destroyed = false
 
-    EsriModuleLoader.loadModules([
+    loadModules([
       'esri/widgets/DistanceMeasurement2D/DistanceMeasurement2DViewModel'
     ]).then(({ DistanceMeasurement2DViewModel }) => {
       if (this.destroyed) {

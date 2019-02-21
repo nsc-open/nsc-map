@@ -4,7 +4,6 @@ import EsriLoaderReact from 'esri-loader-react'
 import MapDraggable from '@/components/MapDraggable'
 import MapPortal from '@/components/MapPortal'
 import MapToolbar from '@/components/MapToolbar'
-import Loader from 'esri-module-loader'
 import styles from './ArcMap.css'
 import { Button } from 'antd'
 

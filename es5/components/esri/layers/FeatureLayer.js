@@ -1,6 +1,6 @@
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
-import EsriModuleLoader from 'esri-module-loader';
+import { loadModules } from 'esri-module-loader';
 import { addKey } from './utils';
 /**
  * usage:
@@ -23,7 +23,7 @@ class FeatureLayer extends Component {
 
   componentWillMount() {
     console.log('FeatureLayer willmount');
-    EsriModuleLoader.loadModules(['FeatureLayer', 'esri/widgets/Sketch/SketchViewModel', 'esri/layers/support/LabelClass']).then(({
+    loadModules(['FeatureLayer', 'esri/widgets/Sketch/SketchViewModel', 'esri/layers/support/LabelClass']).then(({
       FeatureLayer,
       LabelClass
     }) => {

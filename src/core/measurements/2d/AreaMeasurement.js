@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import EsriModuleLoader from 'esri-module-loader'
+import { loadModules } from 'esri-module-loader'
 
 /**
  * Use AreaMeasurement2DViewModel
@@ -14,7 +14,7 @@ class AreaMeasurement extends EventEmitter {
     this.viewModel = null
     this.destroyed = false
 
-    EsriModuleLoader.loadModules([
+    loadModules([
       'esri/widgets/AreaMeasurement2D/AreaMeasurement2DViewModel'
     ]).then(({ AreaMeasurement2DViewModel }) => {
       if (this.destroyed) {

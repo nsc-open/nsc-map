@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import EsriModuleLoader from 'esri-module-loader';
+import * as EsriModuleLoader from 'esri-module-loader';
 import { HIGHLIGHT_SYMBOLS } from '../../constants/symbols';
 
 const loadModules = () => EsriModuleLoader.loadModules(['esri/Graphic']);

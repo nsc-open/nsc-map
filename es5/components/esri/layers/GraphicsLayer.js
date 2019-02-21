@@ -1,6 +1,6 @@
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
-import EsriModuleLoader from 'esri-module-loader';
+import { loadModules } from 'esri-module-loader';
 import { addKey } from './utils';
 /**
  * usage:
@@ -23,7 +23,7 @@ class GraphicsLayer extends Component {
   }
 
   componentWillMount() {
-    EsriModuleLoader.loadModules(['GraphicsLayer']).then(({
+    loadModules(['GraphicsLayer']).then(({
       GraphicsLayer
     }) => {
       const {

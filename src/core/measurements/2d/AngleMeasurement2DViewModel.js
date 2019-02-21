@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import EsriModuleLoader from 'esri-module-loader'
+import { loadModules } from 'esri-module-loader'
 import { createNamespace } from '../../../utils/InstanceManager'
 import { pathAngles } from '../../../utils/geometry'
 
@@ -26,7 +26,7 @@ class AngleMeasurement2DViewModel {
   }
 
   _init () {
-    EsriModuleLoader.loadModules([
+    loadModules([
       'esri/Graphic',
       'esri/layers/GraphicsLayer',
       'esri/widgets/Sketch/SketchViewModel'

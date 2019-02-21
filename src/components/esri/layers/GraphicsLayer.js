@@ -1,6 +1,6 @@
 import React, { Component, Children } from 'react'
 import PropTypes from 'prop-types'
-import EsriModuleLoader from 'esri-module-loader'
+import { loadModules } from 'esri-module-loader'
 import { addKey } from './utils'
 
 /**
@@ -24,7 +24,7 @@ class GraphicsLayer extends Component {
   }
 
   componentWillMount () {
-    EsriModuleLoader.loadModules([
+    loadModules([
       'GraphicsLayer'
     ]).then(({ GraphicsLayer }) => {
       const { map } = this.props

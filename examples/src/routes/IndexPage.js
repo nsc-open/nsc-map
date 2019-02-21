@@ -46,6 +46,7 @@ export default class extends Component {
     return (
       <Map
         onLoad={(map, view)=> console.log('Map.onLoad()', map, view)}
+        loaderOptions={{ url: 'https://js.arcgis.com/4.8' }}
       >
         {/*
         <GraphicsLayer

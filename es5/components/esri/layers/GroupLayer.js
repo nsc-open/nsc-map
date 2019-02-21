@@ -4,7 +4,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
-import EsriModuleLoader from 'esri-module-loader';
+import { loadModules } from 'esri-module-loader';
 
 class GroupLayer extends Component {
   constructor(props) {
@@ -16,7 +16,7 @@ class GroupLayer extends Component {
 
   componentWillMount() {
     console.log('GroupLayer willmount');
-    EsriModuleLoader.loadModules(['esri/layers/GroupLayer']).then(({
+    loadModules(['esri/layers/GroupLayer']).then(({
       GroupLayer
     }) => {
       const {
