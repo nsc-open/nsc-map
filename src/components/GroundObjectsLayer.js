@@ -106,6 +106,7 @@ class GroundObjectsLayer extends Component {
       }
     })
 
+    console.log(points, polylines, polygons)
     return (
       <GroupLayer map={map} view={view}>
         <FeatureLayer

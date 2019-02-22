@@ -32,6 +32,7 @@ export default class extends Component {
           viewInstanceNamespace.set('default', view)
           window.viewInstanceNamespace = viewInstanceNamespace
         }}
+        loaderOptions={{ url: 'https://js.arcgis.com/4.8' }}
       >
         <MapWidget defaultPosition={{ x: 300, y: 300 }}>This is a fixed widget 300, 300</MapWidget>
 

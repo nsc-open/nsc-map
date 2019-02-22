@@ -23,7 +23,7 @@ class GraphicsLayer extends Component {
   }
 
   componentWillMount() {
-    loadModules(['GraphicsLayer']).then(({
+    loadModules(['esri/layers/GraphicsLayer']).then(({
       GraphicsLayer
     }) => {
       const {

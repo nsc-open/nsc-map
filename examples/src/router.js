@@ -3,6 +3,7 @@ import { Router, Route, Switch } from 'dva/router'
 import IndexPage from './routes/IndexPage'
 import MapWidgetTestPage from './routes/MapWidgetTest'
 import LayerServiceTestPage from './routes/LayerServiceTest'
+import GroundObjectsLayerTestPage from './routes/GroundObjectsLayerTest'
 
 function RouterConfig({ history }) {
   return (
@@ -11,6 +12,7 @@ function RouterConfig({ history }) {
         <Route path="/" exact component={IndexPage} />
         <Route path="/widget" exact component={MapWidgetTestPage} />
         <Route path="/layer-service" exact component={LayerServiceTestPage} />
+        <Route path="/ground-objects-layer" exact component={GroundObjectsLayerTestPage} />
       </Switch>
     </Router>
   );

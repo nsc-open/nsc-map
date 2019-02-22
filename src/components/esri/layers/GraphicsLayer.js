@@ -25,7 +25,7 @@ class GraphicsLayer extends Component {
 
   componentWillMount () {
     loadModules([
-      'GraphicsLayer'
+      'esri/layers/GraphicsLayer'
     ]).then(({ GraphicsLayer }) => {
       const { map } = this.props
       const layer = new GraphicsLayer()

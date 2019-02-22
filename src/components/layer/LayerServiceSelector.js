@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Popover, Switch, List } from 'antd'
-import LayerLocator from '../locator/LayerLocator'
+import LayerLocator from './LayerLocator'
 import { createLayerServiceInstance } from '../../utils/layer-service'
 
 const ButtonGroup = Button.Group

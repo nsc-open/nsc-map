@@ -123,6 +123,7 @@ class GroundObjectsLayer extends Component {
         multipoints.push(child);
       }
     });
+    console.log(points, polylines, polygons);
     return React.createElement(GroupLayer, {
       map: map,
       view: view
