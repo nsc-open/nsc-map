@@ -54,8 +54,8 @@ class FeatureLayer extends Component {
         }
       }];
       const layer = new FeatureLayer(featureLayerProperties);
-      this.addLayer(layer); // this.bindEvents()
-
+      this.addLayer(layer);
+      this.bindEvents();
       this.setState({
         layer
       });
@@ -99,6 +99,7 @@ class FeatureLayer extends Component {
             }
 
             this.highlight = layerView.highlight(selectedGraphics);
+            console.log('featurelayer.highlighted');
           });
         });
       }));

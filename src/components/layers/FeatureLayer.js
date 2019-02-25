@@ -52,7 +52,7 @@ class FeatureLayer extends Component {
 
       this.addLayer(layer)
 
-      // this.bindEvents()
+      this.bindEvents()
       this.setState({ layer }) 
 
       onLoad(layer)
@@ -88,6 +88,7 @@ class FeatureLayer extends Component {
               this.highlight.remove()
             }
             this.highlight = layerView.highlight(selectedGraphics)
+            console.log('featurelayer.highlighted')
           })
 
         })

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
 import MapWidget from 'nsc-map/components/base/MapWidget'
 import BasemapDropdown from 'nsc-map/components/widgets/BasemapDropdown'
-import LayerServiceSelector from 'nsc-map/components/layer/LayerServiceSelector'
+import LayerServiceSelector from 'nsc-map/components/layer-utils/LayerServiceSelector'
 import { layers, categories } from 'mock/layer-services'
 
 export default class extends Component {

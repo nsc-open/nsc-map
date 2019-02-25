@@ -14,7 +14,14 @@ export default class extends Component {
     return (
       <Map
         onLoad={this.onLoad}
-        loaderOptions={{ url: 'https://js.arcgis.com/4.8' }}
+        loaderOptions={{
+          url: 'https://js.arcgis.com/4.8',
+          dojoConfig: {
+            has: {
+              "esri-featurelayer-webgl": 1
+            }
+          }
+        }}
       >
         <FeatureLayer featureLayerProperties={{
             source: [],

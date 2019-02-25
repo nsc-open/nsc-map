@@ -117,7 +117,7 @@ class Graphic extends Component {
     } else if (layer.type === 'feature') {
       console.log('Graphic.add as feature', layer, graphic)
       layer.source.push(graphic) // 4.8
-      /* 4.10
+      /* 4.9
       layer.applyEdits({
         addFeatures: [graphic]
       })
@@ -131,7 +131,7 @@ class Graphic extends Component {
       layer.remove(graphic)
     } else if (layer.type === 'feature') {
       layer.source.remove(graphic) // 4.8
-      /* 4.10
+      /* 4.9
       layer.applyEdits({
         deleteFeatures: [graphic]
       }) */
@@ -147,7 +147,7 @@ class Graphic extends Component {
     } else if (layer.type === 'feature') {
       layer.source.remove(graphic)
       layer.source.add(graphic)
-      /* 4.10
+      /* 4.9
       layer.applyEdits({
         updateFeatures: [graphic]
       }) */
