@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
-import GroundObjectsLayer from 'nsc-map/components/GroundObjectsLayer'
+import GroundObjectsLayer from 'nsc-map/components/layers/GroundObjectsLayer'
 import GroundObject from 'nsc-map/components/GroundObject'
 import { polyline, point, polygon1, polygon2 } from 'mock/geometry-jsons'
 

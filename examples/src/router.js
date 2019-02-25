@@ -4,6 +4,7 @@ import IndexPage from './routes/IndexPage'
 import MapWidgetTestPage from './routes/MapWidgetTest'
 import LayerServiceTestPage from './routes/LayerServiceTest'
 import GroundObjectsLayerTestPage from './routes/GroundObjectsLayerTest'
+import FeatureLayerTestPage from './routes/FeatureLayerTest'
 
 function RouterConfig({ history }) {
   return (
@@ -13,6 +14,7 @@ function RouterConfig({ history }) {
         <Route path="/widget" exact component={MapWidgetTestPage} />
         <Route path="/layer-service" exact component={LayerServiceTestPage} />
         <Route path="/ground-objects-layer" exact component={GroundObjectsLayerTestPage} />
+        <Route path="/feature-layer" exact component={FeatureLayerTestPage} />
       </Switch>
     </Router>
   );

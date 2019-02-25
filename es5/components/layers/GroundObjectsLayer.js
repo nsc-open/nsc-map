@@ -2,10 +2,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
-import GroupLayer from './esri/layers/GroupLayer';
-import FeatureLayer from './esri/layers/FeatureLayer';
-import { GEOMETRY_TYPE } from '../constants/geometry';
-import GraphicSelectionManager from './graphic-selection-manager/GraphicSelectionManager'; // is a combination of GraphicsLayer and Annotation Layer
+import GroupLayer from './GroupLayer';
+import FeatureLayer from './FeatureLayer';
+import { GEOMETRY_TYPE } from '../../constants/geometry';
+import GraphicSelectionManager from '../graphic-selection-manager/GraphicSelectionManager'; // is a combination of GraphicsLayer and Annotation Layer
 
 /**
  * <GroundObjectsLayer>
