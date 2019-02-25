@@ -160,9 +160,12 @@ class Graphic extends Component {
     if (layer.type === 'graphics') {
       layer.remove(graphic);
     } else if (layer.type === 'feature') {
+      layer.source.remove(graphic); // 4.8
+
+      /* 4.10
       layer.applyEdits({
         deleteFeatures: [graphic]
-      });
+      }) */
     }
   }
 
@@ -175,9 +178,12 @@ class Graphic extends Component {
       // remove old one
       // add new one
     } else if (layer.type === 'feature') {
+      layer.source.remove(graphic);
+      layer.source.add(graphic);
+      /* 4.10
       layer.applyEdits({
         updateFeatures: [graphic]
-      });
+      }) */
     }
   }
 
