@@ -25,29 +25,36 @@ const removeGraphic = (layer, graphic) => {
   }
 }
 /**
+ * This sketch handles GraphicsLayer and FeatureLayer
+ * 
  * usage:
- *  const sketch = new Sketch({
- *    view,   // mapView
- *    layers  // target layers, it can be graphicsLayer or featureLayer
- *  })
  * 
- * sketch.create(options)
+ * const sketch = new Sketch({ view }, {
+ *  beforeComplete: graphic => {
+ *    // set graphic attributes 
+ *    // update geometryJson
+ *    // return Promise.resolve(graphic) // then apply the complete to the layer
+ *  }
+ * })
  * 
- * sketch.update(graphic, options)
+ * sketch.create(sourceGraphicsLayer, 'polyline')
+ * sketch.create(sourceFeatureLayer)
+ * sketch.update(graphic)
+ * sketch.update(sourceLayer, graphic)
  * 
- * sketch.apply() // apply edits
- * 
- * sketch.on('', () => {})
+ * sketch.destroy()
  */
 
 class Sketch extends EventEmitter {
 
-  constructor ({ view, ...sketchViewModelProperties }) {
+  constructor ({ view, ...sketchViewModelProperties }, options = { beforeComplete: null }) {
     super()
 
     if (!view) {
       throw new Error('view is required')
     }
+
+    this.options = options || {}
 
     this.view = view
     this.sketchViewModelProperties = sketchViewModelProperties
@@ -56,20 +63,16 @@ class Sketch extends EventEmitter {
     this.sourceLayer = null // source layer for create and update, it can be graphicsLayer or featureLayer
     this.sourceGraphic = null
     this.state = 'ready' // ready|create|update|complete|cancel
+    this._eventHandlers = []
   }
 
   // always create a temp graphics layer for sketch, for both create or update. So this would have a unified
-    // way to handle FeatureLayer and GraphicsLayer
-
-    // for create, graphic needs to be remove from this temp graphicsLayer and add into the target layer
-    // for update, graphics need to be edited should be hidden first, and clone into this temp graphicsLayer and do the update
-    // once update complete, need to apply the updated graphics back to the source layer
+  // way to handle FeatureLayer and GraphicsLayer
+  // for create, graphic needs to be remove from this temp graphicsLayer and add into the target layer
+  // for update, graphics need to be edited should be hidden first, and clone into this temp graphicsLayer and do the update
+  // once update complete, need to apply the updated graphics back to the source layer
   _createSketchViewModel (props = {}) {
-    if (this.sketchViewModel) {
-      this.sketchViewModel.layer.removeAll()
-      this.sketchViewModel.reset()
-      this.sketchViewModel = null
-    }
+    this._resetSketchViewModel()
 
     return loadModules([
       'esri/widgets/Sketch/SketchViewModel',
@@ -82,7 +85,8 @@ class Sketch extends EventEmitter {
         ...this.sketchViewModelProperties,
         ...props,
         view,
-        layer: tempGraphicsLayer
+        layer: tempGraphicsLayer,
+        updateOnGraphicClick: false
       })
     })
   }
@@ -90,31 +94,43 @@ class Sketch extends EventEmitter {
   _applyComplete (editingGraphic) {
     const { sourceLayer } = this
     const newGraphic = editingGraphic.clone()
-    addGraphic(sourceLayer, newGraphic)
-    this.state = 'ready'
+
+    // need a beforeCreate handler, to give chance to modify new graphic
+    // and also give chance to stop add graphic
+    let { beforeComplete } = this.options
+
+    if (!beforeComplete) {
+      beforeComplete = () => newGraphic
+    }
+
+    const rtn = beforeComplete(newGraphic)
+    const _then = modifiedGraphic => {
+      if (modifiedGraphic === false) {
+        this.state = 'ready'
+        return // stop apply complete
+      }
+
+      addGraphic(sourceLayer, modifiedGraphic || newGraphic)
+      this.state = 'ready'
+    }
+
+    if (rtn && rtn.then) {
+      rtn.then(_then)
+    } else {
+      _then(rtn)
+    }
   }
 
   _applyCancel () {
     const { sourceLayer, sourceGraphic } = this
-    addGraphic(sourceLayer, sourceGraphic)
+    if (sourceGraphic) { // for create() has no sourceGraphic
+      addGraphic(sourceLayer, sourceGraphic)
+    }
     this.state = 'ready'
   }
 
-  _unbindEvents () {
-
-  }
-
-  destroy () {
-    
-  }
-
-  create (sourceLayer, tool) {
-    this.state = 'create'
-    this.sourceLayer = sourceLayer
-    this.sourceGraphic = null
-  
-    this._createSketchViewModel().then(sketchViewModel => {
-      sketchViewModel.create(tool)
+  _bindEvents (sketchViewModel) {
+    this._eventHandlers = [
       sketchViewModel.on(['redo', 'undo', 'create', 'update'], e => {
         let editingGraphic = null
         if (e.type === 'create') {
@@ -129,16 +145,73 @@ class Sketch extends EventEmitter {
           this._applyComplete(editingGraphic)
         } else if (this.state === 'cancel' && e.state === 'cancel') {
           sketchViewModel.layer.removeAll()
+          this._applyCancel()
         } else if (['complete', 'cancel'].includes(e.state)) {
           sketchViewModel.update([editingGraphic], { tool: 'reshape' })
         }
       })
+    ]
+  }
 
+  _unbindEvents () {
+    this._eventHandlers.forEach(h => h.remove())
+    this._eventHandlers = []
+  }
+
+  _resetSketchViewModel () {
+    if (this.sketchViewModel) {
+      this._unbindEvents()
+      this.view.map.remove(this.sketchViewModel.layer)
+      this.sketchViewModel.layer.removeAll()
+      this.sketchViewModel.reset()
+      this.sketchViewModel = null
+    }
+  }
+
+  destroy () {
+    this._resetSketchViewModel()
+    this.view = null
+    this.sketchViewModelProperties = null
+    this.sourceGraphic = null
+    this.sourceLayer = null
+    this.state = ''
+  }
+
+  /**
+   * for graphicsLayer: create(graphicsLayer, 'polygon')
+   * for featureLayer: create(featureLayer) // tool will be inferred with featureLayer.geometryType
+   */
+  create (sourceLayer, tool) {
+    this.state = 'create'
+    this.sourceLayer = sourceLayer
+    this.sourceGraphic = null
+
+    if (sourceLayer.type === 'feature') {
+      tool = sourceLayer.geometryType
+    }
+  
+    this._createSketchViewModel().then(sketchViewModel => {
+      sketchViewModel.create(tool)
+      this._bindEvents(sketchViewModel)
       this.sketchViewModel = sketchViewModel
     })
   }
 
-  update (sourceLayer, graphic) {
+  /**
+   * update(graphic) // sourceLayer will be use graphic.layer
+   * update(sourceLayer, graphic) // or you can specify sourceLayer
+   */
+  update (/* sourceLayer, graphic */...args) {
+    let sourceLayer, graphic
+
+    if (args.length === 1) { // update(graphic)
+      graphic = args[0]
+      sourceLayer = graphic.layer
+    } else if (args.length === 0) { // update(layer, graphic)
+      sourceLayer = args[0]
+      graphic = args[1]
+    }
+
     this.state = 'update'
     this.sourceLayer = sourceLayer
     this.sourceGraphic = graphic.clone()
@@ -149,19 +222,7 @@ class Sketch extends EventEmitter {
       graphic.layer = sketchViewModel.layer // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
       sketchViewModel.update([graphic], { tool: 'reshape' })
-
-      sketchViewModel.on(['redo', 'undo', 'update'], e => {
-        if (this.state === 'complete' && e.state === 'complete') {
-          sketchViewModel.layer.removeAll()
-          this._applyComplete(e.graphics[0])
-        } else if (this.state === 'cancel' && e.state === 'cancel') {
-          sketchViewModel.layer.removeAll()
-          this._applyCancel()
-        } else if (['complete', 'cancel'].includes(e.state)) {
-          sketchViewModel.update(e.graphics, { tool: 'reshape' })
-        }
-      })
-  
+      this._bindEvents(sketchViewModel)
       this.sketchViewModel = sketchViewModel
     })
   }

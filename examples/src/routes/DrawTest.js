@@ -22,14 +22,30 @@ export default class extends Component {
     loadModules([
       'esri/layers/FeatureLayer',
       'esri/layers/GraphicsLayer',
-      'esri/Graphic'
-    ]).then(({ GraphicsLayer, FeatureLayer, Graphic }) => {
+      'esri/Graphic',
+      'esri/layers/support/LabelClass'
+    ]).then(({ GraphicsLayer, FeatureLayer, Graphic, LabelClass }) => {
       const graphicsLayer = new GraphicsLayer()
       const featureLayer = new FeatureLayer({
         source: [],
         geometryType: 'polygon',
         objectIdField: 'ObjectID',
         displayField: 'ObjectID',
+        fields: [
+          { name: 'ObjectID', alias: 'ObjectID', type: 'string' },
+          { name: 'Name', alias: 'Name', type: 'string' },
+        ],
+        labelingInfo: [{
+          symbol: {
+            type: "text",
+            color: "red",
+            haloColor: "black",
+          },
+          labelPlacement: "above-center",
+          labelExpressionInfo: {
+            expression: "$feature.Name"
+          }
+        }],
         renderer: {
           type: "simple", // autocasts as new SimpleRenderer()
           symbol: {
@@ -42,13 +58,47 @@ export default class extends Component {
           }
         }
       })
+
+      const polylineFeatureLayer = new FeatureLayer({
+        source: [],
+        geometryType: 'polyline',
+        objectIdField: 'ObjectID',
+        displayField: 'ObjectID',
+        fields: [
+          { name: 'ObjectID', alias: 'ObjectID', type: 'string' },
+          { name: 'Name', alias: 'Name', type: 'string' },
+        ],
+        labelingInfo: [{
+          symbol: {
+            type: "text",
+            color: "red",
+            haloColor: "black",
+          },
+          labelPlacement: "above-center",
+          labelExpressionInfo: {
+            expression: "$feature.Name"
+          }
+        }],
+        renderer: {
+          type: "simple", // autocasts as new SimpleRenderer()
+          symbol: {
+            type: "simple-line",  // autocasts as new SimpleLineSymbol()
+            color: "red",
+            width: "2px",
+            style: "short-dot"
+          }
+        }
+      })
+
       map.add(featureLayer)
+      map.add(polylineFeatureLayer)
       map.add(graphicsLayer)
 
       testPolygonGraphicJson.attributes.ObjectID = '001'
+      testPolygonGraphicJson.attributes.Name = 'T001'
       const g = Graphic.fromJSON(testPolygonGraphicJson)
 
-      // graphicsLayer.add(g)
+      graphicsLayer.add(g.clone())
       // g.layer = graphicsLayer
 
       featureLayer.applyEdits({ addFeatures: [g] })
@@ -58,11 +108,25 @@ export default class extends Component {
       const sketch = window.sketch = new Sketch({
         view,
         updateOnGraphicClick: false,
+      }, {
+        beforeComplete: graphic => {
+          graphic.attributes = graphic.attributes || {}
+          graphic.attributes.ObjectID = '123'
+          graphic.attributes.Name = 'XXXX' + Date.now()
+          // return graphic
+        }
       })
 
-      console.log('graphic => ', g)
-      sketch.create(featureLayer, 'polygon')
-      // sketch.update(featureLayer, g)
+      sketch.create(polylineFeatureLayer)
+      // sketch.create(polylineFeatureLayer, 'polyline')
+      // sketch.update(g)
+
+      view.on('click', e => {
+        view.hitTest(e).then(({ results }) => {
+          const selectedGraphics = results.filter(r => r.graphic.layer.type === 'feature' || r.graphic.layer.type === 'graphics').map(r => r.graphic)
+          sketch.update(selectedGraphics[0])
+        })
+      })
     })
     
   }
