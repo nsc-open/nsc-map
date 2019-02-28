@@ -5,28 +5,36 @@ import Graphic from 'nsc-map/components/esri/Graphic'
 import { polygon1, polygon2 } from 'mock/geometry-jsons'
 
 export default class extends Component {
+
+  state = {
+    graphics: [polygon1]
+  }
+
+  componentDidMount () {
+    window.add = () =>  this.addGraphic()
+  }
+
+  addGraphic () {
+    this.setState({
+      graphics: [...this.state.graphics, polygon2]
+    })
+  }
   
   onLoad = (map, view) => {
     this.setState({ map: map })
   }
 
   render () {
+    const { graphics } = this.state
     return (
       <Map
         onLoad={this.onLoad}
-        loaderOptions={{
-          url: 'https://js.arcgis.com/4.8',
-          dojoConfig: {
-            has: {
-              "esri-featurelayer-webgl": 1
-            }
-          }
-        }}
       >
         <FeatureLayer featureLayerProperties={{
             source: [],
             geometryType: 'polygon',
             objectIdField: 'ObjectID',
+            displayField: 'ObjectID',
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {
@@ -39,14 +47,10 @@ export default class extends Component {
               }
             }
           }}>
-          <Graphic
-            key="2"
-            geometryJson={polygon1}
-          />
-          <Graphic
-            key="3"
-            geometryJson={polygon2}
-          />
+          {graphics.map((g, i) => <Graphic
+            key={i}
+            geometryJson={g}
+          />)}
         </FeatureLayer>
       </Map>
     )

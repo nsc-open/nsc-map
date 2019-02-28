@@ -23,7 +23,7 @@ export default class extends Component {
     return (
       <Map
         onLoad={this.onLoad}
-        loaderOptions={{ url: 'https://js.arcgis.com/4.8' }}
+        loaderOptions={{ url: 'https://js.arcgis.com/4.10' }}
       >
        <MapWidget draggable defaultPosition={{ x: 200, y: 200 }}>
         {this.state.map && <BasemapDropdown map={this.state.map} />}
