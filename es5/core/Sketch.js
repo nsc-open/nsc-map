@@ -101,7 +101,10 @@ class Sketch extends EventEmitter {
       return new SketchViewModel(_objectSpread({}, this.sketchViewModelProperties, props, {
         view,
         layer: tempGraphicsLayer,
-        updateOnGraphicClick: false
+        updateOnGraphicClick: false,
+        defaultUpdateOptions: {
+          tool: 'reshape'
+        }
       }));
     });
   }
@@ -175,9 +178,7 @@ class Sketch extends EventEmitter {
 
         this._applyCancel();
       } else if (['complete', 'cancel'].includes(e.state)) {
-        sketchViewModel.update([editingGraphic], {
-          tool: 'reshape'
-        });
+        sketchViewModel.update([editingGraphic]);
       }
     })];
   }
@@ -261,9 +262,7 @@ class Sketch extends EventEmitter {
       sketchViewModel.layer.add(graphic);
       graphic.layer = sketchViewModel.layer; // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
-      sketchViewModel.update([graphic], {
-        tool: 'reshape'
-      });
+      sketchViewModel.update([graphic]);
 
       this._bindEvents(sketchViewModel);
 

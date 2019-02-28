@@ -24,6 +24,7 @@ const removeGraphic = (layer, graphic) => {
     throw new Error('not supported layer', layer)
   }
 }
+
 /**
  * This sketch handles GraphicsLayer and FeatureLayer
  * 
@@ -86,7 +87,8 @@ class Sketch extends EventEmitter {
         ...props,
         view,
         layer: tempGraphicsLayer,
-        updateOnGraphicClick: false
+        updateOnGraphicClick: false,
+        defaultUpdateOptions: { tool: 'reshape' }
       })
     })
   }
@@ -147,7 +149,7 @@ class Sketch extends EventEmitter {
           sketchViewModel.layer.removeAll()
           this._applyCancel()
         } else if (['complete', 'cancel'].includes(e.state)) {
-          sketchViewModel.update([editingGraphic], { tool: 'reshape' })
+          sketchViewModel.update([editingGraphic])
         }
       })
     ]
@@ -221,7 +223,7 @@ class Sketch extends EventEmitter {
       sketchViewModel.layer.add(graphic)
       graphic.layer = sketchViewModel.layer // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
-      sketchViewModel.update([graphic], { tool: 'reshape' })
+      sketchViewModel.update([graphic])
       this._bindEvents(sketchViewModel)
       this.sketchViewModel = sketchViewModel
     })
