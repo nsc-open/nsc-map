@@ -4,7 +4,7 @@ import GroupLayer from './GroupLayer'
 import FeatureLayer from './FeatureLayer'
 import { GEOMETRY_TYPE } from '../../constants/geometry'
 
-import GraphicSelectionManager from '../graphic-selection-manager/GraphicSelectionManager'
+import GraphicSelectionManager from '../../core/graphic-selection-manager/GraphicSelectionManager'
 
 
 // is a combination of GraphicsLayer and Annotation Layer

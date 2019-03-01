@@ -13,9 +13,9 @@ const { Button: RadioButton } = Radio
 const ButtonGroup = Radio.Group
 
 const DRAW_TOOLS = [
-  { key: 'point', icon: 'rocket', label: '点' },
-  { key: 'polyline', icon: 'usb', label: '线' },
-  { key: 'polygon', icon: 'man', label: '多边形' }
+  { key: 'point', icon: '', label: '点' },
+  { key: 'polyline', icon: '', label: '线' },
+  { key: 'polygon', icon: '', label: '多边形' }
 ]
 const DEFAULT_TOOL = 'point'
 
@@ -85,8 +85,8 @@ class DrawOptionsBar extends Component {
 }
 
 DrawOptionsBar.propTypes = {
-  map: PropTypes.object,
-  view: PropTypes.object,
+  map: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   targetLayer: PropTypes.func.isRequired,
   beforeCompleteSketch: PropTypes.func
 }

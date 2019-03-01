@@ -6,6 +6,7 @@ import LayerServiceTestPage from './routes/LayerServiceTest'
 import GroundObjectsLayerTestPage from './routes/GroundObjectsLayerTest'
 import FeatureLayerTestPage from './routes/FeatureLayerTest'
 import DrawTestPage from './routes/DrawTest'
+import SelectTestPage from './routes/SelectTest'
 
 function RouterConfig({ history }) {
   return (
@@ -17,6 +18,7 @@ function RouterConfig({ history }) {
         <Route path="/ground-objects-layer" exact component={GroundObjectsLayerTestPage} />
         <Route path="/feature-layer" exact component={FeatureLayerTestPage} />
         <Route path="/draw" exact component={DrawTestPage} />
+        <Route path="/select" exact component={SelectTestPage} />
       </Switch>
     </Router>
   );

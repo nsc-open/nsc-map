@@ -12,7 +12,7 @@ const viewInstanceNamespace = createNamespace('view')
 const TOOLS = [
   { key: 'select', icon: 'pushpin', label: '选择' },
   { key: 'measure', icon: 'stock', label: '测量', optionsBar: <MeasureOptionsBar /> },
-  { key: 'draw', icon: 'edit', label: '绘制', optionsBar: <DrawOptionsBar /> },
+  // { key: 'draw', icon: 'edit', label: '绘制', optionsBar: <DrawOptionsBar /> },
   { key: 'import', icon: 'upload', label: '导入' },
   { key: 'export', icon: 'download', label: '导出', optionsBar: <ExportOptionsBar /> },
 ]

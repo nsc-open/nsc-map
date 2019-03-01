@@ -1,10 +1,17 @@
 import EventEmitter from 'eventemitter3'
-import SelectionManager from '../../utils/SelectionManager'
+import SelectionManager from '../SelectionManager'
 import PointerSelector from './PointerSelector'
 import { SELECTOR_TYPE } from './constants'
 
 /**
+ * This support graphics selection and highlight from multiple layers (graphicsLayer or featureLayer)
+ * NOTE: highlight GraphicsLayer is only support in SceneView.
+ *       https://developers.arcgis.com/javascript/latest/api-reference/esri-views-layers-GraphicsLayerView.html#highlight
  * 
+ * usage:
+ *   const gsm = new GraphicSelectionManager({ view, layers: [graphicsLayer1, graphicsLayer2, featureLayer, ...] })
+ *   gms.activate({ tool: 'pointer', multiSelect: true })
+ *   gms.on('selectionChange', data => {})
  */
 class GraphicSelectionManager extends EventEmitter {
   constructor ({
@@ -13,6 +20,10 @@ class GraphicSelectionManager extends EventEmitter {
     graphicComparator = (g1, g2) => g1 === g2
   }) {
     super()
+
+    if (!view) {
+      throw new Error('view is required')
+    }
 
     this.view = view            // map view
     this.layers = layers || []
@@ -55,7 +66,7 @@ class GraphicSelectionManager extends EventEmitter {
     }
   }
 
-  activate ({ type = SELECTOR_TYPE.POINTER, multiSelect = true }) {
+  activate ({ type = SELECTOR_TYPE.POINTER, multiSelect = false }) {
     this.deactivate()
 
     if (type === SELECTOR_TYPE.POINTER) {
@@ -79,6 +90,9 @@ class GraphicSelectionManager extends EventEmitter {
   destroy () {
     this.deactivate()
     this.selectionManager.removeListener('selectionChange', this._selectionChangeHandler)
+
+    this.highlights.forEach(h => h && h.remove())
+    this.highlights = []
   }
 }
 

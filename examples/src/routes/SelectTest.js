@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
 import Toolbar from 'nsc-map/components/tools/toolbar/Toolbar'
-import DrawOptionsBar from 'nsc-map/components/tools/draw/DrawOptions'
-import Sketch from 'nsc-map/core/Sketch'
+import SelectOptionsBar from 'nsc-map/components/tools/select/SelectOptions'
 import { loadModules } from 'esri-module-loader'
-
-
+import GraphicSelectionManager from 'nsc-map/core/graphic-selection-manager/GraphicSelectionManager'
+import { polygon, polygon1, polyline } from 'mock/geometry-jsons'
 const testPolygonGraphicJson = JSON.parse('{"geometry":{"spatialReference":{"latestWkid":3857,"wkid":102100},"rings":[[[-13412744.469982473,6081291.325808455],[-13174260.941732787,6080068.333355892],[-13209727.722857099,5998127.839034205],[-13272100.337937785,5814678.971149831],[-13544827.654859222,5885612.533398456],[-13412744.469982473,6081291.325808455]]]},"symbol":{"type":"esriSFS","color":[0,0,0,51],"outline":{"type":"esriSLS","color":[255,0,0,255],"width":2,"style":"esriSLSSolid"},"style":"esriSFSSolid"},"attributes":{}}')
 
 export default class extends Component {
@@ -14,8 +13,22 @@ export default class extends Component {
     view: null
   }
 
+  createGraphicSelectionManager (map, view) {
+    return
+    const gsm = new GraphicSelectionManager({ view })
+    gsm.activate({ type: 'pointer' })
+    window.gsm = gsm
+
+    gsm.addLayer(this.polygonFeatureLayer)
+    gsm.addLayer(this.polylineFeatureLayer)
+    // gsm.addLayer(this.graphicsLayer)
+
+    gsm.on('selectionChange', e => console.log('selectionChange', e))
+  
+  }
+
   onLoad = (map, view) => {
-    this.setState({ map, view })
+    
 
     loadModules([
       'esri/layers/FeatureLayer',
@@ -132,61 +145,33 @@ export default class extends Component {
       const g = Graphic.fromJSON(testPolygonGraphicJson)
 
       graphicsLayer.add(g.clone())
-      // g.layer = graphicsLayer
 
-      featureLayer.applyEdits({ addFeatures: [g] })
-      g.layer = featureLayer
+      featureLayer.applyEdits({ addFeatures: [
+        
+        Graphic.fromJSON(polygon),
+        Graphic.fromJSON(polygon1),
+      ] })
 
-    
-      const sketch = window.sketch = new Sketch({
-        view,
-        updateOnGraphicClick: false,
-      }, {
-        beforeComplete: graphic => {
-          graphic.attributes = graphic.attributes || {}
-          graphic.attributes.ObjectID = '123'
-          graphic.attributes.Name = 'XXXX' + Date.now()
-          // return graphic
-        }
-      })
+      polylineFeatureLayer.applyEdits({ addFeatures: [
+        Graphic.fromJSON(polyline),
+        
+      ] })
 
-      // sketch.create(polylineFeatureLayer)
-      // sketch.create(polylineFeatureLayer, 'polyline')
-      // sketch.update(g)
+      this.createGraphicSelectionManager(map, view)
 
-      view.on('click', e => {
-        view.hitTest(e).then(({ results }) => {
-          const selectedGraphics = results.filter(r => r.graphic.layer.type === 'feature' || r.graphic.layer.type === 'graphics').map(r => r.graphic)
-          sketch.update(selectedGraphics[0])
-        })
-      })
+      this.setState({ map, view })
     })
     
   }
 
   render () {
     const { map, view } = this.state    
-    const TOOLS = [{
-      key: 'draw',
+    const TOOLS = map ? [{
+      key: 'select',
       icon: 'edit',
-      label: '绘制',
-      optionsBar: map ? <DrawOptionsBar 
-        map={map} 
-        view={view} 
-        targetLayer={tool => {
-          const featureLayers = {
-            point: this.pointFeatureLayer,
-            polyline: this.polylineFeatureLayer,
-            polygon: this.polygonFeatureLayer
-          }
-          return featureLayers[tool]
-        }}
-        beforeCompleteSketch={graphic => {
-          graphic.attributes = graphic.attributes || {}
-          graphic.attributes.Name = 'XXXX' + Date.now()
-        }}
-      /> : null
-    }]
+      label: '选择',
+      optionsBar: <SelectOptionsBar view={view} map={view} sourceLayers={[this.polygonFeatureLayer, this.polylineFeatureLayer]} />
+    }] : []
 
     return (
       <Map onLoad={this.onLoad}>

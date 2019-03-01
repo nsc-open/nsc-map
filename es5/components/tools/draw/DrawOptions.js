@@ -15,15 +15,15 @@ const {
 const ButtonGroup = Radio.Group;
 const DRAW_TOOLS = [{
   key: 'point',
-  icon: 'rocket',
+  icon: '',
   label: '点'
 }, {
   key: 'polyline',
-  icon: 'usb',
+  icon: '',
   label: '线'
 }, {
   key: 'polygon',
-  icon: 'man',
+  icon: '',
   label: '多边形'
 }];
 const DEFAULT_TOOL = 'point';
@@ -124,8 +124,8 @@ class DrawOptionsBar extends Component {
 }
 
 DrawOptionsBar.propTypes = {
-  map: PropTypes.object,
-  view: PropTypes.object,
+  map: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   targetLayer: PropTypes.func.isRequired,
   beforeCompleteSketch: PropTypes.func
 };

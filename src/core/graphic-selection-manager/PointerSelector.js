@@ -1,6 +1,8 @@
 import BaseSelector from './BaseSelector'
 import { SELECTOR_TYPE } from './constants'
+import SelectionManager from '../SelectionManager'
 
+const { MODE } = SelectionManager
 /**
  * bind events and select graphics via selectionManager
  * highlight logic will be handled by GraphicSelectionManager
@@ -22,8 +24,7 @@ class PointerSelector extends BaseSelector {
       view.on('click', e => {
         view.hitTest(e).then(({ results }) => {
           const selectedGraphics = results.filter(r => layers.includes(r.graphic.layer)).map(r => r.graphic)
-
-          if (this._multipleMode) {
+          if (this._multipleMode && selectionManager.mode() === MODE.MULTIPLE) {
             selectedGraphics.forEach(graphic => {
               if (selectionManager.includes(graphic)) {
                 selectionManager.remove(graphic)

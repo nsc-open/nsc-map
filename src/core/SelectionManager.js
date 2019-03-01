@@ -33,7 +33,7 @@ class SelectionManager extends EventEmitter {
 
   _normalizeSelection (selection) {
     selection = Array.isArray(selection) ? selection : [selection]
-    if (this.selectionMode === MODE.SINGLE) {
+    if (this.selectionMode === MODE.SINGLE && selection[0]) {
       selection = [selection[0]]
     }
     return selection
@@ -60,7 +60,7 @@ class SelectionManager extends EventEmitter {
   }
 
   select (selection) {
-    selection = this._normalizeSelection(selection)
+    selection = this._normalizeSelection(selection || [])
     const toAdd = selection.filter(s => !this._includes(this.selection, s))
     const toRemove = this.selection.filter(s => !this._includes(selection, s))
 
