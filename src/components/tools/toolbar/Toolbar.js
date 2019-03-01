@@ -42,9 +42,13 @@ class Toolbar extends Component {
   }
 
   clickHandler = toolKey => {
-    // this.props.onChange(toolKey)
-    this.setState({ activeToolKey: toolKey })
-    console.log('select tool', toolKey)
+    const { activeToolKey } = this.state
+
+    if (activeToolKey !== toolKey) {
+      this.setState({ activeToolKey: toolKey })
+    } else {
+      this.setState({ activeToolKey: '' })
+    }
   }
 
   render () {

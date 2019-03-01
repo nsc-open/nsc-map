@@ -5,9 +5,7 @@ import DrawOptionsBar from 'nsc-map/components/tools/draw/DrawOptions'
 import Sketch from 'nsc-map/core/Sketch'
 import { loadModules } from 'esri-module-loader'
 
-const TOOLS = [
-  { key: 'draw', icon: 'edit', label: '绘制', optionsBar: <DrawOptionsBar /> }
-]
+
 const testPolygonGraphicJson = JSON.parse('{"geometry":{"spatialReference":{"latestWkid":3857,"wkid":102100},"rings":[[[-13412744.469982473,6081291.325808455],[-13174260.941732787,6080068.333355892],[-13209727.722857099,5998127.839034205],[-13272100.337937785,5814678.971149831],[-13544827.654859222,5885612.533398456],[-13412744.469982473,6081291.325808455]]]},"symbol":{"type":"esriSFS","color":[0,0,0,51],"outline":{"type":"esriSLS","color":[255,0,0,255],"width":2,"style":"esriSLSSolid"},"style":"esriSFSSolid"},"attributes":{}}')
 
 export default class extends Component {
@@ -90,9 +88,44 @@ export default class extends Component {
         }
       })
 
-      map.add(featureLayer)
-      map.add(polylineFeatureLayer)
-      map.add(graphicsLayer)
+      const pointFeatureLayer = new FeatureLayer({
+        source: [],
+            geometryType: 'point',
+            objectIdField: 'ObjectID',
+            fields: [
+              { name: 'ObjectID', alias: 'ObjectID', type: 'string' },
+              { name: 'Name', alias: 'Name', type: 'string' },
+            ],
+            labelingInfo: [{
+              symbol: {
+                type: "text",
+                color: "red",
+                haloColor: "black",
+              },
+              labelPlacement: "above-center",
+              labelExpressionInfo: {
+                expression: "$feature.Name"
+              }
+            }],
+            renderer: {
+              type: "simple", // autocasts as new SimpleRenderer()
+              symbol: {
+                type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
+                style: "square",
+                color: "blue",
+                size: "8px",  // pixels
+                outline: {  // autocasts as new SimpleLineSymbol()
+                  color: [ 255, 255, 0 ],
+                  width: 3  // points
+                }
+              }
+            }
+      })
+
+      map.add(this.polygonFeatureLayer = featureLayer)
+      map.add(this.polylineFeatureLayer = polylineFeatureLayer)
+      map.add(this.pointFeatureLayer = pointFeatureLayer)
+      map.add(this.graphicsLayer = graphicsLayer)
 
       testPolygonGraphicJson.attributes.ObjectID = '001'
       testPolygonGraphicJson.attributes.Name = 'T001'
@@ -117,7 +150,7 @@ export default class extends Component {
         }
       })
 
-      sketch.create(polylineFeatureLayer)
+      // sketch.create(polylineFeatureLayer)
       // sketch.create(polylineFeatureLayer, 'polyline')
       // sketch.update(g)
 
@@ -132,6 +165,29 @@ export default class extends Component {
   }
 
   render () {
+    const { map, view } = this.state    
+    const TOOLS = [{
+      key: 'draw',
+      icon: 'edit',
+      label: '绘制',
+      optionsBar: <DrawOptionsBar 
+        map={map} 
+        view={view} 
+        targetLayer={tool => {
+          const featureLayers = {
+            point: this.pointFeatureLayer,
+            polyline: this.polylineFeatureLayer,
+            polygon: this.polygonFeatureLayer
+          }
+          return featureLayers[tool]
+        }}
+        beforeCompleteSketch={graphic => {
+          graphic.attributes = graphic.attributes || {}
+          graphic.attributes.Name = 'XXXX' + Date.now()
+        }}
+        />
+    }]
+
     return (
       <Map onLoad={this.onLoad}>
         <Toolbar tools={TOOLS} />

@@ -39,7 +39,7 @@ const removeGraphic = (layer, graphic) => {
  * })
  * 
  * sketch.create(sourceGraphicsLayer, 'polyline')
- * sketch.create(sourceFeatureLayer)
+ * sketch.create(sourceFeatureLayer)  // tool can be omitted here, it will be inferred from featureLayer
  * sketch.update(graphic)
  * sketch.update(sourceLayer, graphic)
  * 
@@ -94,7 +94,6 @@ class Sketch extends EventEmitter {
   }
 
   _applyComplete (editingGraphic) {
-    const { sourceLayer } = this
     const newGraphic = editingGraphic.clone()
 
     // need a beforeCreate handler, to give chance to modify new graphic
@@ -112,7 +111,7 @@ class Sketch extends EventEmitter {
         return // stop apply complete
       }
 
-      addGraphic(sourceLayer, modifiedGraphic || newGraphic)
+      addGraphic(this.sourceLayer, modifiedGraphic || newGraphic)
       this.state = 'ready'
     }
 
@@ -140,6 +139,11 @@ class Sketch extends EventEmitter {
         } else if (e.type === 'update') {
           editingGraphic = e.graphics[0]
         }
+
+        if (!editingGraphic) {
+          return
+        }
+
         editingGraphic.layer = sketchViewModel.layer
 
         if (this.state === 'complete' && e.state === 'complete') {

@@ -39,11 +39,19 @@ class Toolbar extends Component {
     super(props);
 
     _defineProperty(this, "clickHandler", toolKey => {
-      // this.props.onChange(toolKey)
-      this.setState({
-        activeToolKey: toolKey
-      });
-      console.log('select tool', toolKey);
+      const {
+        activeToolKey
+      } = this.state;
+
+      if (activeToolKey !== toolKey) {
+        this.setState({
+          activeToolKey: toolKey
+        });
+      } else {
+        this.setState({
+          activeToolKey: ''
+        });
+      }
     });
 
     this.state = {
