@@ -7,6 +7,7 @@ import GroundObjectsLayerTestPage from './routes/GroundObjectsLayerTest'
 import FeatureLayerTestPage from './routes/FeatureLayerTest'
 import DrawTestPage from './routes/DrawTest'
 import SelectTestPage from './routes/SelectTest'
+import MeasureTestPage from './routes/MeasureTest'
 
 function RouterConfig({ history }) {
   return (
@@ -19,6 +20,7 @@ function RouterConfig({ history }) {
         <Route path="/feature-layer" exact component={FeatureLayerTestPage} />
         <Route path="/draw" exact component={DrawTestPage} />
         <Route path="/select" exact component={SelectTestPage} />
+        <Route path="/measure" exact component={MeasureTestPage} />
       </Switch>
     </Router>
   );

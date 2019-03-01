@@ -8,7 +8,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Radio, Button } from 'antd';
-import { getNamespace } from '../../../utils/InstanceManager';
 import DistanceMeasurement from '../../../core/measurements/2d/DistanceMeasurement';
 import AreaMeasurement from '../../../core/measurements/2d/AreaMeasurement';
 import AngleMeasurement from '../../../core/measurements/2d/AngleMeasurement';
@@ -24,85 +23,71 @@ const DRAW_TOOLS = [{
   key: 'area',
   icon: 'usb',
   label: '面积'
-}, {
-  key: 'angle',
-  icon: 'man',
-  label: '角度'
 }];
+const DEFAULT_TOOL = 'distance';
 
 class MeasureOptionsBar extends Component {
   constructor(props) {
     super(props);
 
-    _defineProperty(this, "clearMeasurement", () => {
-      if (this.measurementTool) {
-        this.measurementTool.clearMeasurement();
-      }
-    });
-
-    _defineProperty(this, "newMeasurement", () => {
-      if (this.measurementTool) {
-        this.measurementTool.newMeasurement();
-      }
-    });
-
     _defineProperty(this, "toolChangeHandler", e => {
+      const {
+        value
+      } = e.target;
       this.setState({
-        activeToolKey: e.target.value
+        activeToolKey: value
       });
+      this.startMeasure(value);
+    });
+
+    _defineProperty(this, "redoHandler", () => {
+      this.startMeasure(this.state.activeToolKey);
     });
 
     this.state = {
-      view: null,
-      activeToolKey: 'distance'
+      activeToolKey: DEFAULT_TOOL
     };
     this.measurementTool = null;
   }
 
-  componentWillMount() {
-    const {
-      mapId
-    } = this.props;
-    const viewInstanceNamespace = getNamespace('view');
-    viewInstanceNamespace.get(mapId).then(view => {
-      this.setState({
-        view
-      });
-    });
+  componentDidMount() {
+    this.startMeasure(this.state.activeToolKey);
   }
 
   componentWillUnmount() {
     this.destroyTool();
   }
 
-  componentDidUpdate() {
+  startMeasure(tool) {
     const {
-      view,
-      activeToolKey
-    } = this.state;
+      view
+    } = this.props;
+    let measurementTool;
     this.destroyTool();
 
-    switch (activeToolKey) {
+    switch (tool) {
       case 'distance':
-        this.measurementTool = new DistanceMeasurement({
+        measurementTool = new DistanceMeasurement({
           view
         });
         break;
 
       case 'area':
-        this.measurementTool = new AreaMeasurement({
+        measurementTool = new AreaMeasurement({
           view
         });
         break;
 
       case 'angle':
-        this.measurementTool = new AngleMeasurement({
+        measurementTool = new AngleMeasurement({
           view
         });
         break;
 
       default:
     }
+
+    this.measurementTool = measurementTool;
   }
 
   destroyTool() {
@@ -114,7 +99,7 @@ class MeasureOptionsBar extends Component {
 
   render() {
     return React.createElement("div", null, "\u6D4B\u91CF\u7C7B\u578B\uFF1A", React.createElement(ButtonGroup, {
-      defaultValue: "distance",
+      defaultValue: DEFAULT_TOOL,
       buttonStyle: "solid",
       onChange: this.toolChangeHandler,
       size: "small"
@@ -122,31 +107,22 @@ class MeasureOptionsBar extends Component {
       key: tool.key,
       icon: tool.icon,
       value: tool.key
-    }, tool.label))), React.createElement("div", {
-      style: {
-        marginTop: '4px'
-      }
-    }, React.createElement(Button, {
+    }, tool.label))), React.createElement(Button, {
+      icon: "redo",
       size: "small",
-      icon: "rollback",
-      onClick: this.newMeasurement
-    }, "\u91CD\u65B0\u6D4B\u91CF"), React.createElement(Button, {
-      size: "small",
-      icon: "close",
-      onClick: this.clearMeasurement,
+      type: "primary",
+      ghost: true,
       style: {
         marginLeft: '8px'
       },
-      type: "danger"
-    }, "\u6E05\u9664")));
+      onClick: this.redoHandler
+    }));
   }
 
 }
 
 MeasureOptionsBar.propTypes = {
-  mapId: PropTypes.string
+  view: PropTypes.object.isRequired
 };
-MeasureOptionsBar.defaultProps = {
-  mapId: 'default'
-};
+MeasureOptionsBar.defaultProps = {};
 export default MeasureOptionsBar;

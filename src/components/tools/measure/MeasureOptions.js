@@ -7,7 +7,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Radio, Button } from 'antd'
-import { getNamespace } from '../../../utils/InstanceManager'
 import DistanceMeasurement from '../../../core/measurements/2d/DistanceMeasurement'
 import AreaMeasurement from '../../../core/measurements/2d/AreaMeasurement'
 import AngleMeasurement from '../../../core/measurements/2d/AngleMeasurement'
@@ -18,47 +17,47 @@ const ButtonGroup = Radio.Group
 const DRAW_TOOLS = [
   { key: 'distance', icon: 'rocket', label: '长度' },
   { key: 'area', icon: 'usb', label: '面积' },
-  { key: 'angle', icon: 'man', label: '角度' }
+  // { key: 'angle', icon: 'man', label: '角度' }
 ]
+const DEFAULT_TOOL = 'distance'
 
 class MeasureOptionsBar extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      view: null,
-      activeToolKey: 'distance'
+      activeToolKey: DEFAULT_TOOL
     }
     this.measurementTool = null
   }
 
-  componentWillMount () {
-    const { mapId } = this.props
-    const viewInstanceNamespace = getNamespace('view')
-    viewInstanceNamespace.get(mapId).then(view => {
-      this.setState({ view })
-    })
+  componentDidMount () {
+    this.startMeasure(this.state.activeToolKey)
   }
 
   componentWillUnmount () {
     this.destroyTool()
   }
 
-  componentDidUpdate () {
-    const { view, activeToolKey } = this.state
+  startMeasure (tool) {
+    const { view } = this.props
+    let measurementTool
+
     this.destroyTool()
 
-    switch (activeToolKey) {
+    switch (tool) {
       case 'distance':
-        this.measurementTool = new DistanceMeasurement({ view })
+        measurementTool = new DistanceMeasurement({ view })
         break
       case 'area':
-        this.measurementTool = new AreaMeasurement({ view })
+        measurementTool = new AreaMeasurement({ view })
         break
       case 'angle':
-        this.measurementTool = new AngleMeasurement({ view })
+        measurementTool = new AngleMeasurement({ view })
         break
       default:
-    }    
+    }
+
+    this.measurementTool = measurementTool
   }
 
   destroyTool () {
@@ -68,46 +67,37 @@ class MeasureOptionsBar extends Component {
     }
   }
 
-  clearMeasurement = () => {
-    if (this.measurementTool) {
-      this.measurementTool.clearMeasurement()
-    }
-  }
-
-  newMeasurement = () => {
-    if (this.measurementTool) {
-      this.measurementTool.newMeasurement()
-    }
-  }
-
   toolChangeHandler = (e) => {
-    this.setState({ activeToolKey: e.target.value })
+    const { value } = e.target
+    this.setState({ activeToolKey: value })
+    this.startMeasure(value)
+  }
+
+  redoHandler = () => {
+    this.startMeasure(this.state.activeToolKey)
   }
 
   render () {
     return (
       <div>
         测量类型：
-        <ButtonGroup defaultValue="distance" buttonStyle="solid" onChange={this.toolChangeHandler} size="small">
+        <ButtonGroup defaultValue={DEFAULT_TOOL} buttonStyle="solid" onChange={this.toolChangeHandler} size="small">
           {DRAW_TOOLS.map(tool => 
             <RadioButton key={tool.key} icon={tool.icon} value={tool.key}>{tool.label}</RadioButton>
           )}
         </ButtonGroup>
-        <div style={{marginTop:'4px'}}>
-          <Button size="small" icon="rollback" onClick={this.newMeasurement}>重新测量</Button>
-          <Button size="small" icon="close" onClick={this.clearMeasurement} style={{marginLeft:'8px'}} type="danger">清除</Button>
-        </div>
+        <Button icon="redo" size="small" type="primary" ghost style={{marginLeft: '8px'}} onClick={this.redoHandler} />
       </div>
     )
   }
 }
 
 MeasureOptionsBar.propTypes = {
-  mapId: PropTypes.string
+  view: PropTypes.object.isRequired
 }
 
 MeasureOptionsBar.defaultProps = {
-  mapId: 'default'
+  
 }
 
 export default MeasureOptionsBar
