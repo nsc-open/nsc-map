@@ -19,7 +19,8 @@ import { Icon, Tooltip } from 'antd';
 
 const styles = {
   bar: {
-    display: 'inline-block'
+    display: 'inline-block',
+    margin: '-6px -8px'
   },
   tools: {
     display: 'flex',
