@@ -4,9 +4,6 @@ import GroupLayer from './GroupLayer'
 import FeatureLayer from './FeatureLayer'
 import { GEOMETRY_TYPE } from '../../constants/geometry'
 
-import GraphicSelectionManager from '../../core/graphic-selection-manager/GraphicSelectionManager'
-
-
 // is a combination of GraphicsLayer and Annotation Layer
 /**
  * <GroundObjectsLayer>
@@ -22,63 +19,25 @@ class GroundObjectsLayer extends Component {
     super(props)
     this.state = {}
 
-    this.pointsFeatureLayer = null
-    this.linesFeatureLayer = null
-    this.polygonsFeatureLayer = null
-
-    this.selectionManager = null
-  }
-
-  componentWillMount () {
-    const { view, onSelectionChange } = this.props
-    const manager = new GraphicSelectionManager({ view })
-    manager.on('selectionChange', onSelectionChange)
-    manager.activate({ type: 'pointer' })
-    this.selectionManager = manager
-  }
-
-  componentWillUnmount () {
-    this.selectionManager.destroy()
-    this.selectionManager = null
-  }
-
-  componentDidMount () {
-    const { defaultSelectedKeys } = this.props
-  }
-
-  componentDidUpdate (prevProps) {
-    const { selectedKeys, selectionMode, allowMultipleSelection, children } = this.props
-    const { selectionManager } = this
-
-    if (prevProps.selectionMode !== selectionMode) {
-      selectionManager.mode(selectionMode)
+    this.featureLayers = {
+      point: null,
+      polyline: null,
+      polygon: null
     }
-
-    if (prevProps.allowMultipleSelection !== allowMultipleSelection) {
-      allowMultipleSelection
-        ? selectionManager.enableMultipleSelection()
-        : selectionManager.disableMultipleSelection()
-    }
-
-    if (prevProps.selectedKeys !== selectedKeys) {
-      // select graphics by key
-      selectionManager.select(selectedKeys)
-      
-      // TODO: key => graphic instance
-    }
-    
   }
 
   layerLoadHandler = (layerType, layer) => {
-    if (layerType === 'points') {
-      this.pointsFeatureLayer = layer
-    } else if (layerType === 'lines') {
-      this.linesFeatureLayer = layer
-    } else if (layerType === 'polygon') {
-      this.polygonsFeatureLayer = layer
-    }
+    this.featureLayers[layerType] = layer
 
-    this.selectionManager.addLayer(layer)
+    const {
+      point: pointFeatureLayer,
+      polyline: polylineFeatureLayer,
+      polygon: polygonFeatureLayer
+    } = this.featureLayers
+    
+    if (pointFeatureLayer && polylineFeatureLayer && polygonFeatureLayer) {
+      this.props.onLoad({ pointFeatureLayer, polylineFeatureLayer, polygonFeatureLayer })
+    }
   }
 
   render () {
@@ -106,12 +65,11 @@ class GroundObjectsLayer extends Component {
       }
     })
 
-    console.log(points, polylines, polygons)
     return (
       <GroupLayer map={map} view={view}>
         <FeatureLayer
-          key="polygonsFeatureLayer"
-          onLoad={layer => this.layerLoadHandler('polygons', layer)}
+          key="polygonFeatureLayer"
+          onLoad={layer => this.layerLoadHandler('polygon', layer)}
           featureLayerProperties={{
             source: [],
             geometryType: 'polygon',
@@ -132,8 +90,8 @@ class GroundObjectsLayer extends Component {
           {polygons}
         </FeatureLayer>
         <FeatureLayer
-          key="linesFeatureLayer"
-          onLoad={layer => this.layerLoadHandler('lines', layer)}
+          key="polylineFeatureLayer"
+          onLoad={layer => this.layerLoadHandler('polyline', layer)}
           featureLayerProperties={{
             source: [],
             geometryType: 'polyline',
@@ -152,8 +110,8 @@ class GroundObjectsLayer extends Component {
           {polylines}
         </FeatureLayer>
         <FeatureLayer
-          key="pointsFeatureLayer"
-          onLoad={layer => this.layerLoadHandler('points', layer)}
+          key="pointFeatureLayer"
+          onLoad={layer => this.layerLoadHandler('point', layer)}
           featureLayerProperties={{
             source: [],
             geometryType: 'point',
@@ -182,13 +140,8 @@ class GroundObjectsLayer extends Component {
 
 GroundObjectsLayer.propTypes = {
   map: PropTypes.object,
-
-  
-  selectionMode: PropTypes.string,
-  allowMultipleSelection: PropTypes.bool,
-  defaultSelectedKeys: PropTypes.array,
-  selectedKeys: PropTypes.array,      // keys of selected ground objects
-  onSelectionChange: PropTypes.func   // ({ selectedKeys, addedKeys, removedKeys }) => {}
+  featureLayerPropperties: PropTypes.array,
+  onLoad: PropTypes.func
 }
 
 GroundObjectsLayer.defaultProps = {
@@ -200,12 +153,7 @@ GroundObjectsLayer.defaultProps = {
     labelingInfo: [],
     renderer: {}
   }],
-
-  selectionMode: 'pointer',
-  allowMultipleSelection: false,
-  defaultSelectedKeys: [],
-  selectedKeys: [],
-  onSelectionChange: e => console.log('selectionChange', e)
+  onLoad: () => {}
 }
 
 export default GroundObjectsLayer

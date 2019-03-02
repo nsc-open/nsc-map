@@ -15,7 +15,6 @@ export default class extends Component {
     return (
       <Map
         onLoad={this.onLoad}
-        loaderOptions={{ url: 'https://js.arcgis.com/4.8' }}
       >
         <GroundObjectsLayer>
          <GroundObject key="0" geometryJson={polygon1} />
