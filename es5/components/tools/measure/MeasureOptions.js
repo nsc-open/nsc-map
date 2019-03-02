@@ -55,6 +55,7 @@ class MeasureOptionsBar extends Component {
   }
 
   componentWillUnmount() {
+    console.log('MeasureOptionsBar unmount');
     this.destroyTool();
   }
 
@@ -91,6 +92,8 @@ class MeasureOptionsBar extends Component {
   }
 
   destroyTool() {
+    console.log('destroyTool', this.measurementTool);
+
     if (this.measurementTool) {
       this.measurementTool.destroy();
       this.measurementTool = null;

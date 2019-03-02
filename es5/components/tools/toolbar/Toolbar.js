@@ -92,14 +92,18 @@ class Toolbar extends Component {
       style: activeToolKey === tool.key ? styles.activeTool : styles.tool,
       onClick: () => this.clickHandler(tool.key)
     }, React.createElement(Tooltip, {
-      title: tool.label
+      title: tool.label,
+      placement: "right"
     }, React.createElement(Icon, {
       type: tool.icon
     }))))))), activeTool && activeTool.optionsBar ? React.createElement(MapWidget, {
       map: map,
       view: view,
       draggable: true,
-      key: activeToolKey
+      defaultPosition: {
+        x: 100,
+        y: 15
+      }
     }, activeTool.optionsBar) : null);
   }
 

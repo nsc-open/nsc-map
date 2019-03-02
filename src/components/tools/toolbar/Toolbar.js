@@ -75,7 +75,7 @@ class Toolbar extends Component {
                     style={activeToolKey === tool.key ? styles.activeTool : styles.tool}
                     onClick={() => this.clickHandler(tool.key)}
                   >
-                    <Tooltip title={tool.label}>
+                    <Tooltip title={tool.label} placement="right">
                       <Icon type={tool.icon} />
                     </Tooltip>
                   </div> 
@@ -85,7 +85,7 @@ class Toolbar extends Component {
         </MapDraggable>
 
         {activeTool && activeTool.optionsBar ?
-          <MapWidget map={map} view={view} draggable key={activeToolKey}>
+          <MapWidget map={map} view={view} draggable defaultPosition={{ x: 100, y: 15 }}>
             {activeTool.optionsBar}
           </MapWidget>
         : null}

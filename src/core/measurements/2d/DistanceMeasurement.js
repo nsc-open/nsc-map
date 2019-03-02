@@ -14,7 +14,7 @@ class DistanceMeasurement extends EventEmitter {
     this.destroyed = false
 
     loadModules([
-      'esri/widgets/DistanceMeasurement2D/DistanceMeasurement2DViewModel'
+      'esri/widgets/DistanceMeasurement2D/DistanceMeasurement2DViewModel',
     ]).then(({ DistanceMeasurement2DViewModel }) => {
       if (this.destroyed) {
         return
@@ -51,6 +51,12 @@ class DistanceMeasurement extends EventEmitter {
 
   destroy () {
     this.clearMeasurement()
+
+    // the DistanceMeasurement2DViewModel doesn't provide a nice destory function
+    // so needs to do it myself
+    this.viewModel.tool.destroy()
+    this.viewModel.view.cursor = 'default'
+
     this.viewModel = null
     this.destroyed = true
   }
