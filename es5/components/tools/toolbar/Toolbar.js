@@ -98,7 +98,8 @@ class Toolbar extends Component {
     }))))))), activeTool && activeTool.optionsBar ? React.createElement(MapWidget, {
       map: map,
       view: view,
-      draggable: true
+      draggable: true,
+      key: activeTool
     }, activeTool.optionsBar) : null);
   }
 
