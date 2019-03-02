@@ -1,20 +1,48 @@
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 import GroupLayer from './GroupLayer';
 import FeatureLayer from './FeatureLayer';
-import { GEOMETRY_TYPE } from '../../constants/geometry'; // is a combination of GraphicsLayer and Annotation Layer
+import { GEOMETRY_TYPE } from '../../constants/geometry';
+const featureProperties = {
+  source: [],
+  objectIdField: 'ObjectID',
+  fields: [{
+    name: 'ObjectID',
+    alias: 'ObjectID',
+    type: 'string'
+  }, {
+    name: 'Name',
+    alias: 'Name',
+    type: 'string'
+  }],
+  labelingInfo: [{
+    symbol: {
+      type: "text",
+      // autocasts as new TextSymbol()
+      color: "red",
+      haloColor: "black"
+    },
+    labelPlacement: "above-center",
+    labelExpressionInfo: {
+      expression: "$feature.Name"
+    }
+  }] // is a combination of GraphicsLayer and Annotation Layer
 
-/**
- * <GroundObjectsLayer>
- *  <GroundObject />
- *  <GroundObject />
- * </GroundObjectsLayer>
- * 
- * TODO:
- *   1. mapping from GroundObject.key to graphic instance
- */
+  /**
+   * <GroundObjectsLayer>
+   *  <GroundObject />
+   *  <GroundObject />
+   * </GroundObjectsLayer>
+   * 
+   * TODO:
+   *   1. mapping from GroundObject.key to graphic instance
+   */
+
+};
 
 class GroundObjectsLayer extends Component {
   constructor(props) {
@@ -83,10 +111,8 @@ class GroundObjectsLayer extends Component {
     }, React.createElement(FeatureLayer, {
       key: "polygonFeatureLayer",
       onLoad: layer => this.layerLoadHandler('polygon', layer),
-      featureLayerProperties: {
-        source: [],
+      featureLayerProperties: _objectSpread({}, featureProperties, {
         geometryType: 'polygon',
-        objectIdField: 'ObjectID',
         renderer: {
           type: "simple",
           // autocasts as new SimpleRenderer()
@@ -101,14 +127,12 @@ class GroundObjectsLayer extends Component {
             }
           }
         }
-      }
+      })
     }, polygons), React.createElement(FeatureLayer, {
       key: "polylineFeatureLayer",
       onLoad: layer => this.layerLoadHandler('polyline', layer),
-      featureLayerProperties: {
-        source: [],
+      featureLayerProperties: _objectSpread({}, featureProperties, {
         geometryType: 'polyline',
-        objectIdField: 'ObjectID',
         renderer: {
           type: "simple",
           // autocasts as new SimpleRenderer()
@@ -120,14 +144,12 @@ class GroundObjectsLayer extends Component {
             style: "short-dot"
           }
         }
-      }
+      })
     }, polylines), React.createElement(FeatureLayer, {
       key: "pointFeatureLayer",
       onLoad: layer => this.layerLoadHandler('point', layer),
-      featureLayerProperties: {
-        source: [],
+      featureLayerProperties: _objectSpread({}, featureProperties, {
         geometryType: 'point',
-        objectIdField: 'ObjectID',
         renderer: {
           type: "simple",
           // autocasts as new SimpleRenderer()
@@ -146,7 +168,7 @@ class GroundObjectsLayer extends Component {
             }
           }
         }
-      }
+      })
     }, points));
   }
 

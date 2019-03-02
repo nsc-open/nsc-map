@@ -4,6 +4,26 @@ import GroupLayer from './GroupLayer'
 import FeatureLayer from './FeatureLayer'
 import { GEOMETRY_TYPE } from '../../constants/geometry'
 
+
+const featureProperties = {
+  source: [],
+  objectIdField: 'ObjectID',
+  fields: [
+    { name: 'ObjectID', alias: 'ObjectID', type: 'string' },
+    { name: 'Name', alias: 'Name', type: 'string' }
+  ],
+  labelingInfo: [{
+    symbol: {
+      type: "text",  // autocasts as new TextSymbol()
+      color: "red",
+      haloColor: "black",
+    },
+    labelPlacement: "above-center",
+    labelExpressionInfo: {
+      expression: "$feature.Name"
+    }
+  }]
+}
 // is a combination of GraphicsLayer and Annotation Layer
 /**
  * <GroundObjectsLayer>
@@ -71,9 +91,8 @@ class GroundObjectsLayer extends Component {
           key="polygonFeatureLayer"
           onLoad={layer => this.layerLoadHandler('polygon', layer)}
           featureLayerProperties={{
-            source: [],
+            ...featureProperties,            
             geometryType: 'polygon',
-            objectIdField: 'ObjectID',
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {
@@ -93,9 +112,8 @@ class GroundObjectsLayer extends Component {
           key="polylineFeatureLayer"
           onLoad={layer => this.layerLoadHandler('polyline', layer)}
           featureLayerProperties={{
-            source: [],
+            ...featureProperties,
             geometryType: 'polyline',
-            objectIdField: 'ObjectID',
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {
@@ -113,9 +131,8 @@ class GroundObjectsLayer extends Component {
           key="pointFeatureLayer"
           onLoad={layer => this.layerLoadHandler('point', layer)}
           featureLayerProperties={{
-            source: [],
+            ...featureProperties,
             geometryType: 'point',
-            objectIdField: 'ObjectID',
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {

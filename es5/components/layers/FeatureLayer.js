@@ -4,7 +4,7 @@ import { loadModules } from 'esri-module-loader';
 import { addKey } from './utils';
 /**
  * usage:
- *  <FeatureLayer featureLayerProperties={} selectedKeys onSelectionChange>
+ *  <FeatureLayer featureLayerProperties={}>
  *    <Graphic />
  *    <Graphic />
  *  </FeatureLayer>
@@ -17,45 +17,18 @@ class FeatureLayer extends Component {
       layer: null // need to put layer as state, so once layer is created, render would run again
 
     };
-    this.eventHandlers = [];
-    this.highlight = null;
   }
 
   componentWillMount() {
-    console.log('FeatureLayer willmount');
-    loadModules(['FeatureLayer', 'esri/widgets/Sketch/SketchViewModel', 'esri/layers/support/LabelClass']).then(({
-      FeatureLayer,
-      LabelClass
+    loadModules(['FeatureLayer']).then(({
+      FeatureLayer
     }) => {
       const {
         featureLayerProperties,
         onLoad
       } = this.props;
-      console.log('FeatureLayer new FeatureLayer()', featureLayerProperties);
-      featureLayerProperties.fields = [{
-        name: 'ObjectID',
-        alias: 'ObjectID',
-        type: 'string'
-      }, {
-        name: 'Name',
-        alias: 'Name',
-        type: 'string'
-      }];
-      featureLayerProperties.labelingInfo = [{
-        symbol: {
-          type: "text",
-          // autocasts as new TextSymbol()
-          color: "red",
-          haloColor: "black"
-        },
-        labelPlacement: "above-center",
-        labelExpressionInfo: {
-          expression: "$feature.Name"
-        }
-      }];
       const layer = new FeatureLayer(featureLayerProperties);
       this.addLayer(layer);
-      this.bindEvents();
       this.setState({
         layer
       });
@@ -64,50 +37,7 @@ class FeatureLayer extends Component {
   }
 
   componentWillUnmount() {
-    this.unbindEvents();
     this.removeLayer(this.state.layer);
-  }
-
-  componentDidUpdate(prevProps) {}
-
-  bindEvents() {
-    const {
-      view,
-      allowPointerSelection
-    } = this.props;
-
-    if (allowPointerSelection) {
-      this.eventHandlers.push(view.on('click', e => {
-        const {
-          view,
-          onSelectionChange
-        } = this.props;
-        const {
-          layer
-        } = this.state;
-        view.hitTest(e).then(({
-          results
-        }) => {
-          const selectedGraphics = results.filter(r => r.graphic.layer === layer).map(r => r.graphic);
-          console.log('selected f', selectedGraphics);
-          this.props.view.whenLayerView(layer).then(layerView => {
-            console.log('layerView', layerView);
-
-            if (this.highlight) {
-              console.log("remove");
-              this.highlight.remove();
-            }
-
-            this.highlight = layerView.highlight(selectedGraphics);
-            console.log('featurelayer.highlighted');
-          });
-        });
-      }));
-    }
-  }
-
-  unbindEvents() {
-    this.eventHandlers.forEach(h => h.remove());
   }
 
   addLayer(layer) {
@@ -136,10 +66,6 @@ class FeatureLayer extends Component {
     } else {
       map.remove(layer);
     }
-  }
-
-  getGraphicKeys(graphics = []) {
-    return graphics.map(g => g.attributes.key);
   }
 
   render() {
@@ -174,18 +100,12 @@ FeatureLayer.propTypes = {
   parentLayer: PropTypes.object,
   featureLayerPropperties: PropTypes.object,
   // isRequired
-  allowPointerSelection: PropTypes.bool,
-  selectedKeys: PropTypes.arrayOf(PropTypes.string),
-  onSelectionChange: PropTypes.func,
   onLoad: PropTypes.func
 };
 FeatureLayer.defaultProps = {
   map: undefined,
   parentLayer: undefined,
   featureLayerPropperties: undefined,
-  allowPointerSelection: true,
-  selectedKeys: [],
-  onSelectionChange: null,
   onLoad: layer => {
     console.log('FeatureLayer onLoad');
   }
