@@ -37,8 +37,7 @@ const styles = {
     padding: '4px 8px',
     borderBottom: '1px solid #e8e8e8'
   },
-  main: {
-    padding: '6px 8px'
+  main: {// padding: '6px 8px'
   }
 };
 export default (({

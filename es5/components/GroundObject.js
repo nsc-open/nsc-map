@@ -6,7 +6,7 @@ function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) r
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Graphic from './esri/Graphic';
+import Graphic from './graphic/Graphic';
 /**
  * GroundObject is a wrapper component of Graphic
  * it accepts geometryJson and bizData

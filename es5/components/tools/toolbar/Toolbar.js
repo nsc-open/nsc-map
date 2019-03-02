@@ -4,8 +4,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MapDraggable from '../../base/MapDraggable';
 import MapWidget from '../../base/MapWidget';
-import { Icon, Tooltip } from 'antd'; // import styles from './Toolbar.css'
-
+import { Icon, Tooltip } from 'antd';
 /**
  * Because OptionsBar is highly related to active tools, 
  * so can we define Toolbar like this:
@@ -19,6 +18,13 @@ import { Icon, Tooltip } from 'antd'; // import styles from './Toolbar.css'
  */
 
 const styles = {
+  bar: {
+    display: 'inline-block'
+  },
+  tools: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
   tool: {
     display: 'inline-block',
     margin: '0 2px',
@@ -64,7 +70,8 @@ class Toolbar extends Component {
       map,
       view,
       tools = [],
-      defaultPosition
+      defaultPosition,
+      direction
     } = this.props;
     const {
       activeToolKey
@@ -73,8 +80,13 @@ class Toolbar extends Component {
     return React.createElement("div", null, React.createElement(MapDraggable, {
       map: map,
       view: view,
-      defaultPosition: defaultPosition
-    }, React.createElement("div", null, tools.map((tool, index) => tool.render ? tool.render() : React.createElement("div", {
+      defaultPosition: defaultPosition,
+      direction: direction
+    }, React.createElement("div", {
+      style: styles.bar
+    }, React.createElement("div", {
+      style: styles.tools
+    }, tools.map((tool, index) => tool.render ? tool.render() : React.createElement("div", {
       key: index,
       style: activeToolKey === tool.key ? styles.activeTool : styles.tool,
       onClick: () => this.clickHandler(tool.key)
@@ -82,7 +94,7 @@ class Toolbar extends Component {
       title: tool.label
     }, React.createElement(Icon, {
       type: tool.icon
-    })))))), activeTool && activeTool.optionsBar ? React.createElement(MapWidget, {
+    }))))))), activeTool && activeTool.optionsBar ? React.createElement(MapWidget, {
       map: map,
       view: view,
       draggable: true
@@ -92,6 +104,7 @@ class Toolbar extends Component {
 }
 
 Toolbar.propTypes = {
+  direction: PropTypes.string.isRequired,
   tools: PropTypes.array.isRequired,
   // [{ icon, key, label, render, optionsBar }],
   activeToolKey: PropTypes.string,
@@ -99,8 +112,9 @@ Toolbar.propTypes = {
   onChange: PropTypes.func
 };
 Toolbar.defaultProps = {
+  direction: 'verticle',
   defaultPosition: {
-    x: 100,
+    x: 15,
     y: 15
   },
   onChange: toolKey => {}

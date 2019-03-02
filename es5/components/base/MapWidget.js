@@ -55,7 +55,6 @@ class MapWidget extends Component {
     const {
       zIndex
     } = this.state;
-    console.log('MapWidget.render()');
 
     if (draggable) {
       return React.createElement(MapDraggble, {

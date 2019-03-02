@@ -45,7 +45,7 @@ class MapWidget extends Component {
   render () {
     const { map, view, draggable, children, defaultPosition } = this.props
     const { zIndex } = this.state
-    console.log('MapWidget.render()')
+    
     if (draggable) {
       return (
         <MapDraggble map={map} view={view} defaultPosition={defaultPosition} zIndex={zIndex}>

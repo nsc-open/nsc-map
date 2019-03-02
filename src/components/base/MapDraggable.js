@@ -35,7 +35,7 @@ const styles = {
     borderBottom: '1px solid #e8e8e8'
   },
   main: {
-    padding: '6px 8px'
+    // padding: '6px 8px'
   }
 }
 
