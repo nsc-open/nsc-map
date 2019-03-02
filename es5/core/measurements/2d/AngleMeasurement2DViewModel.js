@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 import { loadModules } from 'esri-module-loader';
-import { createNamespace } from '../../../utils/InstanceManager';
+import { createNamespace } from '../../../core/InstanceManager';
 import { pathAngles } from '../../../utils/geometry';
 let uid = 0;
 const ns = createNamespace('__AngleMeasurement2DViewModel');

@@ -5,7 +5,7 @@ import Toolbar from 'nsc-map/components/tools/toolbar/Toolbar'
 import DrawOptionsBar from 'nsc-map/components/tools/draw/DrawOptions'
 import ExportOptionsBar from 'nsc-map/components/tools/export/ExportOptions'
 import MeasureOptionsBar from 'nsc-map/components/tools/measure/MeasureOptions'
-import { createNamespace } from 'nsc-map/utils/InstanceManager'
+import { createNamespace } from 'nsc-map/core/InstanceManager'
 
 const viewInstanceNamespace = createNamespace('view')
 

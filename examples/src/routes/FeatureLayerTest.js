@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
 import FeatureLayer from 'nsc-map/components/layers/FeatureLayer'
-import Graphic from 'nsc-map/components/esri/Graphic'
+import Graphic from 'nsc-map/components/graphic/Graphic'
 import { polygon1, polygon2 } from 'mock/geometry-jsons'
 
 export default class extends Component {

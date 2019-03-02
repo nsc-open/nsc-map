@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Dropdown, Button, Icon, Menu } from 'antd'
-import BasemapManager from '../../core/BasemapManager'
+import BasemapManager from '../core/BasemapManager'
 
 const TIANDITU_TOKEN = 'e2b08de0708e5136fff0fccaf21dd9bd'
 
