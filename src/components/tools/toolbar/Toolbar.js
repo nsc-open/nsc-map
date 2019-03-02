@@ -85,7 +85,7 @@ class Toolbar extends Component {
         </MapDraggable>
 
         {activeTool && activeTool.optionsBar ?
-          <MapWidget map={map} view={view} draggable key={activeTool}>
+          <MapWidget map={map} view={view} draggable key={activeToolKey}>
             {activeTool.optionsBar}
           </MapWidget>
         : null}
