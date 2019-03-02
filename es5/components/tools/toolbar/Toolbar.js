@@ -99,7 +99,7 @@ class Toolbar extends Component {
       map: map,
       view: view,
       draggable: true,
-      key: activeTool
+      key: activeToolKey
     }, activeTool.optionsBar) : null);
   }
 
