@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import GroupLayer from './GroupLayer'
 import FeatureLayer from './FeatureLayer'
 import { GEOMETRY_TYPE } from '../../constants/geometry'
+import * as geometryUtils from '../../utils/geometry'
 
 
 const featureProperties = {
@@ -74,13 +75,14 @@ class GroundObjectsLayer extends Component {
     // TODO 这里如果 children数量很大上万条数据，怎么可以快一些或者 cache 计算结果
     Children.map(children, child => {
       const { geometry } = child.props.geometryJson
-      if (geometry.type === GEOMETRY_TYPE.POLYGON.key) {
+      const type = geometryUtils.type(geometry)
+      if (type === GEOMETRY_TYPE.POLYGON.key) {
         polygons.push(child)
-      } else if (geometry.type === GEOMETRY_TYPE.POLYLINE.key) {
+      } else if (type === GEOMETRY_TYPE.POLYLINE.key) {
         polylines.push(child)
-      } else if (geometry.type === GEOMETRY_TYPE.POINT.key) {
+      } else if (type === GEOMETRY_TYPE.POINT.key) {
         points.push(child)
-      } else if (geometry.type === GEOMETRY_TYPE.MULTIPOINT.key) {
+      } else if (type === GEOMETRY_TYPE.MULTIPOINT.key) {
         multipoints.push(child)
       }
     })

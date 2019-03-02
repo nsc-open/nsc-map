@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import GroupLayer from './GroupLayer';
 import FeatureLayer from './FeatureLayer';
 import { GEOMETRY_TYPE } from '../../constants/geometry';
+import * as geometryUtils from '../../utils/geometry';
 const featureProperties = {
   source: [],
   objectIdField: 'ObjectID',
@@ -94,14 +95,15 @@ class GroundObjectsLayer extends Component {
       const {
         geometry
       } = child.props.geometryJson;
+      const type = geometryUtils.type(geometry);
 
-      if (geometry.type === GEOMETRY_TYPE.POLYGON.key) {
+      if (type === GEOMETRY_TYPE.POLYGON.key) {
         polygons.push(child);
-      } else if (geometry.type === GEOMETRY_TYPE.POLYLINE.key) {
+      } else if (type === GEOMETRY_TYPE.POLYLINE.key) {
         polylines.push(child);
-      } else if (geometry.type === GEOMETRY_TYPE.POINT.key) {
+      } else if (type === GEOMETRY_TYPE.POINT.key) {
         points.push(child);
-      } else if (geometry.type === GEOMETRY_TYPE.MULTIPOINT.key) {
+      } else if (type === GEOMETRY_TYPE.MULTIPOINT.key) {
         multipoints.push(child);
       }
     });
