@@ -12,7 +12,7 @@ const extentToLayer = (mapView, layerId) => {
  * LayerLocator
  * 
  * usage:
- *    <LayerLocator layerId="" mapView={mapView}>
+ *    <LayerLocator layerId="" map view>
  *      <Button>Click Me to locate the layer</Button>
  *    </LayerLocator>
  */
@@ -37,11 +37,11 @@ class LayerLocator extends Component {
 
   locate() {
     const {
-      mapView,
+      view,
       layerId,
       onLocate
     } = this.props;
-    extentToLayer(mapView, layerId);
+    extentToLayer(view, layerId);
     onLocate();
   }
 
@@ -61,15 +61,16 @@ class LayerLocator extends Component {
 }
 
 LayerLocator.propTypes = {
-  mapView: PropTypes.object.isRequired,
-  // mapView
+  map: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   onLocate: PropTypes.func,
   layerId: PropTypes.string.isRequired,
   doubleClick: PropTypes.bool // use doubleClick to trigger locate
 
 };
 LayerLocator.defaultProps = {
-  mapView: undefined,
+  map: undefined,
+  view: undefined,
   onLocate: () => {},
   doubleClick: false,
   layerId: undefined

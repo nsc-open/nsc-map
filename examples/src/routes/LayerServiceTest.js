@@ -20,6 +20,7 @@ export default class extends Component {
   }
 
   render () {
+    const { map, view } = this.state
     return (
       <Map
         onLoad={this.onLoad}
@@ -27,7 +28,7 @@ export default class extends Component {
       >
        <MapWidget draggable defaultPosition={{ x: 200, y: 200 }}>
         {this.state.map && <BasemapDropdown map={this.state.map} />}
-        {this.state.view && <LayerServiceSelector mapView={this.state.view} categories={categories} layers={layers} />}
+        {this.state.view && <LayerServiceSelector map={map} view={view} categories={categories} layers={layers} />}
        </MapWidget>
       </Map>
     )

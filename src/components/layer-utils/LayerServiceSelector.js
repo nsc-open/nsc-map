@@ -24,7 +24,7 @@ const setLayerVisibility = (map, layerId, visibility) => {
  * it's an uncontrolled component, you cannot get selected layer status from outside (for now)
  * 
  * usage:
- *    <LayerServiceSelector mapView categories layers />
+ *    <LayerServiceSelector map view categories layers />
  */
 class LayerServiceSelector extends Component {
   constructor (props) {
@@ -39,12 +39,12 @@ class LayerServiceSelector extends Component {
   }
 
   addLayers (layers) {
-    const { layerLoader } = this.props
+    const { layerLoader, map } = this.props
     layers.forEach(layer => layerLoader(map, layer))
   }
 
   switchHandler = layer => {
-    const { mapView } = this.props
+    const { map } = this.props
     const { selectedLayerIds } = this.state
     let newSelectedLayerIds
     let checked
@@ -58,20 +58,20 @@ class LayerServiceSelector extends Component {
     }
 
     this.setState({ selectedLayerIds: newSelectedLayerIds })
-    setLayerVisibility(mapView.map, layer.id, checked)
+    setLayerVisibility(map, layer.id, checked)
   }
 
   locateHandler = layer => {
-    const { mapView } = this.props
+    const { map } = this.props
     const { selectedLayerIds } = this.state
     if (!selectedLayerIds.includes(layer.id)) {
       this.setState({ selectedLayerIds: [...selectedLayerIds, layer.id] })
-      setLayerVisibility(mapView.map, layer.id, true)
+      setLayerVisibility(map, layer.id, true)
     }
   }
 
   renderPopoverContent (categoryId) {
-    const { layers, mapView } = this.props
+    const { layers, map, view } = this.props
     const { selectedLayerIds } = this.state
     const matched = layers.filter(layer => layer.categoryId === categoryId)
 		
@@ -87,7 +87,7 @@ class LayerServiceSelector extends Component {
             <List.Item
               actions={[
                 <Switch checked={selectedLayerIds.includes(item.id)} onChange={() => this.switchHandler(item)} />,
-                <LayerLocator mapView={mapView} layerId={item.id} onLocate={() => this.locateHandler(item)} />
+                <LayerLocator map={map} view={view} layerId={item.id} onLocate={() => this.locateHandler(item)} />
               ]}
             >
               {item.name}
@@ -119,14 +119,16 @@ class LayerServiceSelector extends Component {
 }
 
 LayerServiceSelector.propTypes = {
-  mapView: PropTypes.object.isRequired,
+  map: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   categories: PropTypes.array.isRequired, // [{ id, name }]
   layers: PropTypes.array.isRequired,     // [{ id, name, categoryId, url, type<tiled|dynamic>, visible, sortNo }]
   layerLoader: PropTypes.func.isRequired  // (map, layer) => {}
 }
 
 LayerServiceSelector.defaultProps = {
-  mapView: undefined,
+  map: undefined,
+  view: undefined,
   categories: [],
   layers: [],
   layerLoader: defaultLayerLoader
