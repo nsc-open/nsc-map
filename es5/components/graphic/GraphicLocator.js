@@ -6,7 +6,7 @@ import { Button } from 'antd';
 import * as geometryUtils from '../../utils/geometry';
 import { loadModules } from 'esri-module-loader';
 export const extentToGraphic = (mapView, graphic) => {
-  if (geometryUtils(graphic.geometry) === 'point') {
+  if (geometryUtils.type(graphic.geometry) === 'point') {
     mapView.center = graphic.geometry;
     mapView.zoom = 13;
   } else {
@@ -79,3 +79,4 @@ GraphicLocator.defaultProps = {
   doubleClick: false,
   onLocate: () => {}
 };
+export default GraphicLocator;
