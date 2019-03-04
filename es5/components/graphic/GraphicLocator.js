@@ -3,22 +3,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'antd';
-import MapInstanceManager from '@/lib/map/managers/InstanceManager';
-import { loadModules } from 'esri-module-loader';
-export const extentToGraphic = (map, graphic) => {
-  return loadModules([{
-    name: 'graphicsUtils',
-    path: 'esri/graphicsUtils'
-  }]).then(({
-    graphicsUtils
-  }) => {
-    if (graphic.geometry.type === 'point') {
-      mapView.center = graphic.geometry;
-      mapView.zoom = 13;
-    } else {// const extent = graphicsUtils.graphicsExtent([graphic])
-      // mapView.extent = extent
-    }
-  });
+import * as geometryUtils from '../../utils/geometry';
+export const extentToGraphic = (mapView, graphic) => {
+  if (geometryUtils(graphic.geometry) === 'point') {
+    mapView.center = graphic.geometry;
+    mapView.zoom = 13;
+  } else {
+    mapView.extent = graphic.geometry.extent;
+  }
 };
 
 class GraphicLocator extends Component {
@@ -40,11 +32,12 @@ class GraphicLocator extends Component {
 
   locate() {
     const {
-      mapId,
+      view,
       graphic,
       onLocate
     } = this.props;
-    MapInstanceManager.get(mapId).then(map => extentToGraphic(map, graphic)).then(() => onLocate);
+    extentToGraphic(view, graphic);
+    onLocate();
   }
 
   render() {
@@ -63,9 +56,14 @@ class GraphicLocator extends Component {
 }
 
 GraphicLocator.propTypes = {
+  map: PropTypes.object,
+  view: PropTypes.object,
+  graphic: PropTypes.object,
+  onLocate: PropTypes.func,
   doubleClick: PropTypes.bool // use doubleClick to trigger locate
 
 };
 GraphicLocator.defaultProps = {
-  doubleClick: false
+  doubleClick: false,
+  onLocate: () => {}
 };
