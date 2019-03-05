@@ -5,8 +5,7 @@ import FeatureLayer from './FeatureLayer'
 import { GEOMETRY_TYPE } from '../../constants/geometry'
 import * as geometryUtils from '../../utils/geometry'
 
-
-const featureProperties = {
+const defaultFeatureLayerProperties = {
   source: [],
   objectIdField: 'ObjectID',
   fields: [
@@ -16,8 +15,11 @@ const featureProperties = {
   labelingInfo: [{
     symbol: {
       type: "text",  // autocasts as new TextSymbol()
-      color: "red",
+      color: "green",
       haloColor: "black",
+      font: {
+        size: 12
+      }
     },
     labelPlacement: "above-center",
     labelExpressionInfo: {
@@ -25,6 +27,8 @@ const featureProperties = {
     }
   }]
 }
+
+
 // is a combination of GraphicsLayer and Annotation Layer
 /**
  * <GroundObjectsLayer>
@@ -46,6 +50,15 @@ class GroundObjectsLayer extends Component {
       polygon: null
     }
   }
+  
+  getFeatureLayerProperties (geometryType) {
+    const { featureLayerPropperties } = this.props
+    const match = featureLayerPropperties.find(p => p.geometryType === geometryType) || {}
+    return {
+      ...defaultFeatureLayerProperties,
+      ...match
+    }
+  }
 
   layerLoadHandler = (layerType, layer) => {
     this.featureLayers[layerType] = layer
@@ -63,7 +76,7 @@ class GroundObjectsLayer extends Component {
 
   render () {
     console.log('GroundObjectsLayer render', this.props)
-    const { children, map, view } = this.props
+    const { children, map, view, featureLayerPropperties} = this.props
     if (!map) {
       return null
     }
@@ -92,63 +105,21 @@ class GroundObjectsLayer extends Component {
         <FeatureLayer
           key="polygonFeatureLayer"
           onLoad={layer => this.layerLoadHandler('polygon', layer)}
-          featureLayerProperties={{
-            ...featureProperties,            
-            geometryType: 'polygon',
-            renderer: {
-              type: "simple", // autocasts as new SimpleRenderer()
-              symbol: {
-                type: "simple-fill", // autocasts as new SimpleFillSymbol()
-                color: [227, 139, 79, 0.8],
-                outline: { // autocasts as new SimpleLineSymbol()
-                  color: [255, 255, 255],
-                  width: 1
-                }
-              }
-            }
-          }}
+          featureLayerProperties={this.getFeatureLayerProperties('polygon')}
         >
           {polygons}
         </FeatureLayer>
         <FeatureLayer
           key="polylineFeatureLayer"
           onLoad={layer => this.layerLoadHandler('polyline', layer)}
-          featureLayerProperties={{
-            ...featureProperties,
-            geometryType: 'polyline',
-            renderer: {
-              type: "simple", // autocasts as new SimpleRenderer()
-              symbol: {
-                type: "simple-line",  // autocasts as new SimpleLineSymbol()
-                color: "red",
-                width: "2px",
-                style: "short-dot"
-              }
-            }
-          }}
+          featureLayerProperties={this.getFeatureLayerProperties('polyline')}
         >
           {polylines}
         </FeatureLayer>
         <FeatureLayer
           key="pointFeatureLayer"
           onLoad={layer => this.layerLoadHandler('point', layer)}
-          featureLayerProperties={{
-            ...featureProperties,
-            geometryType: 'point',
-            renderer: {
-              type: "simple", // autocasts as new SimpleRenderer()
-              symbol: {
-                type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-                style: "square",
-                color: "blue",
-                size: "8px",  // pixels
-                outline: {  // autocasts as new SimpleLineSymbol()
-                  color: [ 255, 255, 0 ],
-                  width: 3  // points
-                }
-              }
-            }
-          }}
+          featureLayerProperties={this.getFeatureLayerProperties('point')}
         >
           {points}
         </FeatureLayer>
@@ -167,10 +138,43 @@ GroundObjectsLayer.defaultProps = {
   map: null,
   featureLayerPropperties: [{
     geometryType: 'polygon',
-    fields: [],
-    objectIdField: '',
-    labelingInfo: [],
-    renderer: {}
+    renderer: {
+      type: "simple", // autocasts as new SimpleRenderer()
+      symbol: {
+        type: "simple-fill", // autocasts as new SimpleFillSymbol()
+        color: [227, 139, 79, 0.8],
+        outline: { // autocasts as new SimpleLineSymbol()
+          color: [255, 255, 255],
+          width: 1
+        }
+      }
+    }
+  }, {
+    geometryType: 'polyline',
+    renderer: {
+      type: "simple", // autocasts as new SimpleRenderer()
+      symbol: {
+        type: "simple-line",  // autocasts as new SimpleLineSymbol()
+        color: "red",
+        width: "2px",
+        style: "short-dot"
+      }
+    }
+  }, {
+    geometryType: 'point',
+    renderer: {
+      type: "simple", // autocasts as new SimpleRenderer()
+      symbol: {
+        type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
+        style: "square",
+        color: "blue",
+        size: "8px",  // pixels
+        outline: {  // autocasts as new SimpleLineSymbol()
+          color: [ 255, 255, 0 ],
+          width: 3  // points
+        }
+      }
+    }
   }],
   onLoad: () => {}
 }
