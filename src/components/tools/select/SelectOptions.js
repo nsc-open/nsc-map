@@ -24,8 +24,9 @@ class SelectOptions extends Component {
   }
 
   componentDidMount () {
-    const { view, sourceLayers } = this.props
+    const { view, sourceLayers, onSelectionChange } = this.props
     this.graphicSelectionManager = new GraphicSelectionManager({ view, layers: sourceLayers })
+    this.graphicSelectionManager.on('selectionChange', e => onSelectionChange(e))
     this.activateSelect()
   }
 
@@ -73,11 +74,13 @@ class SelectOptions extends Component {
 SelectOptions.propTypes = {
   map: PropTypes.object.isRequired,
   view: PropTypes.object.isRequired,
-  sourceLayers: PropTypes.array.isRequired
+  sourceLayers: PropTypes.array.isRequired,
+  onSelectionChange: PropTypes.func
 }
 
 SelectOptions.defaultProps = {
-  sourceLayers: []
+  sourceLayers: [],
+  onSelectionChange: () => {}
 }
 
 export default SelectOptions

@@ -76,10 +76,14 @@ function (_Component) {
     value: function componentDidMount() {
       var _this$props = this.props,
           view = _this$props.view,
-          sourceLayers = _this$props.sourceLayers;
+          sourceLayers = _this$props.sourceLayers,
+          onSelectionChange = _this$props.onSelectionChange;
       this.graphicSelectionManager = new GraphicSelectionManager({
         view: view,
         layers: sourceLayers
+      });
+      this.graphicSelectionManager.on('selectionChange', function (e) {
+        return onSelectionChange(e);
       });
       this.activateSelect();
     }
@@ -133,9 +137,11 @@ function (_Component) {
 SelectOptions.propTypes = {
   map: PropTypes.object.isRequired,
   view: PropTypes.object.isRequired,
-  sourceLayers: PropTypes.array.isRequired
+  sourceLayers: PropTypes.array.isRequired,
+  onSelectionChange: PropTypes.func
 };
 SelectOptions.defaultProps = {
-  sourceLayers: []
+  sourceLayers: [],
+  onSelectionChange: function onSelectionChange() {}
 };
 export default SelectOptions;
