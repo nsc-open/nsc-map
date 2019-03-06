@@ -52,8 +52,8 @@ class GroundObjectsLayer extends Component {
   }
   
   getFeatureLayerProperties (geometryType) {
-    const { featureLayerPropperties } = this.props
-    const match = featureLayerPropperties.find(p => p.geometryType === geometryType) || {}
+    const { featureLayerProperties } = this.props
+    const match = featureLayerProperties.find(p => p.geometryType === geometryType) || {}
     return {
       ...defaultFeatureLayerProperties,
       ...match
@@ -76,7 +76,7 @@ class GroundObjectsLayer extends Component {
 
   render () {
     console.log('GroundObjectsLayer render', this.props)
-    const { children, map, view, featureLayerPropperties} = this.props
+    const { children, map, view } = this.props
     if (!map) {
       return null
     }
@@ -130,13 +130,13 @@ class GroundObjectsLayer extends Component {
 
 GroundObjectsLayer.propTypes = {
   map: PropTypes.object,
-  featureLayerPropperties: PropTypes.array,
+  featureLayerProperties: PropTypes.array,
   onLoad: PropTypes.func
 }
 
 GroundObjectsLayer.defaultProps = {
   map: null,
-  featureLayerPropperties: [{
+  featureLayerProperties: [{
     geometryType: 'polygon',
     renderer: {
       type: "simple", // autocasts as new SimpleRenderer()

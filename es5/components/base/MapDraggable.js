@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { Icon } from 'antd';
 import Draggable from 'react-draggable'; // import styles from './MapDraggable.css'
 
-const styles = {
+var styles = {
   draggable: {
     position: 'absolute',
     zIndex: 50,
@@ -41,28 +41,29 @@ const styles = {
     padding: '6px 8px'
   }
 };
-export default (({
-  map,
-  view,
-  zIndex,
-  children,
-  direction = 'horizontal',
-  defaultPosition = {
+export default (function (_ref) {
+  var map = _ref.map,
+      view = _ref.view,
+      zIndex = _ref.zIndex,
+      children = _ref.children,
+      _ref$direction = _ref.direction,
+      direction = _ref$direction === void 0 ? 'horizontal' : _ref$direction,
+      _ref$defaultPosition = _ref.defaultPosition,
+      defaultPosition = _ref$defaultPosition === void 0 ? {
     x: 100,
     y: 100
-  }
-}) => {
-  const isHorizontal = direction === 'horizontal';
+  } : _ref$defaultPosition;
+  var isHorizontal = direction === 'horizontal';
   return React.createElement(MapPortal, {
     map: map,
     view: view
   }, React.createElement(Draggable, {
-    handle: `.handler`,
+    handle: ".handler",
     defaultPosition: defaultPosition,
     bounds: "parent"
   }, React.createElement("div", {
     style: _objectSpread({}, styles.draggable, {
-      zIndex
+      zIndex: zIndex
     })
   }, React.createElement("div", {
     style: isHorizontal ? styles.layoutHorizontal : styles.layoutVertical

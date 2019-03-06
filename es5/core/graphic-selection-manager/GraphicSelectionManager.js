@@ -1,3 +1,21 @@
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 import EventEmitter from 'eventemitter3';
@@ -15,33 +33,47 @@ import { SELECTOR_TYPE } from './constants';
  *   gms.on('selectionChange', data => {})
  */
 
-class GraphicSelectionManager extends EventEmitter {
-  constructor({
-    view: _view,
-    layers: _layers,
-    graphicComparator = (g1, g2) => g1 === g2
-  }) {
-    super();
+var GraphicSelectionManager =
+/*#__PURE__*/
+function (_EventEmitter) {
+  _inherits(GraphicSelectionManager, _EventEmitter);
 
-    _defineProperty(this, "_selectionChangeHandler", ({
-      selection,
-      added,
-      removed
-    }) => {
-      const {
-        view,
-        layers
-      } = this;
-      layers.forEach((layer, index) => {
-        this.highlights[index] && this.highlights[index].remove();
-        view.whenLayerView(layer).then(layerView => {
-          this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer));
+  function GraphicSelectionManager(_ref) {
+    var _this;
+
+    var _view = _ref.view,
+        _layers = _ref.layers,
+        _ref$graphicComparato = _ref.graphicComparator,
+        graphicComparator = _ref$graphicComparato === void 0 ? function (g1, g2) {
+      return g1 === g2;
+    } : _ref$graphicComparato;
+
+    _classCallCheck(this, GraphicSelectionManager);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphicSelectionManager).call(this));
+
+    _defineProperty(_assertThisInitialized(_this), "_selectionChangeHandler", function (_ref2) {
+      var selection = _ref2.selection,
+          added = _ref2.added,
+          removed = _ref2.removed;
+
+      var _assertThisInitialize = _assertThisInitialized(_this),
+          view = _assertThisInitialize.view,
+          layers = _assertThisInitialize.layers;
+
+      layers.forEach(function (layer, index) {
+        _this.highlights[index] && _this.highlights[index].remove();
+        view.whenLayerView(layer).then(function (layerView) {
+          _this.highlights[index] = layerView.highlight(selection.filter(function (s) {
+            return s.layer === layer;
+          }));
         });
       });
-      this.emit('selectionChange', {
-        selection,
-        added,
-        removed
+
+      _this.emit('selectionChange', {
+        selection: selection,
+        added: added,
+        removed: removed
       });
     });
 
@@ -49,68 +81,86 @@ class GraphicSelectionManager extends EventEmitter {
       throw new Error('view is required');
     }
 
-    this.view = _view; // map view
+    _this.view = _view; // map view
 
-    this.layers = _layers || [];
-    this.highlights = []; // each layer would have a highlight
+    _this.layers = _layers || [];
+    _this.highlights = []; // each layer would have a highlight
 
-    this.selectionManager = new SelectionManager({
+    _this.selectionManager = new SelectionManager({
       comparator: graphicComparator
     });
 
-    this._init();
+    _this._init();
+
+    return _this;
   }
 
-  _init() {
-    // inside of a specified selector, like PointerSelector, would operate selectionManager, which will emit events
-    this.selectionManager.on('selectionChange', this._selectionChangeHandler);
-  }
-
-  addLayer(layer) {
-    if (this.layers.indexOf(layer) === -1) {
-      this.layers.push(layer);
+  _createClass(GraphicSelectionManager, [{
+    key: "_init",
+    value: function _init() {
+      // inside of a specified selector, like PointerSelector, would operate selectionManager, which will emit events
+      this.selectionManager.on('selectionChange', this._selectionChangeHandler);
     }
-  }
-
-  removeLayer(layer) {
-    const index = this.layers.indexOf(layer);
-
-    if (index > -1) {
-      this.layers = this.layers.filter((_, i) => i !== index);
-      this.highlights = this.highlights.filter((_, i) => i !== index);
+  }, {
+    key: "addLayer",
+    value: function addLayer(layer) {
+      if (this.layers.indexOf(layer) === -1) {
+        this.layers.push(layer);
+      }
     }
-  }
+  }, {
+    key: "removeLayer",
+    value: function removeLayer(layer) {
+      var index = this.layers.indexOf(layer);
 
-  activate({
-    type = SELECTOR_TYPE.POINTER,
-    multiSelect = false
-  }) {
-    this.deactivate();
-
-    if (type === SELECTOR_TYPE.POINTER) {
-      this.selector = new PointerSelector(this);
-    } else if (type === SELECTOR_TYPE.BOX) {// TODO 
+      if (index > -1) {
+        this.layers = this.layers.filter(function (_, i) {
+          return i !== index;
+        });
+        this.highlights = this.highlights.filter(function (_, i) {
+          return i !== index;
+        });
+      }
     }
+  }, {
+    key: "activate",
+    value: function activate(_ref3) {
+      var _ref3$type = _ref3.type,
+          type = _ref3$type === void 0 ? SELECTOR_TYPE.POINTER : _ref3$type,
+          _ref3$multiSelect = _ref3.multiSelect,
+          multiSelect = _ref3$multiSelect === void 0 ? false : _ref3$multiSelect;
+      this.deactivate();
 
-    this.selectionManager.mode(multiSelect ? SelectionManager.MODE.MULTIPLE : SelectionManager.MODE.SINGLE);
-    this.selector.activate();
-  }
+      if (type === SELECTOR_TYPE.POINTER) {
+        this.selector = new PointerSelector(this);
+      } else if (type === SELECTOR_TYPE.BOX) {// TODO 
+      }
 
-  deactivate() {
-    if (this.selector) {
-      this.selector.deactivate();
-      this.selector.destroy();
-      this.selector = null;
+      this.selectionManager.mode(multiSelect ? SelectionManager.MODE.MULTIPLE : SelectionManager.MODE.SINGLE);
+      this.selector.activate();
     }
-  }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      if (this.selector) {
+        this.selector.deactivate();
+        this.selector.destroy();
+        this.selector = null;
+      }
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      this.deactivate();
+      this.selectionManager.removeListener('selectionChange', this._selectionChangeHandler);
+      this.highlights.forEach(function (h) {
+        return h && h.remove();
+      });
+      this.highlights = [];
+    }
+  }]);
 
-  destroy() {
-    this.deactivate();
-    this.selectionManager.removeListener('selectionChange', this._selectionChangeHandler);
-    this.highlights.forEach(h => h && h.remove());
-    this.highlights = [];
-  }
-
-}
+  return GraphicSelectionManager;
+}(EventEmitter);
 
 export default GraphicSelectionManager;

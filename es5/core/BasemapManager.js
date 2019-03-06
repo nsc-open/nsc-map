@@ -2,12 +2,20 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 import { loadModules } from 'esri-module-loader';
 
-const removeBasemap = map => {
+var removeBasemap = function removeBasemap(map) {
   if (map.basemap) {
     map.basemap.cancelLoad();
-    map.basemap.baseLayers.forEach(layer => map.remove(layer));
+    map.basemap.baseLayers.forEach(function (layer) {
+      return map.remove(layer);
+    });
   }
 }; // sample basemaps:
 // const BASEMAPS = [{
@@ -24,68 +32,87 @@ const removeBasemap = map => {
 // }]
 
 
-class BasemapManager {
-  constructor({
-    map,
-    basemaps = []
-  }) {
+var BasemapManager =
+/*#__PURE__*/
+function () {
+  function BasemapManager(_ref) {
+    var map = _ref.map,
+        _ref$basemaps = _ref.basemaps,
+        basemaps = _ref$basemaps === void 0 ? [] : _ref$basemaps;
+
+    _classCallCheck(this, BasemapManager);
+
     this.map = map;
     this.annotationLayer = null;
     this.basemaps = basemaps;
     this.annotationVisible = false;
   }
 
-  _removeBasemap() {
-    removeBasemap(this.map);
-  }
+  _createClass(BasemapManager, [{
+    key: "_removeBasemap",
+    value: function _removeBasemap() {
+      removeBasemap(this.map);
+    }
+  }, {
+    key: "_setBasemap",
+    value: function _setBasemap(basemap) {
+      var _this = this;
 
-  _setBasemap(basemap) {
-    this._removeBasemap();
+      this._removeBasemap();
 
-    loadModules(['esri/Basemap', 'esri/layers/WebTileLayer']).then(({
-      Basemap,
-      WebTileLayer
-    }) => {
-      const mapLayer = new WebTileLayer(basemap.mapLayer);
-      const annotationLayer = new WebTileLayer(_objectSpread({}, basemap.annotationLayer, {
-        visible: this.annotationVisible
-      }));
-      this.annotationLayer = annotationLayer;
-      this.map.basemap = new Basemap({
-        baseLayers: [mapLayer, annotationLayer]
+      loadModules(['esri/Basemap', 'esri/layers/WebTileLayer']).then(function (_ref2) {
+        var Basemap = _ref2.Basemap,
+            WebTileLayer = _ref2.WebTileLayer;
+        var mapLayer = new WebTileLayer(basemap.mapLayer);
+        var annotationLayer = new WebTileLayer(_objectSpread({}, basemap.annotationLayer, {
+          visible: _this.annotationVisible
+        }));
+        _this.annotationLayer = annotationLayer;
+        _this.map.basemap = new Basemap({
+          baseLayers: [mapLayer, annotationLayer]
+        });
       });
-    });
-  }
-
-  showMap() {
-    const basemap = this.basemaps.find(b => b.id === 'map');
-
-    this._setBasemap(basemap);
-  }
-
-  showSatellite() {
-    const basemap = this.basemaps.find(b => b.id === 'statellite');
-
-    this._setBasemap(basemap);
-  }
-
-  showAnnotation() {
-    this.annotationVisible = true;
-
-    if (this.annotationLayer) {
-      this.annotationLayer.visible = true;
     }
-  }
+  }, {
+    key: "showMap",
+    value: function showMap() {
+      var basemap = this.basemaps.find(function (b) {
+        return b.id === 'map';
+      });
 
-  hideAnnotation() {
-    this.annotationVisible = false;
-
-    if (this.annotationLayer) {
-      this.annotationLayer.visible = false;
+      this._setBasemap(basemap);
     }
-  }
+  }, {
+    key: "showSatellite",
+    value: function showSatellite() {
+      var basemap = this.basemaps.find(function (b) {
+        return b.id === 'statellite';
+      });
 
-}
+      this._setBasemap(basemap);
+    }
+  }, {
+    key: "showAnnotation",
+    value: function showAnnotation() {
+      this.annotationVisible = true;
+
+      if (this.annotationLayer) {
+        this.annotationLayer.visible = true;
+      }
+    }
+  }, {
+    key: "hideAnnotation",
+    value: function hideAnnotation() {
+      this.annotationVisible = false;
+
+      if (this.annotationLayer) {
+        this.annotationLayer.visible = false;
+      }
+    }
+  }]);
+
+  return BasemapManager;
+}();
 
 BasemapManager.removeBasemap = removeBasemap;
 export default BasemapManager;

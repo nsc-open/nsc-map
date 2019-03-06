@@ -1,5 +1,5 @@
-export const addKey = (graphicProps, key) => {
-  const _add = (graphic, key) => {
+export var addKey = function addKey(graphicProps, key) {
+  var _add = function _add(graphic, key) {
     if (!graphic) {
       return graphic;
     }

@@ -12,13 +12,11 @@ import Graphic from './graphic/Graphic';
  * it accepts geometryJson and bizData
  */
 
-const GroundObject = props => {
-  const {
-    geometryJson,
-    bizData,
-    attributesMapper
-  } = props,
-        restProps = _objectWithoutProperties(props, ["geometryJson", "bizData", "attributesMapper"]);
+var GroundObject = function GroundObject(props) {
+  var geometryJson = props.geometryJson,
+      bizData = props.bizData,
+      attributesMapper = props.attributesMapper,
+      restProps = _objectWithoutProperties(props, ["geometryJson", "bizData", "attributesMapper"]);
 
   if (geometryJson) {
     geometryJson.attributes = attributesMapper(bizData, geometryJson.attributes);
@@ -38,7 +36,9 @@ GroundObject.propTypes = {
 GroundObject.defaultProps = {
   geometryJson: undefined,
   bizData: {},
-  attributesMapper: (bizData, attributes) => attributes // TODO 其实可以不需要，直接在 使用 GroundObject 时，拿个 mapper 做转换然后传 props 就好了
+  attributesMapper: function attributesMapper(bizData, attributes) {
+    return attributes;
+  } // TODO 其实可以不需要，直接在 使用 GroundObject 时，拿个 mapper 做转换然后传 props 就好了
 
 };
 export default GroundObject;

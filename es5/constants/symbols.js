@@ -1,4 +1,4 @@
-export const HIGHLIGHT_SYMBOLS = {
+export var HIGHLIGHT_SYMBOLS = {
   point: {
     type: 'simple-marker',
     style: 'circle',

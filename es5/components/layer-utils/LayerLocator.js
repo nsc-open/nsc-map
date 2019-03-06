@@ -1,11 +1,29 @@
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'antd';
 
-const extentToLayer = (mapView, layerId) => {
-  const layer = mapView.map.findLayerById(layerId);
+var extentToLayer = function extentToLayer(mapView, layerId) {
+  var layer = mapView.map.findLayerById(layerId);
   layer && (mapView.extent = layer.fullExtent);
 };
 /**
@@ -18,47 +36,65 @@ const extentToLayer = (mapView, layerId) => {
  */
 
 
-class LayerLocator extends Component {
-  constructor(...args) {
-    super(...args);
+var LayerLocator =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(LayerLocator, _Component);
 
-    _defineProperty(this, "doubleClickHandler", () => {
-      if (this.props.doubleClick) {
-        this.locate();
+  function LayerLocator() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, LayerLocator);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(LayerLocator)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "doubleClickHandler", function () {
+      if (_this.props.doubleClick) {
+        _this.locate();
       }
     });
 
-    _defineProperty(this, "clickHandler", () => {
-      if (!this.props.doubleClick) {
-        this.locate();
+    _defineProperty(_assertThisInitialized(_this), "clickHandler", function () {
+      if (!_this.props.doubleClick) {
+        _this.locate();
       }
     });
+
+    return _this;
   }
 
-  locate() {
-    const {
-      view,
-      layerId,
-      onLocate
-    } = this.props;
-    extentToLayer(view, layerId);
-    onLocate();
-  }
+  _createClass(LayerLocator, [{
+    key: "locate",
+    value: function locate() {
+      var _this$props = this.props,
+          view = _this$props.view,
+          layerId = _this$props.layerId,
+          onLocate = _this$props.onLocate;
+      extentToLayer(view, layerId);
+      onLocate();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var children = this.props.children;
+      return React.createElement("span", {
+        onClick: this.clickHandler,
+        onDoubleClick: this.doubleClickHandler
+      }, children ? children : React.createElement(Button, {
+        size: "small",
+        icon: "environment-o"
+      }));
+    }
+  }]);
 
-  render() {
-    const {
-      children
-    } = this.props;
-    return React.createElement("span", {
-      onClick: this.clickHandler,
-      onDoubleClick: this.doubleClickHandler
-    }, children ? children : React.createElement(Button, {
-      size: "small",
-      icon: "environment-o"
-    }));
-  }
-
-}
+  return LayerLocator;
+}(Component);
 
 LayerLocator.propTypes = {
   map: PropTypes.object.isRequired,
@@ -71,7 +107,7 @@ LayerLocator.propTypes = {
 LayerLocator.defaultProps = {
   map: undefined,
   view: undefined,
-  onLocate: () => {},
+  onLocate: function onLocate() {},
   doubleClick: false,
   layerId: undefined
 };

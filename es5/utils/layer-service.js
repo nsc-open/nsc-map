@@ -1,18 +1,31 @@
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 import queryString from 'query-string';
 import { loadModules } from 'esri-module-loader';
-const LAYER_TYPE = {
+var LAYER_TYPE = {
   TILE: 'tiled',
   DYNAMIC: 'dynamic'
 };
-const registeredTokens = [];
-export const isPBS = (layerServiceUrl = '') => layerServiceUrl.includes('/PBS/');
-export const parseToken = (layerServiceUrl = '') => {
-  const {
-    url,
-    query
-  } = queryString.parseUrl(layerServiceUrl);
+var registeredTokens = [];
+export var isPBS = function isPBS() {
+  var layerServiceUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  return layerServiceUrl.includes('/PBS/');
+};
+export var parseToken = function parseToken() {
+  var layerServiceUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+  var _queryString$parseUrl = queryString.parseUrl(layerServiceUrl),
+      url = _queryString$parseUrl.url,
+      query = _queryString$parseUrl.query;
+
   return {
-    url,
+    url: url,
     token: query.token
   };
 };
@@ -21,13 +34,17 @@ export const parseToken = (layerServiceUrl = '') => {
  * note: basically arcgis layer service is able to access by ajax without any cross origin issue
  */
 
-export const fetchArcgisLayerServiceJson = (layerServiceUrl = '') => {
-  const {
-    url,
-    query
-  } = queryString.parseUrl(layerServiceUrl);
+export var fetchArcgisLayerServiceJson = function fetchArcgisLayerServiceJson() {
+  var layerServiceUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+  var _queryString$parseUrl2 = queryString.parseUrl(layerServiceUrl),
+      url = _queryString$parseUrl2.url,
+      query = _queryString$parseUrl2.query;
+
   query.f = 'json';
-  return fetch(`${url}?${queryString.stringify(query)}`).then(r => r.json());
+  return fetch("".concat(url, "?").concat(queryString.stringify(query))).then(function (r) {
+    return r.json();
+  });
 };
 /**
  * get layer service type, tiled or dynamic
@@ -37,48 +54,54 @@ export const fetchArcgisLayerServiceJson = (layerServiceUrl = '') => {
  * securied layer service needs token included in layerServiceUrl
  */
 
-export const inferLayerServiceType = (layerServiceUrl = '') => {
+export var inferLayerServiceType = function inferLayerServiceType() {
+  var layerServiceUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
   if (isPBS(layerServiceUrl)) {
     return Promise.resolve(LAYER_TYPE.TILE);
   } else {
-    return fetchArcgisLayerServiceJson(layerServiceUrl).then(json => json.tileInfo ? LAYER_TYPE.TILE : LAYER_TYPE.DYNAMIC);
+    return fetchArcgisLayerServiceJson(layerServiceUrl).then(function (json) {
+      return json.tileInfo ? LAYER_TYPE.TILE : LAYER_TYPE.DYNAMIC;
+    });
   }
 };
-export const createLayerServiceInstance = ({
-  id,
-  url = '',
-  type
-}) => {
-  return Promise.all([type ? Promise.resolve(type) : inferLayerServiceType(url), loadModules(['esri/layers/WebTileLayer', 'esri/layers/MapImageLayer', 'esri/identity/IdentityManager'])]).then(([layerServiceType, {
-    WebTileLayer,
-    MapImageLayer,
-    IdentityManager
-  }]) => {
+export var createLayerServiceInstance = function createLayerServiceInstance(_ref) {
+  var id = _ref.id,
+      _ref$url = _ref.url,
+      url = _ref$url === void 0 ? '' : _ref$url,
+      type = _ref.type;
+  return Promise.all([type ? Promise.resolve(type) : inferLayerServiceType(url), loadModules(['esri/layers/WebTileLayer', 'esri/layers/MapImageLayer', 'esri/identity/IdentityManager'])]).then(function (_ref2) {
+    var _ref3 = _slicedToArray(_ref2, 2),
+        layerServiceType = _ref3[0],
+        _ref3$ = _ref3[1],
+        WebTileLayer = _ref3$.WebTileLayer,
+        MapImageLayer = _ref3$.MapImageLayer,
+        IdentityManager = _ref3$.IdentityManager;
+
     if (isPBS(url)) {
       return new WebTileLayer({
-        id,
+        id: id,
         urlTemplate: url + '/tile/{level}/{row}/{col}'
       });
     } else {
-      const {
-        url: server,
-        token
-      } = parseToken(url);
+      var _parseToken = parseToken(url),
+          server = _parseToken.url,
+          token = _parseToken.token;
 
       if (token && !registeredTokens.includes(token)) {
         IdentityManager.registerToken({
-          server,
-          token
+          server: server,
+          token: token
         });
         registeredTokens.push(token);
       }
 
       return layerServiceType === LAYER_TYPE.TILE ? new WebTileLayer({
-        id,
-        url
+        id: id,
+        url: url
       }) : new MapImageLayer({
-        id,
-        url
+        id: id,
+        url: url
       });
     }
   });

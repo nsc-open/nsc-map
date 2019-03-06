@@ -1,5 +1,5 @@
 // point | multipoint | polyline | polygon | extent | mesh
-export const GEOMETRY_TYPE = {
+export var GEOMETRY_TYPE = {
   POINT: {
     key: 'point',
     zIndex: 5

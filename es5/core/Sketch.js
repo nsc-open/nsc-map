@@ -1,3 +1,5 @@
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -6,10 +8,26 @@ function _objectWithoutProperties(source, excluded) { if (source == null) return
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 import EventEmitter from 'eventemitter3';
 import { loadModules } from 'esri-module-loader';
 
-const addGraphic = (layer, graphic) => {
+var addGraphic = function addGraphic(layer, graphic) {
   if (layer.type === 'graphics') {
     layer.add(graphic);
   } else if (layer.type === 'feature') {
@@ -21,7 +39,7 @@ const addGraphic = (layer, graphic) => {
   }
 };
 
-const removeGraphic = (layer, graphic) => {
+var removeGraphic = function removeGraphic(layer, graphic) {
   if (layer.type === 'graphics') {
     layer.remove(graphic);
   } else if (layer.type === 'feature') {
@@ -54,31 +72,40 @@ const removeGraphic = (layer, graphic) => {
  */
 
 
-class Sketch extends EventEmitter {
-  constructor(_ref, options = {
-    beforeComplete: null
-  }) {
-    let {
-      view
-    } = _ref,
+var Sketch =
+/*#__PURE__*/
+function (_EventEmitter) {
+  _inherits(Sketch, _EventEmitter);
+
+  function Sketch(_ref) {
+    var _this;
+
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+      beforeComplete: null
+    };
+
+    var view = _ref.view,
         sketchViewModelProperties = _objectWithoutProperties(_ref, ["view"]);
 
-    super();
+    _classCallCheck(this, Sketch);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Sketch).call(this));
 
     if (!view) {
       throw new Error('view is required');
     }
 
-    this.options = options || {};
-    this.view = view;
-    this.sketchViewModelProperties = sketchViewModelProperties;
-    this.sketchViewModel = null;
-    this.sourceLayer = null; // source layer for create and update, it can be graphicsLayer or featureLayer
+    _this.options = options || {};
+    _this.view = view;
+    _this.sketchViewModelProperties = sketchViewModelProperties;
+    _this.sketchViewModel = null;
+    _this.sourceLayer = null; // source layer for create and update, it can be graphicsLayer or featureLayer
 
-    this.sourceGraphic = null;
-    this.state = 'ready'; // ready|create|update|complete|cancel
+    _this.sourceGraphic = null;
+    _this.state = 'ready'; // ready|create|update|complete|cancel
 
-    this._eventHandlers = [];
+    _this._eventHandlers = [];
+    return _this;
   } // always create a temp graphics layer for sketch, for both create or update. So this would have a unified
   // way to handle FeatureLayer and GraphicsLayer
   // for create, graphic needs to be remove from this temp graphicsLayer and add into the target layer
@@ -86,201 +113,222 @@ class Sketch extends EventEmitter {
   // once update complete, need to apply the updated graphics back to the source layer
 
 
-  _createSketchViewModel(props = {}) {
-    this._resetSketchViewModel();
+  _createClass(Sketch, [{
+    key: "_createSketchViewModel",
+    value: function _createSketchViewModel() {
+      var _this2 = this;
 
-    return loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer']).then(({
-      SketchViewModel,
-      GraphicsLayer
-    }) => {
-      const {
-        view
-      } = this;
-      const tempGraphicsLayer = new GraphicsLayer();
-      view.map.add(tempGraphicsLayer);
-      return new SketchViewModel(_objectSpread({}, this.sketchViewModelProperties, props, {
-        view,
-        layer: tempGraphicsLayer,
-        updateOnGraphicClick: false,
-        defaultUpdateOptions: {
-          tool: 'reshape'
+      var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      this._resetSketchViewModel();
+
+      return loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer']).then(function (_ref2) {
+        var SketchViewModel = _ref2.SketchViewModel,
+            GraphicsLayer = _ref2.GraphicsLayer;
+        var view = _this2.view;
+        var tempGraphicsLayer = new GraphicsLayer();
+        view.map.add(tempGraphicsLayer);
+        return new SketchViewModel(_objectSpread({}, _this2.sketchViewModelProperties, props, {
+          view: view,
+          layer: tempGraphicsLayer,
+          updateOnGraphicClick: false,
+          defaultUpdateOptions: {
+            tool: 'reshape'
+          }
+        }));
+      });
+    }
+  }, {
+    key: "_applyComplete",
+    value: function _applyComplete(editingGraphic) {
+      var _this3 = this;
+
+      var newGraphic = editingGraphic.clone(); // need a beforeCreate handler, to give chance to modify new graphic
+      // and also give chance to stop add graphic
+
+      var beforeComplete = this.options.beforeComplete;
+
+      if (!beforeComplete) {
+        beforeComplete = function beforeComplete() {
+          return newGraphic;
+        };
+      }
+
+      var rtn = beforeComplete(newGraphic);
+
+      var _then = function _then(modifiedGraphic) {
+        if (modifiedGraphic === false) {
+          _this3.state = 'ready';
+          return; // stop apply complete
         }
-      }));
-    });
-  }
 
-  _applyComplete(editingGraphic) {
-    const newGraphic = editingGraphic.clone(); // need a beforeCreate handler, to give chance to modify new graphic
-    // and also give chance to stop add graphic
+        addGraphic(_this3.sourceLayer, modifiedGraphic || newGraphic);
+        _this3.state = 'ready';
+      };
 
-    let {
-      beforeComplete
-    } = this.options;
-
-    if (!beforeComplete) {
-      beforeComplete = () => newGraphic;
+      if (rtn && rtn.then) {
+        rtn.then(_then);
+      } else {
+        _then(rtn);
+      }
     }
+  }, {
+    key: "_applyCancel",
+    value: function _applyCancel() {
+      var sourceLayer = this.sourceLayer,
+          sourceGraphic = this.sourceGraphic;
 
-    const rtn = beforeComplete(newGraphic);
-
-    const _then = modifiedGraphic => {
-      if (modifiedGraphic === false) {
-        this.state = 'ready';
-        return; // stop apply complete
+      if (sourceGraphic) {
+        // for create() has no sourceGraphic
+        addGraphic(sourceLayer, sourceGraphic);
       }
 
-      addGraphic(this.sourceLayer, modifiedGraphic || newGraphic);
       this.state = 'ready';
-    };
-
-    if (rtn && rtn.then) {
-      rtn.then(_then);
-    } else {
-      _then(rtn);
     }
-  }
+  }, {
+    key: "_bindEvents",
+    value: function _bindEvents(sketchViewModel) {
+      var _this4 = this;
 
-  _applyCancel() {
-    const {
-      sourceLayer,
-      sourceGraphic
-    } = this;
+      this._eventHandlers = [sketchViewModel.on(['redo', 'undo', 'create', 'update'], function (e) {
+        var editingGraphic = null;
 
-    if (sourceGraphic) {
-      // for create() has no sourceGraphic
-      addGraphic(sourceLayer, sourceGraphic);
+        if (e.type === 'create') {
+          editingGraphic = e.graphic;
+        } else if (e.type === 'update') {
+          editingGraphic = e.graphics[0];
+        }
+
+        if (!editingGraphic) {
+          return;
+        }
+
+        editingGraphic.layer = sketchViewModel.layer;
+
+        if (_this4.state === 'complete' && e.state === 'complete') {
+          sketchViewModel.layer.removeAll();
+
+          _this4._applyComplete(editingGraphic);
+        } else if (_this4.state === 'cancel' && e.state === 'cancel') {
+          sketchViewModel.layer.removeAll();
+
+          _this4._applyCancel();
+        } else if (['complete', 'cancel'].includes(e.state)) {
+          sketchViewModel.update([editingGraphic]);
+        }
+      })];
     }
+  }, {
+    key: "_unbindEvents",
+    value: function _unbindEvents() {
+      this._eventHandlers.forEach(function (h) {
+        return h.remove();
+      });
 
-    this.state = 'ready';
-  }
+      this._eventHandlers = [];
+    }
+  }, {
+    key: "_resetSketchViewModel",
+    value: function _resetSketchViewModel() {
+      if (this.sketchViewModel) {
+        this._unbindEvents();
 
-  _bindEvents(sketchViewModel) {
-    this._eventHandlers = [sketchViewModel.on(['redo', 'undo', 'create', 'update'], e => {
-      let editingGraphic = null;
+        this.view.map.remove(this.sketchViewModel.layer);
+        this.sketchViewModel.layer.removeAll();
+        this.sketchViewModel.reset();
+        this.sketchViewModel = null;
+      }
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      this._resetSketchViewModel();
 
-      if (e.type === 'create') {
-        editingGraphic = e.graphic;
-      } else if (e.type === 'update') {
-        editingGraphic = e.graphics[0];
+      this.view = null;
+      this.sketchViewModelProperties = null;
+      this.sourceGraphic = null;
+      this.sourceLayer = null;
+      this.state = '';
+    }
+    /**
+     * for graphicsLayer: create(graphicsLayer, 'polygon')
+     * for featureLayer: create(featureLayer) // tool will be inferred with featureLayer.geometryType
+     */
+
+  }, {
+    key: "create",
+    value: function create(sourceLayer, tool) {
+      var _this5 = this;
+
+      this.state = 'create';
+      this.sourceLayer = sourceLayer;
+      this.sourceGraphic = null;
+
+      if (sourceLayer.type === 'feature') {
+        tool = sourceLayer.geometryType;
       }
 
-      if (!editingGraphic) {
-        return;
+      this._createSketchViewModel().then(function (sketchViewModel) {
+        sketchViewModel.create(tool);
+
+        _this5._bindEvents(sketchViewModel);
+
+        _this5.sketchViewModel = sketchViewModel;
+      });
+    }
+    /**
+     * update(graphic) // sourceLayer will be use graphic.layer
+     * update(sourceLayer, graphic) // or you can specify sourceLayer
+     */
+
+  }, {
+    key: "update",
+    value: function update() {
+      var _this6 = this;
+
+      var sourceLayer, graphic;
+
+      if (arguments.length === 1) {
+        // update(graphic)
+        graphic = arguments.length <= 0 ? undefined : arguments[0];
+        sourceLayer = graphic.layer;
+      } else if (arguments.length === 0) {
+        // update(layer, graphic)
+        sourceLayer = arguments.length <= 0 ? undefined : arguments[0];
+        graphic = arguments.length <= 1 ? undefined : arguments[1];
       }
 
-      editingGraphic.layer = sketchViewModel.layer;
+      this.state = 'update';
+      this.sourceLayer = sourceLayer;
+      this.sourceGraphic = graphic.clone();
 
-      if (this.state === 'complete' && e.state === 'complete') {
-        sketchViewModel.layer.removeAll();
+      this._createSketchViewModel().then(function (sketchViewModel) {
+        removeGraphic(sourceLayer, graphic);
+        sketchViewModel.layer.add(graphic);
+        graphic.layer = sketchViewModel.layer; // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
-        this._applyComplete(editingGraphic);
-      } else if (this.state === 'cancel' && e.state === 'cancel') {
-        sketchViewModel.layer.removeAll();
+        sketchViewModel.update([graphic]);
 
-        this._applyCancel();
-      } else if (['complete', 'cancel'].includes(e.state)) {
-        sketchViewModel.update([editingGraphic]);
-      }
-    })];
-  }
+        _this6._bindEvents(sketchViewModel);
 
-  _unbindEvents() {
-    this._eventHandlers.forEach(h => h.remove());
-
-    this._eventHandlers = [];
-  }
-
-  _resetSketchViewModel() {
-    if (this.sketchViewModel) {
-      this._unbindEvents();
-
-      this.view.map.remove(this.sketchViewModel.layer);
-      this.sketchViewModel.layer.removeAll();
-      this.sketchViewModel.reset();
-      this.sketchViewModel = null;
+        _this6.sketchViewModel = sketchViewModel;
+      });
     }
-  }
-
-  destroy() {
-    this._resetSketchViewModel();
-
-    this.view = null;
-    this.sketchViewModelProperties = null;
-    this.sourceGraphic = null;
-    this.sourceLayer = null;
-    this.state = '';
-  }
-  /**
-   * for graphicsLayer: create(graphicsLayer, 'polygon')
-   * for featureLayer: create(featureLayer) // tool will be inferred with featureLayer.geometryType
-   */
-
-
-  create(sourceLayer, tool) {
-    this.state = 'create';
-    this.sourceLayer = sourceLayer;
-    this.sourceGraphic = null;
-
-    if (sourceLayer.type === 'feature') {
-      tool = sourceLayer.geometryType;
+  }, {
+    key: "complete",
+    value: function complete() {
+      this.state = 'complete';
+      this.sketchViewModel.complete();
     }
-
-    this._createSketchViewModel().then(sketchViewModel => {
-      sketchViewModel.create(tool);
-
-      this._bindEvents(sketchViewModel);
-
-      this.sketchViewModel = sketchViewModel;
-    });
-  }
-  /**
-   * update(graphic) // sourceLayer will be use graphic.layer
-   * update(sourceLayer, graphic) // or you can specify sourceLayer
-   */
-
-
-  update(
-  /* sourceLayer, graphic */
-  ...args) {
-    let sourceLayer, graphic;
-
-    if (args.length === 1) {
-      // update(graphic)
-      graphic = args[0];
-      sourceLayer = graphic.layer;
-    } else if (args.length === 0) {
-      // update(layer, graphic)
-      sourceLayer = args[0];
-      graphic = args[1];
+  }, {
+    key: "cancel",
+    value: function cancel() {
+      this.state = 'cancel';
+      this.sketchViewModel.cancel();
     }
+  }]);
 
-    this.state = 'update';
-    this.sourceLayer = sourceLayer;
-    this.sourceGraphic = graphic.clone();
-
-    this._createSketchViewModel().then(sketchViewModel => {
-      removeGraphic(sourceLayer, graphic);
-      sketchViewModel.layer.add(graphic);
-      graphic.layer = sketchViewModel.layer; // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
-
-      sketchViewModel.update([graphic]);
-
-      this._bindEvents(sketchViewModel);
-
-      this.sketchViewModel = sketchViewModel;
-    });
-  }
-
-  complete() {
-    this.state = 'complete';
-    this.sketchViewModel.complete();
-  }
-
-  cancel() {
-    this.state = 'cancel';
-    this.sketchViewModel.cancel();
-  }
-
-}
+  return Sketch;
+}(EventEmitter);
 
 export default Sketch;

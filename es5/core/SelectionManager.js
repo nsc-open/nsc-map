@@ -1,131 +1,205 @@
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 import EventEmitter from 'eventemitter3';
 /**
  * handle the selection math of a collection
  */
 
-const DEFAULT_COMPARATOR = (a, b) => a === b;
+var DEFAULT_COMPARATOR = function DEFAULT_COMPARATOR(a, b) {
+  return a === b;
+};
 
-const SELECTION_CHANGE_EVENT = 'selectionChange';
-const MODE = {
+var SELECTION_CHANGE_EVENT = 'selectionChange';
+var MODE = {
   SINGLE: 'single',
   MULTIPLE: 'multiple'
 };
 
-class SelectionManager extends EventEmitter {
-  constructor(options) {
-    super();
-    this.comparator = options && options.comparator ? options.comparator : DEFAULT_COMPARATOR;
-    this.selectionMode = MODE.SINGLE;
-    this.selection = [];
+var SelectionManager =
+/*#__PURE__*/
+function (_EventEmitter) {
+  _inherits(SelectionManager, _EventEmitter);
+
+  function SelectionManager(options) {
+    var _this;
+
+    _classCallCheck(this, SelectionManager);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectionManager).call(this));
+    _this.comparator = options && options.comparator ? options.comparator : DEFAULT_COMPARATOR;
+    _this.selectionMode = MODE.SINGLE;
+    _this.selection = [];
+    return _this;
   }
 
-  _setSelection({
-    selection = [],
-    added = [],
-    removed = []
-  }) {
-    this.selection = selection;
+  _createClass(SelectionManager, [{
+    key: "_setSelection",
+    value: function _setSelection(_ref) {
+      var _ref$selection = _ref.selection,
+          selection = _ref$selection === void 0 ? [] : _ref$selection,
+          _ref$added = _ref.added,
+          added = _ref$added === void 0 ? [] : _ref$added,
+          _ref$removed = _ref.removed,
+          removed = _ref$removed === void 0 ? [] : _ref$removed;
+      this.selection = selection;
 
-    if (added.length > 0 || removed.length > 0) {
-      this.emit(SELECTION_CHANGE_EVENT, {
-        selection,
-        added,
-        removed
-      });
-    }
-  }
-
-  _includes(collection, item) {
-    return !!collection.find(s => this.comparator(s, item));
-  }
-
-  _normalizeSelection(selection) {
-    selection = Array.isArray(selection) ? selection : [selection];
-
-    if (this.selectionMode === MODE.SINGLE && selection[0]) {
-      selection = [selection[0]];
-    }
-
-    return selection;
-  }
-
-  mode(value) {
-    if (!value) {
-      return this.selectionMode;
-    } else {
-      this.selectionMode = value;
-
-      if (value === MODE.SINGLE && this.selection.length > 1) {
-        const [toRemain, ...toRemove] = this.selection;
-
-        this._setSelection({
-          selection: [toRemain],
-          removed: toRemove
+      if (added.length > 0 || removed.length > 0) {
+        this.emit(SELECTION_CHANGE_EVENT, {
+          selection: selection,
+          added: added,
+          removed: removed
         });
       }
     }
-  }
+  }, {
+    key: "_includes",
+    value: function _includes(collection, item) {
+      var _this2 = this;
 
-  includes(item) {
-    return this._includes(this.selection, item);
-  }
-
-  select(selection) {
-    selection = this._normalizeSelection(selection || []);
-    const toAdd = selection.filter(s => !this._includes(this.selection, s));
-    const toRemove = this.selection.filter(s => !this._includes(selection, s));
-
-    this._setSelection({
-      selection,
-      added: toAdd,
-      removed: toRemove
-    });
-  }
-
-  clear() {
-    if (this.selection.length > 0) {
-      this._setSelection({
-        removed: this.selection
+      return !!collection.find(function (s) {
+        return _this2.comparator(s, item);
       });
     }
-  }
+  }, {
+    key: "_normalizeSelection",
+    value: function _normalizeSelection(selection) {
+      selection = Array.isArray(selection) ? selection : [selection];
 
-  add(selection) {
-    const newSelection = [...this.selection];
-    const toAdd = [];
-
-    this._normalizeSelection(selection).forEach(s => {
-      if (!this._includes(this.selection, s)) {
-        newSelection.push(s);
-        toAdd.push(s);
+      if (this.selectionMode === MODE.SINGLE && selection[0]) {
+        selection = [selection[0]];
       }
-    });
 
-    this._setSelection({
-      selection: newSelection,
-      added: toAdd
-    });
-  }
-
-  remove(selection) {
-    const toRemove = [];
-    const toRemain = [];
-    selection = this._normalizeSelection(selection);
-    this.selection.forEach(s => {
-      if (this._includes(selection, s)) {
-        toRemove.push(s);
+      return selection;
+    }
+  }, {
+    key: "mode",
+    value: function mode(value) {
+      if (!value) {
+        return this.selectionMode;
       } else {
-        toRemain.push(s);
+        this.selectionMode = value;
+
+        if (value === MODE.SINGLE && this.selection.length > 1) {
+          var _this$selection = _toArray(this.selection),
+              toRemain = _this$selection[0],
+              toRemove = _this$selection.slice(1);
+
+          this._setSelection({
+            selection: [toRemain],
+            removed: toRemove
+          });
+        }
       }
-    });
+    }
+  }, {
+    key: "includes",
+    value: function includes(item) {
+      return this._includes(this.selection, item);
+    }
+  }, {
+    key: "select",
+    value: function select(selection) {
+      var _this3 = this;
 
-    this._setSelection({
-      selection: toRemain,
-      removed: toRemove
-    });
-  }
+      selection = this._normalizeSelection(selection || []);
+      var toAdd = selection.filter(function (s) {
+        return !_this3._includes(_this3.selection, s);
+      });
+      var toRemove = this.selection.filter(function (s) {
+        return !_this3._includes(selection, s);
+      });
 
-}
+      this._setSelection({
+        selection: selection,
+        added: toAdd,
+        removed: toRemove
+      });
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      if (this.selection.length > 0) {
+        this._setSelection({
+          removed: this.selection
+        });
+      }
+    }
+  }, {
+    key: "add",
+    value: function add(selection) {
+      var _this4 = this;
+
+      var newSelection = _toConsumableArray(this.selection);
+
+      var toAdd = [];
+
+      this._normalizeSelection(selection).forEach(function (s) {
+        if (!_this4._includes(_this4.selection, s)) {
+          newSelection.push(s);
+          toAdd.push(s);
+        }
+      });
+
+      this._setSelection({
+        selection: newSelection,
+        added: toAdd
+      });
+    }
+  }, {
+    key: "remove",
+    value: function remove(selection) {
+      var _this5 = this;
+
+      var toRemove = [];
+      var toRemain = [];
+      selection = this._normalizeSelection(selection);
+      this.selection.forEach(function (s) {
+        if (_this5._includes(selection, s)) {
+          toRemove.push(s);
+        } else {
+          toRemain.push(s);
+        }
+      });
+
+      this._setSelection({
+        selection: toRemain,
+        removed: toRemove
+      });
+    }
+  }]);
+
+  return SelectionManager;
+}(EventEmitter);
 
 SelectionManager.MODE = MODE;
 export default SelectionManager;
