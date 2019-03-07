@@ -156,7 +156,7 @@ function (_Component) {
         // so here we need to find the objectId by business id
         // and then replace the objectId then do the update
         var query = layer.createQuery();
-        query.where += " AND id = '".concat(graphic.attributes[bizIdField], "'");
+        query.where += " AND ".concat(bizIdField, " = '").concat(graphic.attributes[bizIdField], "'");
         layer.queryFeatures(query).then(function (_ref3) {
           var features = _ref3.features;
 

@@ -106,7 +106,7 @@ class Graphic extends Component {
       // so here we need to find the objectId by business id
       // and then replace the objectId then do the update
       const query = layer.createQuery()
-      query.where += ` AND id = '${graphic.attributes[bizIdField]}'`
+      query.where += ` AND ${bizIdField} = '${graphic.attributes[bizIdField]}'`
       layer.queryFeatures(query).then(({ features }) => {
         if (features.length === 0) {
           return
