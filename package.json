@@ -1,6 +1,6 @@
 {
   "name": "nsc-map",
-  "version": "0.0.25",
+  "version": "0.0.28",
   "description": "",
   "main": "es5/index.js",
   "scripts": {

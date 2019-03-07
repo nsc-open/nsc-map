@@ -103,7 +103,7 @@ function (_Component) {
           graphicProperties = _this$props2.graphicProperties,
           geometryJson = _this$props2.geometryJson;
 
-      if (prevGraphicProperties !== graphicProperties || prevGeometryJson !== geometryJson) {
+      if (this.state.graphic && (prevGraphicProperties !== graphicProperties || prevGeometryJson !== geometryJson)) {
         createGraphic({
           graphicProperties: graphicProperties,
           geometryJson: geometryJson
@@ -141,14 +141,34 @@ function (_Component) {
   }, {
     key: "update",
     value: function update(graphic) {
-      var layer = this.props.layer;
+      var _this$props3 = this.props,
+          layer = _this$props3.layer,
+          bizIdField = _this$props3.bizIdField;
 
       if (layer.type === 'graphics') {// find by key
         // remove old one
         // add new one
       } else if (layer.type === 'feature') {
-        layer.applyEdits({
+        /* layer.applyEdits({
           updateFeatures: [graphic]
+        }) */
+        // objectId of feature will change each time the graphic added into the featureLayer
+        // so here we need to find the objectId by business id
+        // and then replace the objectId then do the update
+        var query = layer.createQuery();
+        query.where += " AND id = '".concat(graphic.attributes[bizIdField], "'");
+        layer.queryFeatures(query).then(function (_ref3) {
+          var features = _ref3.features;
+
+          if (features.length === 0) {
+            return;
+          }
+
+          var objectId = features[0].attributes[layer.objectIdField];
+          graphic.attributes[layer.objectIdField] = objectId;
+          layer.applyEdits({
+            updateFeatures: [graphic]
+          });
         });
       }
     }
@@ -164,11 +184,13 @@ function (_Component) {
 
 Graphic.propTypes = {
   geometryJson: PropTypes.object,
-  graphicProperties: PropTypes.object // if geometryJson passed, graphicProperties will be ignored
-
+  graphicProperties: PropTypes.object,
+  // if geometryJson passed, graphicProperties will be ignored
+  bizIdField: PropTypes.string
 };
 Graphic.defaultProps = {
   geometryJson: null,
-  graphicProperties: null
+  graphicProperties: null,
+  bizIdField: 'bizId'
 };
 export default Graphic;

@@ -164,9 +164,9 @@ function (_Component) {
 
         };
         return Children.map(children, function (child) {
-          var graphicKey = child.key;
-          addKey(child.props, graphicKey);
-          childProps.highlight = selectedKeys.includes(graphicKey);
+          // const graphicKey = child.key
+          // addKey(child.props, graphicKey)
+          // childProps.highlight = selectedKeys.includes(graphicKey)
           return React.cloneElement(child, childProps);
         });
       } else {

@@ -56,8 +56,10 @@ class Graphic extends Component {
     const { graphicProperties, geometryJson } = this.props
 
     if (
-      prevGraphicProperties !== graphicProperties ||
-      prevGeometryJson !== geometryJson
+      this.state.graphic && (
+        prevGraphicProperties !== graphicProperties ||
+        prevGeometryJson !== geometryJson
+      )
     ) {
       createGraphic({
         graphicProperties, geometryJson
@@ -90,14 +92,32 @@ class Graphic extends Component {
   }
 
   update (graphic) {
-    const { layer } = this.props
+    const { layer, bizIdField } = this.props
     if (layer.type === 'graphics') {
       // find by key
       // remove old one
       // add new one
     } else if (layer.type === 'feature') {
-      layer.applyEdits({
+      /* layer.applyEdits({
         updateFeatures: [graphic]
+      }) */
+
+      // objectId of feature will change each time the graphic added into the featureLayer
+      // so here we need to find the objectId by business id
+      // and then replace the objectId then do the update
+      const query = layer.createQuery()
+      query.where += ` AND id = '${graphic.attributes[bizIdField]}'`
+      layer.queryFeatures(query).then(({ features }) => {
+        if (features.length === 0) {
+          return
+        }
+
+        const objectId = features[0].attributes[layer.objectIdField]
+        graphic.attributes[layer.objectIdField] = objectId
+
+        layer.applyEdits({
+          updateFeatures: [graphic]
+        })
       })
     }
   }
@@ -109,12 +129,14 @@ class Graphic extends Component {
 
 Graphic.propTypes = {
   geometryJson: PropTypes.object,
-  graphicProperties: PropTypes.object // if geometryJson passed, graphicProperties will be ignored
+  graphicProperties: PropTypes.object, // if geometryJson passed, graphicProperties will be ignored
+  bizIdField: PropTypes.string
 }
 
 Graphic.defaultProps = {
   geometryJson: null,
-  graphicProperties: null
+  graphicProperties: null,
+  bizIdField: 'bizId'
 }
 
 export default Graphic

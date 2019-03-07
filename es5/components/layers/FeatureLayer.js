@@ -114,8 +114,8 @@ function (_Component) {
 
         };
         return Children.map(children, function (child) {
-          var graphicKey = child.key;
-          addKey(child.props, graphicKey);
+          // const graphicKey = child.key
+          // addKey(child.props, graphicKey)
           return React.cloneElement(child, childProps);
         });
       } else {

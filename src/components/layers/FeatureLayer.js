@@ -64,8 +64,8 @@ class FeatureLayer extends Component {
       console.log('FeatureLayer render has layer')
       const childProps = { layer } // pass graphicsLayer to direct children
       return Children.map(children, child => {
-        const graphicKey = child.key
-        addKey(child.props, graphicKey)
+        // const graphicKey = child.key
+        // addKey(child.props, graphicKey)
         return React.cloneElement(child, childProps)
       })
     } else {

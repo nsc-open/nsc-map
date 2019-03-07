@@ -97,9 +97,9 @@ class GraphicsLayer extends Component {
     if (layer) {
       const childProps = { layer } // pass graphicsLayer to direct children
       return Children.map(children, child => {
-        const graphicKey = child.key
-        addKey(child.props, graphicKey)
-        childProps.highlight = selectedKeys.includes(graphicKey)
+        // const graphicKey = child.key
+        // addKey(child.props, graphicKey)
+        // childProps.highlight = selectedKeys.includes(graphicKey)
         return React.cloneElement(child, childProps)
       })
     } else {
