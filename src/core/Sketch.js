@@ -129,8 +129,8 @@ class Sketch extends EventEmitter {
   }
 
   _applyCancel () {
-    const { sourceLayer, sourceGraphic } = this
-    if (sourceGraphic) { // for create() has no sourceGraphic
+    const { sourceLayer, sourceGraphic, options } = this
+    if (sourceGraphic && options.removeOriginalFeatureBeforeUpdate) { // for create() has no sourceGraphic
       addGraphic(sourceLayer, sourceGraphic)
     }
     this.state = 'ready'

@@ -175,9 +175,10 @@ function (_EventEmitter) {
     key: "_applyCancel",
     value: function _applyCancel() {
       var sourceLayer = this.sourceLayer,
-          sourceGraphic = this.sourceGraphic;
+          sourceGraphic = this.sourceGraphic,
+          options = this.options;
 
-      if (sourceGraphic) {
+      if (sourceGraphic && options.removeOriginalFeatureBeforeUpdate) {
         // for create() has no sourceGraphic
         addGraphic(sourceLayer, sourceGraphic);
       }
