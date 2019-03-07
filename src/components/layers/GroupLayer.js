@@ -15,10 +15,10 @@ class GroupLayer extends Component {
     loadModules([
       'esri/layers/GroupLayer'
     ]).then(({ GroupLayer }) => {
-      const { map, onLoad } = this.props
+      const { map, index, onLoad } = this.props
       console.log(onLoad)
       const layer = new GroupLayer()
-      map.add(layer)
+      map.add(layer, index)
       console.log('GroupLayer map.add(layer)')
       this.setState({ layer })
 
@@ -50,6 +50,7 @@ class GroupLayer extends Component {
 GroupLayer.propTypes = {
   map: PropTypes.object,
   view: PropTypes.object,
+  index: PropTypes.number,
   onLoad: PropTypes.func
 }
 

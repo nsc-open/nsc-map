@@ -77,12 +77,8 @@ var Sketch =
 function (_EventEmitter) {
   _inherits(Sketch, _EventEmitter);
 
-  function Sketch(_ref) {
+  function Sketch(_ref, options) {
     var _this;
-
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-      beforeComplete: null
-    };
 
     var view = _ref.view,
         sketchViewModelProperties = _objectWithoutProperties(_ref, ["view"]);
@@ -95,7 +91,10 @@ function (_EventEmitter) {
       throw new Error('view is required');
     }
 
-    _this.options = options || {};
+    _this.options = _objectSpread({
+      beforeComplete: null,
+      removeOriginalFeatureBeforeUpdate: true
+    }, options || {});
     _this.view = view;
     _this.sketchViewModelProperties = sketchViewModelProperties;
     _this.sketchViewModel = null;
@@ -303,7 +302,10 @@ function (_EventEmitter) {
       this.sourceGraphic = graphic.clone();
 
       this._createSketchViewModel().then(function (sketchViewModel) {
-        removeGraphic(sourceLayer, graphic);
+        if (_this6.options.removeOriginalFeatureBeforeUpdate) {
+          removeGraphic(sourceLayer, graphic);
+        }
+
         sketchViewModel.layer.add(graphic);
         graphic.layer = sketchViewModel.layer; // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 

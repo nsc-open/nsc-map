@@ -2,6 +2,22 @@ import { Component } from 'react'
 import PropTypes from 'prop-types'
 import { loadModules } from 'esri-module-loader'
 
+const createGraphic = ({ graphicProperties, geometryJson }) => {
+  return loadModules([
+    'esri/Graphic'
+  ]).then(({ Graphic }) => {
+    let graphic
+    if (geometryJson) {
+      graphic = Graphic.fromJSON(geometryJson)
+    } else if (graphicProperties) {
+      graphic = new Graphic(graphicProperties)
+    } else {
+      throw new Error('geometryJson and graphicProperties cannot to be empty at the same time')
+    }
+    return graphic
+  })
+}
+
 /**
  * usage:
  *  <GraphicsLayer>
@@ -22,20 +38,10 @@ class Graphic extends Component {
 
   componentWillMount () {
     // load and add to graphicsLayer/featureLayer
-    loadModules([
-      'esri/Graphic'
-    ]).then(({ Graphic }) => {
-      const { graphicProperties, geometryJson } = this.props
-      let graphic
-
-      if (geometryJson) {
-        graphic = Graphic.fromJSON(geometryJson)
-      } else if (graphicProperties) {
-        graphic = new Graphic(graphicProperties)
-      } else {
-        throw new Error('geometryJson and graphicProperties cannot to be empty at the same time')
-      }
-
+    const { graphicProperties, geometryJson } = this.props
+    createGraphic({
+      graphicProperties, geometryJson
+    }).then(graphic => {
       this.add(graphic)
       this.setState({ graphic })
     })
@@ -43,6 +49,22 @@ class Graphic extends Component {
 
   componentWillUnmount () {
     this.remove(this.state.graphic)
+  }
+
+  componentDidUpdate (prevProps) {
+    const { graphicProperties: prevGraphicProperties, geometryJson: prevGeometryJson } = prevProps
+    const { graphicProperties, geometryJson } = this.props
+
+    if (
+      prevGraphicProperties !== graphicProperties ||
+      prevGeometryJson !== geometryJson
+    ) {
+      createGraphic({
+        graphicProperties, geometryJson
+      }).then(graphic => {
+        this.update(graphic)
+      })
+    }
   }
 
   add (graphic) {

@@ -51,10 +51,11 @@ function (_Component) {
         var GroupLayer = _ref.GroupLayer;
         var _this2$props = _this2.props,
             map = _this2$props.map,
+            index = _this2$props.index,
             onLoad = _this2$props.onLoad;
         console.log(onLoad);
         var layer = new GroupLayer();
-        map.add(layer);
+        map.add(layer, index);
         console.log('GroupLayer map.add(layer)');
 
         _this2.setState({
@@ -102,6 +103,7 @@ function (_Component) {
 GroupLayer.propTypes = {
   map: PropTypes.object,
   view: PropTypes.object,
+  index: PropTypes.number,
   onLoad: PropTypes.func
 };
 GroupLayer.defaultProps = {

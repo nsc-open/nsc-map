@@ -19,6 +19,25 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { loadModules } from 'esri-module-loader';
+
+var createGraphic = function createGraphic(_ref) {
+  var graphicProperties = _ref.graphicProperties,
+      geometryJson = _ref.geometryJson;
+  return loadModules(['esri/Graphic']).then(function (_ref2) {
+    var Graphic = _ref2.Graphic;
+    var graphic;
+
+    if (geometryJson) {
+      graphic = Graphic.fromJSON(geometryJson);
+    } else if (graphicProperties) {
+      graphic = new Graphic(graphicProperties);
+    } else {
+      throw new Error('geometryJson and graphicProperties cannot to be empty at the same time');
+    }
+
+    return graphic;
+  });
+};
 /**
  * usage:
  *  <GraphicsLayer>
@@ -26,6 +45,7 @@ import { loadModules } from 'esri-module-loader';
       <Graphic key="" graphicProperties={} />
     </GraphicsLayer>
  */
+
 
 var Graphic =
 /*#__PURE__*/
@@ -53,21 +73,13 @@ function (_Component) {
       var _this2 = this;
 
       // load and add to graphicsLayer/featureLayer
-      loadModules(['esri/Graphic']).then(function (_ref) {
-        var Graphic = _ref.Graphic;
-        var _this2$props = _this2.props,
-            graphicProperties = _this2$props.graphicProperties,
-            geometryJson = _this2$props.geometryJson;
-        var graphic;
-
-        if (geometryJson) {
-          graphic = Graphic.fromJSON(geometryJson);
-        } else if (graphicProperties) {
-          graphic = new Graphic(graphicProperties);
-        } else {
-          throw new Error('geometryJson and graphicProperties cannot to be empty at the same time');
-        }
-
+      var _this$props = this.props,
+          graphicProperties = _this$props.graphicProperties,
+          geometryJson = _this$props.geometryJson;
+      createGraphic({
+        graphicProperties: graphicProperties,
+        geometryJson: geometryJson
+      }).then(function (graphic) {
         _this2.add(graphic);
 
         _this2.setState({
@@ -79,6 +91,26 @@ function (_Component) {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       this.remove(this.state.graphic);
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      var _this3 = this;
+
+      var prevGraphicProperties = prevProps.graphicProperties,
+          prevGeometryJson = prevProps.geometryJson;
+      var _this$props2 = this.props,
+          graphicProperties = _this$props2.graphicProperties,
+          geometryJson = _this$props2.geometryJson;
+
+      if (prevGraphicProperties !== graphicProperties || prevGeometryJson !== geometryJson) {
+        createGraphic({
+          graphicProperties: graphicProperties,
+          geometryJson: geometryJson
+        }).then(function (graphic) {
+          _this3.update(graphic);
+        });
+      }
     }
   }, {
     key: "add",

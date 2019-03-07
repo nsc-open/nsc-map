@@ -48,14 +48,20 @@ const removeGraphic = (layer, graphic) => {
 
 class Sketch extends EventEmitter {
 
-  constructor ({ view, ...sketchViewModelProperties }, options = { beforeComplete: null }) {
+  constructor ({
+    view, ...sketchViewModelProperties
+  }, options) {
     super()
 
     if (!view) {
       throw new Error('view is required')
     }
 
-    this.options = options || {}
+    this.options = {
+      beforeComplete: null,
+      removeOriginalFeatureBeforeUpdate: true,
+      ...(options || {})
+    }
 
     this.view = view
     this.sketchViewModelProperties = sketchViewModelProperties
@@ -223,7 +229,10 @@ class Sketch extends EventEmitter {
     this.sourceGraphic = graphic.clone()
 
     this._createSketchViewModel().then(sketchViewModel => {
-      removeGraphic(sourceLayer, graphic)
+      if (this.options.removeOriginalFeatureBeforeUpdate) {
+        removeGraphic(sourceLayer, graphic)
+      }
+      
       sketchViewModel.layer.add(graphic)
       graphic.layer = sketchViewModel.layer // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
