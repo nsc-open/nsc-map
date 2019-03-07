@@ -73,16 +73,23 @@ function (_Component) {
 
     _defineProperty(_assertThisInitialized(_this), "clickHandler", function (toolKey) {
       var activeToolKey = _this.state.activeToolKey;
+      var active = false;
 
       if (activeToolKey !== toolKey) {
+        active = true;
+
         _this.setState({
           activeToolKey: toolKey
         });
       } else {
+        active = false;
+
         _this.setState({
           activeToolKey: ''
         });
       }
+
+      _this.props.onChange(toolKey, active);
     });
 
     _this.state = {
@@ -158,6 +165,6 @@ Toolbar.defaultProps = {
     x: 15,
     y: 15
   },
-  onChange: function onChange(toolKey) {}
+  onChange: function onChange(toolKey, active) {}
 };
 export default Toolbar;

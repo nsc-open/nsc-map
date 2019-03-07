@@ -50,12 +50,17 @@ class Toolbar extends Component {
 
   clickHandler = toolKey => {
     const { activeToolKey } = this.state
+    let active = false
 
     if (activeToolKey !== toolKey) {
+      active = true
       this.setState({ activeToolKey: toolKey })
     } else {
+      active = false
       this.setState({ activeToolKey: '' })
     }
+
+    this.props.onChange(toolKey, active)
   }
 
   render () {
@@ -105,7 +110,7 @@ Toolbar.propTypes = {
 Toolbar.defaultProps = {
   direction: 'verticle',
   defaultPosition: { x: 15, y: 15 },
-  onChange: (toolKey) => {}
+  onChange: (toolKey, active) => {}
 }
 
 export default Toolbar
