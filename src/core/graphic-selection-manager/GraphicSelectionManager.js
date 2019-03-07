@@ -39,6 +39,11 @@ class GraphicSelectionManager extends EventEmitter {
   }
 
   _selectionChangeHandler = ({ selection, added, removed }) => {
+    this.highlight(selection)
+    this.emit('selectionChange', ({ selection, added, removed }))
+  }
+
+  highlight (selection = []) {
     const { view, layers } = this
 
     layers.forEach((layer, index) => {
@@ -48,8 +53,6 @@ class GraphicSelectionManager extends EventEmitter {
         this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer))
       })
     })
-  
-    this.emit('selectionChange', ({ selection, added, removed }))
   }
 
   addLayer (layer) {

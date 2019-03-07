@@ -41,8 +41,8 @@ function (_EventEmitter) {
   function GraphicSelectionManager(_ref) {
     var _this;
 
-    var _view = _ref.view,
-        _layers = _ref.layers,
+    var view = _ref.view,
+        layers = _ref.layers,
         _ref$graphicComparato = _ref.graphicComparator,
         graphicComparator = _ref$graphicComparato === void 0 ? function (g1, g2) {
       return g1 === g2;
@@ -57,18 +57,7 @@ function (_EventEmitter) {
           added = _ref2.added,
           removed = _ref2.removed;
 
-      var _assertThisInitialize = _assertThisInitialized(_this),
-          view = _assertThisInitialize.view,
-          layers = _assertThisInitialize.layers;
-
-      layers.forEach(function (layer, index) {
-        _this.highlights[index] && _this.highlights[index].remove();
-        view.whenLayerView(layer).then(function (layerView) {
-          _this.highlights[index] = layerView.highlight(selection.filter(function (s) {
-            return s.layer === layer;
-          }));
-        });
-      });
+      _this.highlight(selection);
 
       _this.emit('selectionChange', {
         selection: selection,
@@ -77,13 +66,13 @@ function (_EventEmitter) {
       });
     });
 
-    if (!_view) {
+    if (!view) {
       throw new Error('view is required');
     }
 
-    _this.view = _view; // map view
+    _this.view = view; // map view
 
-    _this.layers = _layers || [];
+    _this.layers = layers || [];
     _this.highlights = []; // each layer would have a highlight
 
     _this.selectionManager = new SelectionManager({
@@ -100,6 +89,23 @@ function (_EventEmitter) {
     value: function _init() {
       // inside of a specified selector, like PointerSelector, would operate selectionManager, which will emit events
       this.selectionManager.on('selectionChange', this._selectionChangeHandler);
+    }
+  }, {
+    key: "highlight",
+    value: function highlight() {
+      var _this2 = this;
+
+      var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var view = this.view,
+          layers = this.layers;
+      layers.forEach(function (layer, index) {
+        _this2.highlights[index] && _this2.highlights[index].remove();
+        view.whenLayerView(layer).then(function (layerView) {
+          _this2.highlights[index] = layerView.highlight(selection.filter(function (s) {
+            return s.layer === layer;
+          }));
+        });
+      });
     }
   }, {
     key: "addLayer",

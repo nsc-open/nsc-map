@@ -226,17 +226,18 @@ class Sketch extends EventEmitter {
 
     this.state = 'update'
     this.sourceLayer = sourceLayer
-    this.sourceGraphic = graphic.clone()
+    this.sourceGraphic = graphic
 
     this._createSketchViewModel().then(sketchViewModel => {
       if (this.options.removeOriginalFeatureBeforeUpdate) {
         removeGraphic(sourceLayer, graphic)
       }
       
-      sketchViewModel.layer.add(graphic)
-      graphic.layer = sketchViewModel.layer // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
+      const clonedGraphic = graphic.clone()
+      sketchViewModel.layer.add(clonedGraphic)
+      clonedGraphic.layer = sketchViewModel.layer // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
-      sketchViewModel.update([graphic])
+      sketchViewModel.update([clonedGraphic])
       this._bindEvents(sketchViewModel)
       this.sketchViewModel = sketchViewModel
     })

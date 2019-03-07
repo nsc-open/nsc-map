@@ -300,17 +300,18 @@ function (_EventEmitter) {
 
       this.state = 'update';
       this.sourceLayer = sourceLayer;
-      this.sourceGraphic = graphic.clone();
+      this.sourceGraphic = graphic;
 
       this._createSketchViewModel().then(function (sketchViewModel) {
         if (_this6.options.removeOriginalFeatureBeforeUpdate) {
           removeGraphic(sourceLayer, graphic);
         }
 
-        sketchViewModel.layer.add(graphic);
-        graphic.layer = sketchViewModel.layer; // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
+        var clonedGraphic = graphic.clone();
+        sketchViewModel.layer.add(clonedGraphic);
+        clonedGraphic.layer = sketchViewModel.layer; // this has to be set manually, otherwise the sync code after won't see graphic added into the layer
 
-        sketchViewModel.update([graphic]);
+        sketchViewModel.update([clonedGraphic]);
 
         _this6._bindEvents(sketchViewModel);
 

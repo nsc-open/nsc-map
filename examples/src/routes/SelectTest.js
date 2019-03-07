@@ -170,7 +170,14 @@ export default class extends Component {
       key: 'select',
       icon: 'edit',
       label: '选择',
-      optionsBar: <SelectOptionsBar view={view} map={view} sourceLayers={[this.polygonFeatureLayer, this.polylineFeatureLayer]} />
+      optionsBar: 
+      <SelectOptionsBar
+        ref={c => window.x = c}
+        view={view}
+        map={view}
+        sourceLayers={[this.polygonFeatureLayer, this.polylineFeatureLayer]}
+        onSelectionChange={e => console.log(e)}
+      />
     }] : []
 
     return (
