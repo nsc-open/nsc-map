@@ -104,6 +104,7 @@ function (_EventEmitter) {
     _this.state = 'ready'; // ready|create|update|complete|cancel
 
     _this._eventHandlers = [];
+    _this.destroyed = false;
     return _this;
   } // always create a temp graphics layer for sketch, for both create or update. So this would have a unified
   // way to handle FeatureLayer and GraphicsLayer
@@ -124,6 +125,11 @@ function (_EventEmitter) {
       return loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer']).then(function (_ref2) {
         var SketchViewModel = _ref2.SketchViewModel,
             GraphicsLayer = _ref2.GraphicsLayer;
+
+        if (_this2.destroyed) {
+          return;
+        }
+
         var view = _this2.view;
         var tempGraphicsLayer = new GraphicsLayer();
         view.map.add(tempGraphicsLayer);
@@ -249,6 +255,7 @@ function (_EventEmitter) {
       this.sourceGraphic = null;
       this.sourceLayer = null;
       this.state = '';
+      this.destroyed = true;
     }
     /**
      * for graphicsLayer: create(graphicsLayer, 'polygon')

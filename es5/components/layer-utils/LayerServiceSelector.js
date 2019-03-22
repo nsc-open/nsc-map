@@ -18,11 +18,11 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -66,7 +66,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(LayerServiceSelector).call(this, props));
 
-    _defineProperty(_assertThisInitialized(_this), "switchHandler", function (layer) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "switchHandler", function (layer) {
       var map = _this.props.map;
       var selectedLayerIds = _this.state.selectedLayerIds;
       var newSelectedLayerIds;
@@ -89,7 +89,7 @@ function (_Component) {
       setLayerVisibility(map, layer.id, checked);
     });
 
-    _defineProperty(_assertThisInitialized(_this), "locateHandler", function (layer) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "locateHandler", function (layer) {
       var map = _this.props.map;
       var selectedLayerIds = _this.state.selectedLayerIds;
 

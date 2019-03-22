@@ -44,6 +44,7 @@ function (_EventEmitter) {
       var DistanceMeasurement2DViewModel = _ref2.DistanceMeasurement2DViewModel;
 
       if (_this.destroyed) {
+        console.log('destroyed');
         return;
       }
 
@@ -90,12 +91,15 @@ function (_EventEmitter) {
   }, {
     key: "destroy",
     value: function destroy() {
-      this.clearMeasurement(); // the DistanceMeasurement2DViewModel doesn't provide a nice destory function
-      // so needs to do it myself
+      if (this.viewModel) {
+        this.clearMeasurement(); // the DistanceMeasurement2DViewModel doesn't provide a nice destory function
+        // so needs to do it myself
 
-      this.viewModel.tool.destroy();
-      this.viewModel.view.cursor = 'default';
-      this.viewModel = null;
+        this.viewModel.tool.destroy();
+        this.viewModel.view.cursor = 'default';
+        this.viewModel = null;
+      }
+
       this.destroyed = true;
     }
   }]);

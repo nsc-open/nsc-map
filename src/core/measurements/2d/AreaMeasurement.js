@@ -51,14 +51,17 @@ class AreaMeasurement extends EventEmitter {
   }
 
   destroy () {
-    this.clearMeasurement()
+    if (this.viewModel) {
+      this.clearMeasurement()
 
-    // the DistanceMeasurement2DViewModel doesn't provide a nice destory function
-    // so needs to do it myself
-    this.viewModel.tool.destroy()
-    this.viewModel.view.cursor = 'default'
+      // the DistanceMeasurement2DViewModel doesn't provide a nice destory function
+      // so needs to do it myself
+      this.viewModel.tool.destroy()
+      this.viewModel.view.cursor = 'default'
+      
+      this.viewModel = null
+    }
     
-    this.viewModel = null
     this.destroyed = true
   }
 }

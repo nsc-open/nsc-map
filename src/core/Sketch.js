@@ -71,6 +71,7 @@ class Sketch extends EventEmitter {
     this.sourceGraphic = null
     this.state = 'ready' // ready|create|update|complete|cancel
     this._eventHandlers = []
+    this.destroyed = false
   }
 
   // always create a temp graphics layer for sketch, for both create or update. So this would have a unified
@@ -85,6 +86,10 @@ class Sketch extends EventEmitter {
       'esri/widgets/Sketch/SketchViewModel',
       'esri/layers/GraphicsLayer'
     ]).then(({ SketchViewModel, GraphicsLayer }) => {
+      if (this.destroyed) {
+        return
+      }
+
       const { view } = this
       const tempGraphicsLayer = new GraphicsLayer()
       view.map.add(tempGraphicsLayer)
@@ -187,6 +192,7 @@ class Sketch extends EventEmitter {
     this.sourceGraphic = null
     this.sourceLayer = null
     this.state = ''
+    this.destroyed = true
   }
 
   /**
