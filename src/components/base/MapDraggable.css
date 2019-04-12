@@ -20,7 +20,7 @@
 .layoutVertical {
   display: flex;
   flex-direction: column;
-  min-height: 100px;
+  min-height: 20px;
 }
 
 .handler {
