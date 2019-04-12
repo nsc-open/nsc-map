@@ -22,7 +22,7 @@ const styles = {
   layoutVertical: {
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '100px'
+    minHeight: '20px'
   },
   handlerHorizontal: {
     cursor: 'move',
