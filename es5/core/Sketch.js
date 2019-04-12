@@ -272,7 +272,7 @@ function (_EventEmitter) {
       this.sourceGraphic = null;
 
       if (sourceLayer.type === 'feature') {
-        tool = sourceLayer.geometryType;
+        tool = sourceLayer.geometryType || tool; // client side featurelayer's geometryType is null before it has any source added
       }
 
       this._createSketchViewModel().then(function (sketchViewModel) {
