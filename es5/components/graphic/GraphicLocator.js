@@ -10,11 +10,11 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -23,10 +23,10 @@ import PropTypes from 'prop-types';
 import { Button } from 'antd';
 import * as geometryUtils from '../../utils/geometry';
 import { loadModules } from 'esri-module-loader';
-export var extentToGraphic = function extentToGraphic(mapView, graphic) {
+export var extentToGraphic = function extentToGraphic(mapView, graphic, pointZoomValue) {
   if (geometryUtils.type(graphic.geometry) === 'point') {
     mapView.center = graphic.geometry;
-    mapView.zoom = 13;
+    mapView.zoom = pointZoomValue;
   } else {
     mapView.extent = graphic.geometry.extent;
   }
@@ -50,13 +50,13 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(GraphicLocator)).call.apply(_getPrototypeOf2, [this].concat(args)));
 
-    _defineProperty(_assertThisInitialized(_this), "doubleClickHandler", function () {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "doubleClickHandler", function () {
       if (_this.props.doubleClick) {
         _this.locate();
       }
     });
 
-    _defineProperty(_assertThisInitialized(_this), "clickHandler", function () {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "clickHandler", function () {
       if (!_this.props.doubleClick) {
         _this.locate();
       }
@@ -72,15 +72,16 @@ function (_Component) {
           view = _this$props.view,
           graphic = _this$props.graphic,
           geometryJson = _this$props.geometryJson,
-          onLocate = _this$props.onLocate;
+          onLocate = _this$props.onLocate,
+          pointZoomValue = _this$props.pointZoomValue;
 
       if (graphic) {
-        extentToGraphic(view, graphic);
+        extentToGraphic(view, graphic, pointZoomValue);
         onLocate();
       } else {
         loadModules('esri/Graphic').then(function (Graphic) {
           var graphic = Graphic.fromJSON(geometryJson);
-          extentToGraphic(view, graphic);
+          extentToGraphic(view, graphic, pointZoomValue);
           onLocate();
         });
       }
@@ -108,11 +109,13 @@ GraphicLocator.propTypes = {
   graphic: PropTypes.object,
   geometryJson: PropTypes.object,
   onLocate: PropTypes.func,
-  doubleClick: PropTypes.bool // use doubleClick to trigger locate
-
+  doubleClick: PropTypes.bool,
+  // use doubleClick to trigger locate
+  pointZoomValue: PropTypes.number
 };
 GraphicLocator.defaultProps = {
   doubleClick: false,
-  onLocate: function onLocate() {}
+  onLocate: function onLocate() {},
+  pointZoomValue: 13
 };
 export default GraphicLocator;
