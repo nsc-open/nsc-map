@@ -4,10 +4,10 @@ import { Button } from 'antd'
 import * as geometryUtils from '../../utils/geometry'
 import { loadModules } from 'esri-module-loader'
 
-export const extentToGraphic = (mapView, graphic) => {
+export const extentToGraphic = (mapView, graphic, pointZoomValue) => {
   if (geometryUtils.type(graphic.geometry) === 'point') {
     mapView.center = graphic.geometry
-    mapView.zoom = 13
+    mapView.zoom = pointZoomValue
   } else {
     mapView.extent = graphic.geometry.extent
   }
@@ -15,14 +15,14 @@ export const extentToGraphic = (mapView, graphic) => {
 
 class GraphicLocator extends Component {
   locate () {
-    const { view, graphic, geometryJson, onLocate } = this.props
+    const { view, graphic, geometryJson, onLocate, pointZoomValue } = this.props
     if (graphic) {
-      extentToGraphic(view, graphic)
+      extentToGraphic(view, graphic, pointZoomValue)
       onLocate()
     } else {
       loadModules('esri/Graphic').then(Graphic => {
         const graphic = Graphic.fromJSON(geometryJson)
-        extentToGraphic(view, graphic)
+        extentToGraphic(view, graphic, pointZoomValue)
         onLocate()
       })
     }
@@ -56,12 +56,14 @@ GraphicLocator.propTypes = {
   graphic: PropTypes.object,
   geometryJson: PropTypes.object,
   onLocate: PropTypes.func,
-  doubleClick: PropTypes.bool // use doubleClick to trigger locate
+  doubleClick: PropTypes.bool, // use doubleClick to trigger locate
+  pointZoomValue: PropTypes.number
 }
 
 GraphicLocator.defaultProps = {
   doubleClick: false,
-  onLocate: () => {}
+  onLocate: () => {},
+  pointZoomValue: 13
 }
 
 export default GraphicLocator
