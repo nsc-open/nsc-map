@@ -20,9 +20,17 @@ class GraphicLocator extends Component {
       extentToGraphic(view, graphic, pointZoomValue)
       onLocate()
     } else {
-      loadModules('esri/Graphic').then(Graphic => {
-        const graphic = Graphic.fromJSON(geometryJson)
-        extentToGraphic(view, graphic, pointZoomValue)
+      loadModules([
+        'esri/Graphic',
+        'esri/geometry/geometryEngine'
+      ]).then(({ Graphic, geometryEngine }) => {
+        if (Array.isArray(geometryJson)) {
+          const unionGeometry = geometryEngine.union(geometryJson.map(json => Graphic.fromJSON(json).geometry))
+          view.extent = unionGeometry.extent
+        } else {
+          const graphic = Graphic.fromJSON(geometryJson)
+          extentToGraphic(view, graphic, pointZoomValue)
+        }
         onLocate()
       })
     }
@@ -54,7 +62,7 @@ GraphicLocator.propTypes = {
   map: PropTypes.object,
   view: PropTypes.object,
   graphic: PropTypes.object,
-  geometryJson: PropTypes.object,
+  geometryJson: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   onLocate: PropTypes.func,
   doubleClick: PropTypes.bool, // use doubleClick to trigger locate
   pointZoomValue: PropTypes.number
