@@ -8,8 +8,10 @@ const createGraphic = ({ graphicProperties, geometryJson }) => {
   ]).then(({ Graphic }) => {
     let graphic
     if (geometryJson) {
-      // graphic = Graphic.fromJSON(geometryJson) // fromJSON won't set symbol properly
-      graphic = new Graphic(geometryJson)
+      // notice that: 
+      // symbol.type like `esriXXX` can only be handled by fromJSON
+      // symbol.type like 'simple-line' can only be handled by new Graphic
+      graphic = Graphic.fromJSON(geometryJson)
     } else if (graphicProperties) {
       graphic = new Graphic(graphicProperties)
     } else {
@@ -38,7 +40,6 @@ class Graphic extends Component {
   }
 
   componentWillMount () {
-    console.log('Graphic componentWillMount')
     // load and add to graphicsLayer/featureLayer
     const { graphicProperties, geometryJson } = this.props
     createGraphic({
@@ -54,7 +55,6 @@ class Graphic extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    console.log('Graphic componentDidUpdate')
     const { graphicProperties: prevGraphicProperties, geometryJson: prevGeometryJson } = prevProps
     const { graphicProperties, geometryJson } = this.props
 
@@ -73,7 +73,6 @@ class Graphic extends Component {
   }
 
   add (graphic) {
-    console.log('Graphic add', this.props.layer)
     const { layer } = this.props
     if (layer.type === 'graphics') {
       layer.add(graphic)
@@ -96,7 +95,6 @@ class Graphic extends Component {
   }
 
   update (graphic) {
-    console.log('Graphic update')
     const { layer, bizIdField } = this.props
     if (layer.type === 'graphics') {
       // find by key

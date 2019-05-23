@@ -11,9 +11,10 @@ export const polyline = {
     spatialReference: { wkid: 102100 }
   },
   symbol: {
-    type: "simple-line",  // autocasts as SimpleLineSymbol()
+    // type: "simple-line",  // autocasts as SimpleLineSymbol()
+    type: 'esriSLS',
     color: [255, 0, 0],
-    width: 10
+    width: 6
   },
   attributes: {
     ObjectID: 'demo-polyline-001',
