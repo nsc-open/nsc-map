@@ -28,7 +28,8 @@ var createGraphic = function createGraphic(_ref) {
     var graphic;
 
     if (geometryJson) {
-      graphic = Graphic.fromJSON(geometryJson);
+      // graphic = Graphic.fromJSON(geometryJson) // fromJSON won't set symbol properly
+      graphic = new Graphic(geometryJson);
     } else if (graphicProperties) {
       graphic = new Graphic(graphicProperties);
     } else {
@@ -72,7 +73,8 @@ function (_Component) {
     value: function componentWillMount() {
       var _this2 = this;
 
-      // load and add to graphicsLayer/featureLayer
+      console.log('Graphic componentWillMount'); // load and add to graphicsLayer/featureLayer
+
       var _this$props = this.props,
           graphicProperties = _this$props.graphicProperties,
           geometryJson = _this$props.geometryJson;
@@ -97,6 +99,7 @@ function (_Component) {
     value: function componentDidUpdate(prevProps) {
       var _this3 = this;
 
+      console.log('Graphic componentDidUpdate');
       var prevGraphicProperties = prevProps.graphicProperties,
           prevGeometryJson = prevProps.geometryJson;
       var _this$props2 = this.props,
@@ -115,6 +118,7 @@ function (_Component) {
   }, {
     key: "add",
     value: function add(graphic) {
+      console.log('Graphic add', this.props.layer);
       var layer = this.props.layer;
 
       if (layer.type === 'graphics') {
@@ -141,6 +145,7 @@ function (_Component) {
   }, {
     key: "update",
     value: function update(graphic) {
+      console.log('Graphic update');
       var _this$props3 = this.props,
           layer = _this$props3.layer,
           bizIdField = _this$props3.bizIdField;

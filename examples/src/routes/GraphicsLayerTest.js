@@ -11,19 +11,17 @@ export default class extends Component {
   
 
   onLoad = (map, view) => {
-    this.setState({ map: map })
+    // this.setState({ map: map })
+    console.log('map => ', map)
   }
 
   render () {
     return (
-      <Map
-        onLoad={this.onLoad}
-        loaderOptions={{ url: 'https://js.arcgis.com/4.8' }}
-      >
+      <Map onLoad={this.onLoad}>
         <GraphicsLayer>
           <Graphic
-            key="2"
-            geometryJson={json1}
+            key="1"
+            geometryJson={polyline}
           />
           <Graphic
             key="3"

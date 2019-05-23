@@ -5,6 +5,7 @@ import MapWidgetTestPage from './routes/MapWidgetTest'
 import LayerServiceTestPage from './routes/LayerServiceTest'
 import GroundObjectsLayerTestPage from './routes/GroundObjectsLayerTest'
 import FeatureLayerTestPage from './routes/FeatureLayerTest'
+import GraphicsLayerTestPage from './routes/GraphicsLayerTest'
 import DrawTestPage from './routes/DrawTest'
 import SelectTestPage from './routes/SelectTest'
 import MeasureTestPage from './routes/MeasureTest'
@@ -21,6 +22,7 @@ function RouterConfig({ history }) {
         <Route path="/draw" exact component={DrawTestPage} />
         <Route path="/select" exact component={SelectTestPage} />
         <Route path="/measure" exact component={MeasureTestPage} />
+        <Route path="/graphics-layer" exact component={GraphicsLayerTestPage} />
       </Switch>
     </Router>
   );
