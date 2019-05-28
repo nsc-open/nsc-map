@@ -10,11 +10,11 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -34,7 +34,7 @@ function (_BaseSelector) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(BoxSelector).call(this, args));
 
-    _defineProperty(_assertThisInitialized(_this), "_mapMouseDownHandler", function (e) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "_mapMouseDownHandler", function (e) {
       if (!_this._ready) {
         return;
       }
@@ -54,7 +54,7 @@ function (_BaseSelector) {
       _this._tempGraphicsLayer.add(_this._boxGraphic);
     });
 
-    _defineProperty(_assertThisInitialized(_this), "_mapMouseMoveHandler", function (e) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "_mapMouseMoveHandler", function (e) {
       if (_this._startPoint) {
         e.stopPropagation();
         var _this$_modules2 = _this._modules,
@@ -77,7 +77,7 @@ function (_BaseSelector) {
       }
     });
 
-    _defineProperty(_assertThisInitialized(_this), "_mapMouseUpHandler", function (e) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "_mapMouseUpHandler", function (e) {
       if (_this._boxGraphic) {
         e.stopPropagation();
 

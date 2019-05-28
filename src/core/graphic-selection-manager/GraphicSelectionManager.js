@@ -2,6 +2,7 @@ import EventEmitter from 'eventemitter3'
 import SelectionManager from '../SelectionManager'
 import PointerSelector from './PointerSelector'
 import { SELECTOR_TYPE } from './constants'
+import { highlight } from '../highlight'
 
 /**
  * This support graphics selection and highlight from multiple layers (graphicsLayer or featureLayer)
@@ -48,9 +49,10 @@ class GraphicSelectionManager extends EventEmitter {
 
     layers.forEach((layer, index) => {
       this.highlights[index] && this.highlights[index].remove()
-
+      
       view.whenLayerView(layer).then(layerView => {
-        this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer))
+        // this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer))
+        this.highlights[index] = highlight(layerView, selection.filter(s => s.layer === layer))
       })
     })
   }

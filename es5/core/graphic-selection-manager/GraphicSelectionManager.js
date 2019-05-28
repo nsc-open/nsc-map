@@ -10,11 +10,11 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -22,6 +22,7 @@ import EventEmitter from 'eventemitter3';
 import SelectionManager from '../SelectionManager';
 import PointerSelector from './PointerSelector';
 import { SELECTOR_TYPE } from './constants';
+import { highlight as _highlight } from '../highlight';
 /**
  * This support graphics selection and highlight from multiple layers (graphicsLayer or featureLayer)
  * NOTE: highlight GraphicsLayer is only support in SceneView.
@@ -52,7 +53,7 @@ function (_EventEmitter) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphicSelectionManager).call(this));
 
-    _defineProperty(_assertThisInitialized(_this), "_selectionChangeHandler", function (_ref2) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "_selectionChangeHandler", function (_ref2) {
       var selection = _ref2.selection,
           added = _ref2.added,
           removed = _ref2.removed;
@@ -101,7 +102,8 @@ function (_EventEmitter) {
       layers.forEach(function (layer, index) {
         _this2.highlights[index] && _this2.highlights[index].remove();
         view.whenLayerView(layer).then(function (layerView) {
-          _this2.highlights[index] = layerView.highlight(selection.filter(function (s) {
+          // this.highlights[index] = layerView.highlight(selection.filter(s => s.layer === layer))
+          _this2.highlights[index] = _highlight(layerView, selection.filter(function (s) {
             return s.layer === layer;
           }));
         });
