@@ -44,6 +44,10 @@ class GraphicSelectionManager extends EventEmitter {
     this.emit('selectionChange', ({ selection, added, removed }))
   }
 
+  clearHighlight () {
+    this.highlights.forEach(h => h.remove())
+  }
+
   highlight (selection = []) {
     const { view, layers } = this
 
@@ -86,6 +90,7 @@ class GraphicSelectionManager extends EventEmitter {
 
   deactivate () {
     if (this.selector) {
+      this.clearHighlight()
       this.selector.deactivate()
       this.selector.destroy()
       this.selector = null

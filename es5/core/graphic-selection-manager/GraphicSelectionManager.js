@@ -92,6 +92,13 @@ function (_EventEmitter) {
       this.selectionManager.on('selectionChange', this._selectionChangeHandler);
     }
   }, {
+    key: "clearHighlight",
+    value: function clearHighlight() {
+      this.highlights.forEach(function (h) {
+        return h.remove();
+      });
+    }
+  }, {
     key: "highlight",
     value: function highlight() {
       var _this2 = this;
@@ -151,6 +158,7 @@ function (_EventEmitter) {
     key: "deactivate",
     value: function deactivate() {
       if (this.selector) {
+        this.clearHighlight();
         this.selector.deactivate();
         this.selector.destroy();
         this.selector = null;

@@ -69,6 +69,7 @@ class Sketch extends EventEmitter {
 
     this.sourceLayer = null // source layer for create and update, it can be graphicsLayer or featureLayer
     this.sourceGraphic = null
+    this.editingGraphic = null
     this.state = 'ready' // ready|create|update|complete|cancel
     this._eventHandlers = []
     this.destroyed = false
@@ -151,6 +152,7 @@ class Sketch extends EventEmitter {
           editingGraphic = e.graphics[0]
         }
 
+        this.editingGraphic = editingGraphic
         if (!editingGraphic) {
           return
         }
@@ -190,6 +192,7 @@ class Sketch extends EventEmitter {
     this.view = null
     this.sketchViewModelProperties = null
     this.sourceGraphic = null
+    this.editingGraphic = null
     this.sourceLayer = null
     this.state = ''
     this.destroyed = true

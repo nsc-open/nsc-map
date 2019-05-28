@@ -101,6 +101,7 @@ function (_EventEmitter) {
     _this.sourceLayer = null; // source layer for create and update, it can be graphicsLayer or featureLayer
 
     _this.sourceGraphic = null;
+    _this.editingGraphic = null;
     _this.state = 'ready'; // ready|create|update|complete|cancel
 
     _this._eventHandlers = [];
@@ -205,6 +206,8 @@ function (_EventEmitter) {
           editingGraphic = e.graphics[0];
         }
 
+        _this4.editingGraphic = editingGraphic;
+
         if (!editingGraphic) {
           return;
         }
@@ -253,6 +256,7 @@ function (_EventEmitter) {
       this.view = null;
       this.sketchViewModelProperties = null;
       this.sourceGraphic = null;
+      this.editingGraphic = null;
       this.sourceLayer = null;
       this.state = '';
       this.destroyed = true;
