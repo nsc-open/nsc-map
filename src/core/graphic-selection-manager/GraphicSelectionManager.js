@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3'
 import SelectionManager from '../SelectionManager'
 import PointerSelector from './PointerSelector'
 import { SELECTOR_TYPE } from './constants'
-import { highlight } from '../highlight'
+import { highlight } from '../../utils/highlight'
 
 /**
  * This support graphics selection and highlight from multiple layers (graphicsLayer or featureLayer)

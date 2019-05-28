@@ -1,4 +1,4 @@
-import * as geometryUtils from '../utils/geometry'
+import * as geometryUtils from './geometry'
 
 /**
  * due to the reason that highlight GraphicsLayer is only support in SceneView.
