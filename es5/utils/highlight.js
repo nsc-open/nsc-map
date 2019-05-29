@@ -32,6 +32,7 @@ var createHighlightGrpahic = function createHighlightGrpahic(graphic, _ref) {
 
 export var highlight = function highlight(layerView) {
   var targets = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  var options = arguments.length > 2 ? arguments[2] : undefined;
   var layer = layerView.layer,
       view = layerView.view;
   var isGraphicsLayerView = layer.type === 'graphics';
@@ -41,23 +42,38 @@ export var highlight = function highlight(layerView) {
     return layerView.highlight(targets);
   }
 
+  var mode = options && options.mode || 'symbol'; // visibiliy | symbol
+
   var highlightOptions = view.highlightOptions;
   var highlightGraphics = targets.map(function (t) {
     return createHighlightGrpahic(t, highlightOptions);
   });
-  targets.forEach(function (t) {
-    return t.visible = false;
-  });
-  layer.addMany(highlightGraphics);
 
-  var removeFunc = function removeFunc() {
-    layer.removeMany(highlightGraphics);
-    targets.forEach(function (t) {
-      return t.visible = true;
+  if (mode === 'symbol') {
+    var originSymbolMapping = {};
+    targets.forEach(function (t, i) {
+      originSymbolMapping[i] = t.clone().symbol;
+      t.symbol = highlightGraphics[i].symbol;
     });
-  };
-
-  return {
-    remove: removeFunc
-  };
+    return {
+      remove: function remove() {
+        targets.forEach(function (t, i) {
+          t.symbol = originSymbolMapping[i];
+        });
+      }
+    };
+  } else {
+    targets.forEach(function (t) {
+      return t.visible = false;
+    });
+    layer.addMany(highlightGraphics);
+    return {
+      remove: function remove() {
+        layer.removeMany(highlightGraphics);
+        targets.forEach(function (t) {
+          return t.visible = true;
+        });
+      }
+    };
+  }
 };

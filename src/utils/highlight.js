@@ -24,22 +24,38 @@ const createHighlightGrpahic = (graphic, { color, fillOpacity, haloOpacity }) =>
   return clone
 }
 
-export const highlight = (layerView, targets = []) => {
+export const highlight = (layerView, targets = [], options) => {
   const { layer, view } = layerView
   const isGraphicsLayerView = layer.type === 'graphics'
   if (!isGraphicsLayerView) { // featureLayerView
     return layerView.highlight(targets)
   }
 
+  const mode = (options && options.mode) || 'symbol' // visibiliy | symbol
   const { highlightOptions } = view
   const highlightGraphics = targets.map(t => createHighlightGrpahic(t, highlightOptions))
 
-  targets.forEach(t => t.visible = false)
-  layer.addMany(highlightGraphics)
-
-  const removeFunc = () => {
-    layer.removeMany(highlightGraphics)
-    targets.forEach(t => t.visible = true)
+  if (mode === 'symbol') {
+    const originSymbolMapping = {}
+    targets.forEach((t, i) => {
+      originSymbolMapping[i] = t.clone().symbol
+      t.symbol = highlightGraphics[i].symbol
+    })    
+    return {
+      remove: () => {
+        targets.forEach((t, i) => {
+          t.symbol = originSymbolMapping[i]
+        })
+      }
+    }
+  } else {
+    targets.forEach(t => t.visible = false)
+    layer.addMany(highlightGraphics)
+    return {
+      remove: () => {
+        layer.removeMany(highlightGraphics)
+        targets.forEach(t => t.visible = true)
+      }
+    }
   }
-  return { remove: removeFunc }
 }
