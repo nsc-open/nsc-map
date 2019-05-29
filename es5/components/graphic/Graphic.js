@@ -111,7 +111,11 @@ function (_Component) {
           graphicProperties: graphicProperties,
           geometryJson: geometryJson
         }).then(function (graphic) {
-          _this3.update(graphic);
+          _this3.update(graphic, _this3.state.graphic);
+
+          _this3.setState({
+            graphic: graphic
+          });
         });
       }
     }
@@ -143,7 +147,7 @@ function (_Component) {
     }
   }, {
     key: "update",
-    value: function update(graphic) {
+    value: function update(graphic, oldGraphic) {
       var _this$props3 = this.props,
           layer = _this$props3.layer,
           bizIdField = _this$props3.bizIdField;
@@ -153,9 +157,6 @@ function (_Component) {
         // find by key
         // remove old one
         // add new one
-        var oldGraphic = layer.graphics.items.find(function (item) {
-          return item.attributes[bizIdField] === bizId;
-        });
         layer.remove(oldGraphic);
         layer.add(graphic);
       } else if (layer.type === 'feature') {

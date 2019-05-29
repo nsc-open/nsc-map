@@ -67,7 +67,8 @@ class Graphic extends Component {
       createGraphic({
         graphicProperties, geometryJson
       }).then(graphic => {
-        this.update(graphic)
+        this.update(graphic, this.state.graphic)
+        this.setState({ graphic })
       })
     }
   }
@@ -94,7 +95,7 @@ class Graphic extends Component {
     }
   }
 
-  update (graphic) {
+  update (graphic, oldGraphic) {
     const { layer, bizIdField } = this.props
     const bizId = graphic.attributes[bizIdField]
 
@@ -102,7 +103,6 @@ class Graphic extends Component {
       // find by key
       // remove old one
       // add new one
-      const oldGraphic = layer.graphics.items.find(item => item.attributes[bizIdField] === bizId)
       layer.remove(oldGraphic)
       layer.add(graphic)
     } else if (layer.type === 'feature') {
