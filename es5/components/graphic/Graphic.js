@@ -147,10 +147,17 @@ function (_Component) {
       var _this$props3 = this.props,
           layer = _this$props3.layer,
           bizIdField = _this$props3.bizIdField;
+      var bizId = graphic.attributes[bizIdField];
 
-      if (layer.type === 'graphics') {// find by key
+      if (layer.type === 'graphics') {
+        // find by key
         // remove old one
         // add new one
+        var oldGraphic = layer.graphics.items.find(function (item) {
+          return item.attributes[bizIdField] === bizId;
+        });
+        layer.remove(oldGraphic);
+        layer.add(graphic);
       } else if (layer.type === 'feature') {
         /* layer.applyEdits({
           updateFeatures: [graphic]
@@ -159,7 +166,7 @@ function (_Component) {
         // so here we need to find the objectId by business id
         // and then replace the objectId then do the update
         var query = layer.createQuery();
-        query.where += " AND ".concat(bizIdField, " = '").concat(graphic.attributes[bizIdField], "'");
+        query.where += " AND ".concat(bizIdField, " = '").concat(bizId, "'");
         layer.queryFeatures(query).then(function (_ref3) {
           var features = _ref3.features;
 

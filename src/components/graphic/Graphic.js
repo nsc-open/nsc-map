@@ -96,10 +96,15 @@ class Graphic extends Component {
 
   update (graphic) {
     const { layer, bizIdField } = this.props
+    const bizId = graphic.attributes[bizIdField]
+
     if (layer.type === 'graphics') {
       // find by key
       // remove old one
       // add new one
+      const oldGraphic = layer.graphics.items.find(item => item.attributes[bizIdField] === bizId)
+      layer.remove(oldGraphic)
+      layer.add(graphic)
     } else if (layer.type === 'feature') {
       /* layer.applyEdits({
         updateFeatures: [graphic]
@@ -109,7 +114,7 @@ class Graphic extends Component {
       // so here we need to find the objectId by business id
       // and then replace the objectId then do the update
       const query = layer.createQuery()
-      query.where += ` AND ${bizIdField} = '${graphic.attributes[bizIdField]}'`
+      query.where += ` AND ${bizIdField} = '${bizId}'`
       layer.queryFeatures(query).then(({ features }) => {
         if (features.length === 0) {
           return
