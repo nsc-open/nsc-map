@@ -1,9 +1,6 @@
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 import { loadModules } from 'esri-module-loader'
-import { highlight } from './highlight'
-
-const KEY_ATTRIBUTE = 'key'
 
 const createGraphic = ({ graphicProperties, geometryJson }) => {
   return loadModules([
@@ -40,8 +37,6 @@ class Graphic extends Component {
     this.state = {
       graphic: null
     }
-
-    this.highlight = null
   }
 
   componentWillMount () {
@@ -61,10 +56,10 @@ class Graphic extends Component {
 
   componentDidUpdate (prevProps) {
     const { graphicProperties: prevGraphicProperties, geometryJson: prevGeometryJson } = prevProps
-    const { mapView, layer, graphicProperties, geometryJson, selected } = this.props
-    const { graphic } = this.state
+    const { graphicProperties, geometryJson } = this.props
+
     if (
-      graphic && (
+      this.state.graphic && (
         prevGraphicProperties !== graphicProperties ||
         prevGeometryJson !== geometryJson
       )
@@ -76,45 +71,6 @@ class Graphic extends Component {
         this.setState({ graphic })
       })
     }
-
-    // process selected
-    if (graphic && selected) {
-      mapView.whenLayerView(layer).then(layerView => {
-        this.highlight = highlight(layerView, [graphic])
-      })
-    } else if (graphic && !selected && this.highlight) {
-      this.highlight.remove()
-      this.highlight = null
-    }
-  }
-
-  bindEvents () {
-    const { mapView } = this.props
-    const { graphic } = this.state
-    this.handlers = [
-      mapView.on('click', e => {
-        mapView.hitTest(e).then(({ results }) => {
-          const clicked = results.find(r => r.graphic === graphic)
-          if (clicked) {
-            this.onClick(e)
-          }
-        })
-      })
-    ]
-  }
-
-  unbindEvents () {
-    this.handlers.forEach(h => h.remove())
-  }
-
-  onClick (e) {
-    const { onSelect, selected, selectable } = this.props
-    const { graphic } = this.state
-    if (!selectable) {
-      return
-    }
-
-    onSelect && onSelect(e, this)
   }
 
   add (graphic) {
@@ -180,35 +136,15 @@ class Graphic extends Component {
 }
 
 Graphic.propTypes = {
-  layer: PropTypes.object.isRequired,
   geometryJson: PropTypes.object,
   graphicProperties: PropTypes.object, // if geometryJson passed, graphicProperties will be ignored
-  bizIdField: PropTypes.string,
-
-  selectable: PropTypes.bool,
-  selected: PropTypes.bool,
-
-  editable: PropTypes.bool,
-  editing: PropTypes.bool
+  bizIdField: PropTypes.string
 }
 
 Graphic.defaultProps = {
   geometryJson: null,
   graphicProperties: null,
-  bizIdField: 'bizId',
-  keyAttribute: KEY_ATTRIBUTE,
-
-  selectable: true,
-  selected: false,
-
-  editable: true,
-  editing: false
-}
-
-
-Graphic.keyAttribute = KEY_ATTRIBUTE
-Graphic.getKey = graphicReactInstance => {
-  return graphicReactInstance.state.graphic.attributes.key
+  bizIdField: 'bizId'
 }
 
 export default Graphic

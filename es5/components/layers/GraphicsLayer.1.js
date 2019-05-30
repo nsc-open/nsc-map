@@ -39,7 +39,8 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphicsLayer).call(this, props));
     _this.state = {
-      layer: null
+      layer: null // need to put layer as state, so once layer is created, render would run again
+
     };
     return _this;
   }
@@ -72,12 +73,20 @@ function (_Component) {
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      var properties = this.props.properties;
+      var graphicsLayerProperties = this.props.graphicsLayerProperties;
       var layer = this.state.layer; // update graphicsLayer properties
 
-      if (properties !== prevProps.properties) {// layer.set(properties)
-        // TODO
+      if (graphicsLayerProperties !== prevProps.graphicsLayerProperties) {
+        layer.set(graphicsLayerProperties);
       }
+    }
+  }, {
+    key: "getGraphicKeys",
+    value: function getGraphicKeys() {
+      var graphics = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      return graphics.map(function (g) {
+        return g.attributes.key;
+      });
     }
   }, {
     key: "render",
@@ -85,47 +94,19 @@ function (_Component) {
       console.log('GraphicsLayer render');
       var _this$props$children = this.props.children,
           children = _this$props$children === void 0 ? [] : _this$props$children;
-      var _this$state = this.state,
-          layer = _this$state.layer,
-          selectedKeys = _this$state.selectedKeys;
+      var layer = this.state.layer;
 
       if (layer) {
+        var childProps = {
+          layer: layer // pass graphicsLayer to direct children
+
+        };
         return Children.map(children, function (child) {
-          var graphicKey = Graphic.getKey(child);
-          return React.cloneElement(child, {
-            layer: layer,
-            selected: selectedKeys.includes(graphicKey),
-            editing: editingKeys.includes(graphicKey),
-            selectable: true,
-            editable: true
-          });
+          return React.cloneElement(child, childProps);
         });
       } else {
         return null;
       }
-    }
-  }], [{
-    key: "getDerivedStateFromProps",
-    value: function getDerivedStateFromProps(props, prevState) {
-      var prevProps = prevState.prevProps;
-      var newState = {
-        prevProps: props
-      };
-
-      var needSync = function needSync(name) {
-        return !prevProps && name in props || prevProps && prevProps[name] !== props[name];
-      }; // ================ selectedKeys =================
-
-
-      if (props.selectable) {
-        if (needSync('selectedKeys')) {
-          newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
-        } else if (!prevProps && props.defaultSelectedKeys) {
-          newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
-        }
-      }
-
-      return newState;
     }
   }]);
 
@@ -133,27 +114,13 @@ function (_Component) {
 }(Component);
 
 GraphicsLayer.propTypes = {
-  map: PropTypes.object.isRequired,
-  mapView: PropTypes.object.isRequired,
-  properties: PropTypes.object,
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.element), PropTypes.element]),
-  selectable: PropTypes.bool.isRequired,
-  hoverable: PropTypes.bool.isRequired,
-  selectedKeys: PropTypes.array,
-  editingKeys: PropTypes.array,
-  // hoverKeys: PropTypes.array // hover 是不需要 keys 去控制的，hover 一定是鼠标 hover 事件触发，不应该由外部去控制
-  sketch: PropTypes.func,
-  onLoad: PropTypes.func,
-  onSelect: PropTypes.func,
-  onHover: PropTypes.func
+  graphicsLayerProperties: PropTypes.object,
+  onLoad: PropTypes.func
 };
 GraphicsLayer.defaultProps = {
   children: [],
-  properties: null,
-  selectable: true,
-  hoverable: true,
-  onLoad: function onLoad(layer) {},
-  onSelect: function onSelect() {},
-  onHover: function onHover() {}
+  graphicsLayerProperties: null,
+  onLoad: function onLoad(layer) {}
 };
 export default GraphicsLayer;

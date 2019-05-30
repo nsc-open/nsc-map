@@ -19,8 +19,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { loadModules } from 'esri-module-loader';
-import { highlight } from './highlight';
-var KEY_ATTRIBUTE = 'key';
 
 var createGraphic = function createGraphic(_ref) {
   var graphicProperties = _ref.graphicProperties,
@@ -69,7 +67,6 @@ function (_Component) {
     _this.state = {
       graphic: null
     };
-    _this.highlight = null;
     return _this;
   }
 
@@ -106,14 +103,10 @@ function (_Component) {
       var prevGraphicProperties = prevProps.graphicProperties,
           prevGeometryJson = prevProps.geometryJson;
       var _this$props2 = this.props,
-          mapView = _this$props2.mapView,
-          layer = _this$props2.layer,
           graphicProperties = _this$props2.graphicProperties,
-          geometryJson = _this$props2.geometryJson,
-          selected = _this$props2.selected;
-      var graphic = this.state.graphic;
+          geometryJson = _this$props2.geometryJson;
 
-      if (graphic && (prevGraphicProperties !== graphicProperties || prevGeometryJson !== geometryJson)) {
+      if (this.state.graphic && (prevGraphicProperties !== graphicProperties || prevGeometryJson !== geometryJson)) {
         createGraphic({
           graphicProperties: graphicProperties,
           geometryJson: geometryJson
@@ -124,59 +117,7 @@ function (_Component) {
             graphic: graphic
           });
         });
-      } // process selected
-
-
-      if (graphic && selected) {
-        mapView.whenLayerView(layer).then(function (layerView) {
-          _this3.highlight = highlight(layerView, [graphic]);
-        });
-      } else if (graphic && !selected && this.highlight) {
-        this.highlight.remove();
-        this.highlight = null;
       }
-    }
-  }, {
-    key: "bindEvents",
-    value: function bindEvents() {
-      var _this4 = this;
-
-      var mapView = this.props.mapView;
-      var graphic = this.state.graphic;
-      this.handlers = [mapView.on('click', function (e) {
-        mapView.hitTest(e).then(function (_ref3) {
-          var results = _ref3.results;
-          var clicked = results.find(function (r) {
-            return r.graphic === graphic;
-          });
-
-          if (clicked) {
-            _this4.onClick(e);
-          }
-        });
-      })];
-    }
-  }, {
-    key: "unbindEvents",
-    value: function unbindEvents() {
-      this.handlers.forEach(function (h) {
-        return h.remove();
-      });
-    }
-  }, {
-    key: "onClick",
-    value: function onClick(e) {
-      var _this$props3 = this.props,
-          onSelect = _this$props3.onSelect,
-          selected = _this$props3.selected,
-          selectable = _this$props3.selectable;
-      var graphic = this.state.graphic;
-
-      if (!selectable) {
-        return;
-      }
-
-      onSelect && onSelect(e, this);
     }
   }, {
     key: "add",
@@ -207,9 +148,9 @@ function (_Component) {
   }, {
     key: "update",
     value: function update(graphic, oldGraphic) {
-      var _this$props4 = this.props,
-          layer = _this$props4.layer,
-          bizIdField = _this$props4.bizIdField;
+      var _this$props3 = this.props,
+          layer = _this$props3.layer,
+          bizIdField = _this$props3.bizIdField;
       var bizId = graphic.attributes[bizIdField];
 
       if (layer.type === 'graphics') {
@@ -227,8 +168,8 @@ function (_Component) {
         // and then replace the objectId then do the update
         var query = layer.createQuery();
         query.where += " AND ".concat(bizIdField, " = '").concat(bizId, "'");
-        layer.queryFeatures(query).then(function (_ref4) {
-          var features = _ref4.features;
+        layer.queryFeatures(query).then(function (_ref3) {
+          var features = _ref3.features;
 
           if (features.length === 0) {
             return;
@@ -253,30 +194,14 @@ function (_Component) {
 }(Component);
 
 Graphic.propTypes = {
-  layer: PropTypes.object.isRequired,
   geometryJson: PropTypes.object,
   graphicProperties: PropTypes.object,
   // if geometryJson passed, graphicProperties will be ignored
-  bizIdField: PropTypes.string,
-  selectable: PropTypes.bool,
-  selected: PropTypes.bool,
-  editable: PropTypes.bool,
-  editing: PropTypes.bool
+  bizIdField: PropTypes.string
 };
 Graphic.defaultProps = {
   geometryJson: null,
   graphicProperties: null,
-  bizIdField: 'bizId',
-  keyAttribute: KEY_ATTRIBUTE,
-  selectable: true,
-  selected: false,
-  editable: true,
-  editing: false
+  bizIdField: 'bizId'
 };
-Graphic.keyAttribute = KEY_ATTRIBUTE;
-
-Graphic.getKey = function (graphicReactInstance) {
-  return graphicReactInstance.state.graphic.attributes.key;
-};
-
 export default Graphic;
