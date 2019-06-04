@@ -84,6 +84,8 @@ function (_Component) {
         _this2.setState({
           graphic: graphic
         });
+
+        _this2.add(graphic);
       });
     }
   }, {
@@ -93,17 +95,7 @@ function (_Component) {
 
       if (graphic) {
         this.remove(graphic);
-      }
-    }
-  }, {
-    key: "shouldComponentUpdate",
-    value: function shouldComponentUpdate(nextProps, nextState) {
-      // only when graphic is created, this component should be updated
-      // or, this to ensure state.graphic always has value in componentDidUpdate
-      if (!nextState.graphic) {
-        return false;
-      } else {
-        return true;
+        this.highlightHandler = null;
       }
     }
   }, {
@@ -117,42 +109,33 @@ function (_Component) {
           json = _this$props2.json,
           selected = _this$props2.selected,
           selectable = _this$props2.selectable;
-      var graphic = this.state.graphic;
 
       var needSync = function needSync(name) {
         return !prevProps && name in _this3.props || prevProps && prevProps[name] !== _this3.props[name];
-      }; // graphic instance create or update
+      };
 
-
-      if (needSync('json')) {
-        createGraphic({
-          properties: properties,
-          json: json
-        }).then(function (graphic) {
-          _this3.setState({
-            graphic: graphic
+      if (prevGraphic) {
+        if (needSync('properties')) {
+          this.update(prevGraphic, properties);
+        } else if (needSync('json')) {
+          createGraphic({
+            properties: properties,
+            json: json
+          }).then(function (graphic) {
+            _this3.setState({
+              graphic: graphic
+            }, function () {
+              _this3.replace(graphic, prevGraphic);
+            });
           });
-        });
-        return; // this return to ensure new graphic will be do replace in above statement
-      }
-
-      if (needSync('properties')) {
-        this.update(graphic, properties);
-      }
-
-      if (graphic !== prevGraphic) {
-        if (!prevGraphic) {
-          this.add(graphic);
-        } else {
-          this.replace(graphic, prevGraphic);
         }
       } // process selected
 
 
       if (selectable) {
-        if (needSync('selected') && selected) {
-          this.highlight(graphic);
-        } else if (needSync('selected') && !selected) {
+        if (selected && !this.highlightHandler) {
+          this.highlight();
+        } else if (!selected && this.highlightHandler) {
           this.clearHighlight();
         }
       } else {
@@ -186,32 +169,14 @@ function (_Component) {
       });
       this.eventHandlers = [];
     }
-    /**
-     * when graphic instance changes (like replace graphic) but other status like selected not change,
-     * the selected process logic in componentDidUpdate() won't refresh the highlight
-     * in this case, manually sync is required
-     */
-
-  }, {
-    key: "syncGraphicStatus",
-    value: function syncGraphicStatus(graphic) {
-      var _this$props3 = this.props,
-          selectable = _this$props3.selectable,
-          selected = _this$props3.selected;
-
-      if (selectable && selected) {
-        this.clearHighlight();
-        this.highlight(graphic);
-      }
-    }
   }, {
     key: "onClick",
     value: function onClick(e) {
-      var _this$props4 = this.props,
-          onClick = _this$props4.onClick,
-          onSelect = _this$props4.onSelect,
-          selected = _this$props4.selected,
-          selectable = _this$props4.selectable;
+      var _this$props3 = this.props,
+          onClick = _this$props3.onClick,
+          onSelect = _this$props3.onSelect,
+          selected = _this$props3.selected,
+          selectable = _this$props3.selectable;
       var graphic = this.state.graphic;
       onClick && onClick(e);
 
@@ -223,13 +188,13 @@ function (_Component) {
     }
   }, {
     key: "highlight",
-    value: function highlight(graphic) {
+    value: function highlight() {
       var _this5 = this;
 
-      console.log('higlight graphic');
-      var _this$props5 = this.props,
-          view = _this$props5.view,
-          layer = _this$props5.layer;
+      var _this$props4 = this.props,
+          view = _this$props4.view,
+          layer = _this$props4.layer;
+      var graphic = this.state.graphic;
       view.whenLayerView(layer).then(function (layerView) {
         _this5.highlightHandler = utils.highlight(layerView, [graphic]);
       });
@@ -237,12 +202,8 @@ function (_Component) {
   }, {
     key: "clearHighlight",
     value: function clearHighlight() {
-      console.log('clearHighlight graphic');
-
-      if (this.highlightHandler) {
-        this.highlightHandler.remove();
-        this.highlightHandler = null;
-      }
+      this.highlightHandler.remove();
+      this.highlightHandler = null;
     }
   }, {
     key: "add",
@@ -259,7 +220,6 @@ function (_Component) {
       }
 
       this.bindEvents(graphic);
-      this.syncGraphicStatus(graphic); // sync status
     }
   }, {
     key: "remove",
@@ -276,7 +236,6 @@ function (_Component) {
       }
 
       this.unbindEvents();
-      this.clearHighlight();
     }
   }, {
     key: "update",
@@ -293,8 +252,11 @@ function (_Component) {
     key: "replace",
     value: function replace(graphic, oldGraphic) {
       console.log('replace graphic');
-      var layer = this.props.layer;
+      var _this$props5 = this.props,
+          layer = _this$props5.layer,
+          selected = _this$props5.selected;
       this.unbindEvents();
+      selected && this.clearHighlight();
 
       if (layer.type === 'graphics') {
         layer.remove(oldGraphic);
@@ -307,7 +269,7 @@ function (_Component) {
       }
 
       this.bindEvents(graphic);
-      this.syncGraphicStatus(graphic); // sync status
+      selected && this.highlight();
     }
   }, {
     key: "render",
@@ -339,10 +301,7 @@ Graphic.defaultProps = {
   selectable: true,
   selected: false,
   editable: true,
-  editing: false,
-  onClick: null,
-  onSelect: null,
-  onEdit: null
+  editing: false
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 

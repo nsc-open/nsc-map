@@ -45,6 +45,7 @@ class Graphic extends Component {
     const { properties, json } = this.props
     createGraphic({ properties, json }).then(graphic => {
       this.setState({ graphic })
+      this.add(graphic)
     })
   }
 
@@ -52,51 +53,33 @@ class Graphic extends Component {
     const { graphic } = this.state
     if (graphic) {
       this.remove(graphic)
-    }
-  }
-
-  shouldComponentUpdate (nextProps, nextState) {
-    // only when graphic is created, this component should be updated
-    // or, this to ensure state.graphic always has value in componentDidUpdate
-    if (!nextState.graphic) {
-      return false
-    } else {
-      return true
+      this.highlightHandler = null
     }
   }
 
   componentDidUpdate (prevProps, prevState) {
     const { graphic: prevGraphic } = prevState
     const { properties, json, selected, selectable } = this.props
-    const { graphic } = this.state
 
     const needSync = name => (!prevProps && name in this.props) || (prevProps && prevProps[name] !== this.props[name])
-    
-    // graphic instance create or update
-    if (needSync('json')) {
-      createGraphic({ properties, json }).then(graphic => {
-        this.setState({ graphic })
-      })
-      return // this return to ensure new graphic will be do replace in above statement
-    }
 
-    if (needSync('properties')) {
-      this.update(graphic, properties)
-    }
-
-    if (graphic !== prevGraphic) {
-      if (!prevGraphic) {
-        this.add(graphic)
-      } else {
-        this.replace(graphic, prevGraphic)
+    if (prevGraphic) {
+      if (needSync('properties')) {
+        this.update(prevGraphic, properties)
+      } else if (needSync('json')) {
+        createGraphic({ properties, json }).then(graphic => {
+          this.setState({ graphic }, () => {
+            this.replace(graphic, prevGraphic)
+          })
+        })
       }
     }
 
     // process selected
     if (selectable) {
-      if (needSync('selected') && selected) {
-        this.highlight(graphic)
-      } else if (needSync('selected') && !selected) {
+      if (selected && !this.highlightHandler) {
+        this.highlight()
+      } else if (!selected && this.highlightHandler) {
         this.clearHighlight()
       }
     } else {
@@ -124,19 +107,6 @@ class Graphic extends Component {
     this.eventHandlers = []
   }
 
-  /**
-   * when graphic instance changes (like replace graphic) but other status like selected not change,
-   * the selected process logic in componentDidUpdate() won't refresh the highlight
-   * in this case, manually sync is required
-   */
-  syncGraphicStatus (graphic) {
-    const { selectable, selected } = this.props
-    if (selectable && selected) {
-      this.clearHighlight()
-      this.highlight(graphic)
-    }
-  }
-
   onClick (e) {
     const { onClick, onSelect, selected, selectable } = this.props
     const { graphic } = this.state
@@ -150,20 +120,17 @@ class Graphic extends Component {
     onSelect && onSelect(e, this)
   }
 
-  highlight (graphic) {
-    console.log('higlight graphic')
+  highlight () {
     const { view, layer } = this.props
+    const { graphic } = this.state
     view.whenLayerView(layer).then(layerView => {
       this.highlightHandler = utils.highlight(layerView, [graphic])
     })
   }
 
   clearHighlight () {
-    console.log('clearHighlight graphic')
-    if (this.highlightHandler) {
-      this.highlightHandler.remove()
-      this.highlightHandler = null
-    }
+    this.highlightHandler.remove()
+    this.highlightHandler = null
   }
 
   add (graphic) {
@@ -178,7 +145,6 @@ class Graphic extends Component {
     }
 
     this.bindEvents(graphic)
-    this.syncGraphicStatus(graphic) // sync status
   }
 
   remove (graphic) {
@@ -193,7 +159,6 @@ class Graphic extends Component {
     }
 
     this.unbindEvents()
-    this.clearHighlight()
   }
 
   update (graphic, properties) {
@@ -207,8 +172,10 @@ class Graphic extends Component {
    */
   replace (graphic, oldGraphic) {
     console.log('replace graphic')
-    const { layer } = this.props
+    const { layer, selected } = this.props
+    
     this.unbindEvents()
+    selected && this.clearHighlight()
 
     if (layer.type === 'graphics') {
       layer.remove(oldGraphic)
@@ -221,7 +188,7 @@ class Graphic extends Component {
     }
 
     this.bindEvents(graphic)
-    this.syncGraphicStatus(graphic) // sync status
+    selected && this.highlight()
   }
 
   render () {
@@ -241,9 +208,7 @@ Graphic.propTypes = {
   selected: PropTypes.bool,
 
   editable: PropTypes.bool,
-  editing: PropTypes.bool,
-
-  
+  editing: PropTypes.bool
 }
 
 Graphic.defaultProps = {
@@ -254,11 +219,7 @@ Graphic.defaultProps = {
   selected: false,
 
   editable: true,
-  editing: false,
-
-  onClick: null,
-  onSelect: null,
-  onEdit: null
+  editing: false
 }
 
 
