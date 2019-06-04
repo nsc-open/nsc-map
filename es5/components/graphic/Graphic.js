@@ -19,35 +19,29 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { loadModules } from 'esri-module-loader';
-import { highlight } from './highlight';
+import * as utils from './utils';
 var KEY_ATTRIBUTE = 'key';
 
 var createGraphic = function createGraphic(_ref) {
-  var graphicProperties = _ref.graphicProperties,
-      geometryJson = _ref.geometryJson;
+  var properties = _ref.properties,
+      json = _ref.json;
   return loadModules(['esri/Graphic']).then(function (_ref2) {
     var Graphic = _ref2.Graphic;
-    var graphic;
 
-    if (geometryJson) {
-      // notice that: 
-      // symbol.type like `esriXXX` can only be handled by fromJSON
-      // symbol.type like 'simple-line' can only be handled by new Graphic
-      graphic = Graphic.fromJSON(geometryJson);
-    } else if (graphicProperties) {
-      graphic = new Graphic(graphicProperties);
+    if (properties) {
+      return new Graphic(properties);
+    } else if (json) {
+      return Graphic.fromJSON(json);
     } else {
-      throw new Error('geometryJson and graphicProperties cannot to be empty at the same time');
+      throw new Error('properties and json cannot to be empty at the same time');
     }
-
-    return graphic;
   });
 };
 /**
  * usage:
  *  <GraphicsLayer>
-      <Graphic key="" geometryJson={} />
-      <Graphic key="" graphicProperties={} />
+      <Graphic key="" json={} />
+      <Graphic key="" properties={} />
     </GraphicsLayer>
  */
 
@@ -69,82 +63,93 @@ function (_Component) {
     _this.state = {
       graphic: null
     };
-    _this.highlight = null;
+    _this.highlightHandler = null;
+    _this.eventHandlers = [];
     return _this;
   }
 
   _createClass(Graphic, [{
-    key: "componentWillMount",
-    value: function componentWillMount() {
+    key: "componentDidMount",
+    value: function componentDidMount() {
       var _this2 = this;
 
       // load and add to graphicsLayer/featureLayer
       var _this$props = this.props,
-          graphicProperties = _this$props.graphicProperties,
-          geometryJson = _this$props.geometryJson;
+          properties = _this$props.properties,
+          json = _this$props.json;
       createGraphic({
-        graphicProperties: graphicProperties,
-        geometryJson: geometryJson
+        properties: properties,
+        json: json
       }).then(function (graphic) {
-        _this2.add(graphic);
-
         _this2.setState({
           graphic: graphic
         });
+
+        _this2.add(graphic);
       });
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      this.remove(this.state.graphic);
+      var graphic = this.state.graphic;
+
+      if (graphic) {
+        this.remove(graphic);
+        this.highlightHandler = null;
+      }
     }
   }, {
     key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
+    value: function componentDidUpdate(prevProps, prevState) {
       var _this3 = this;
 
-      var prevGraphicProperties = prevProps.graphicProperties,
-          prevGeometryJson = prevProps.geometryJson;
+      var prevGraphic = prevState.graphic;
       var _this$props2 = this.props,
-          mapView = _this$props2.mapView,
-          layer = _this$props2.layer,
-          graphicProperties = _this$props2.graphicProperties,
-          geometryJson = _this$props2.geometryJson,
-          selected = _this$props2.selected;
-      var graphic = this.state.graphic;
+          properties = _this$props2.properties,
+          json = _this$props2.json,
+          selected = _this$props2.selected,
+          selectable = _this$props2.selectable;
 
-      if (graphic && (prevGraphicProperties !== graphicProperties || prevGeometryJson !== geometryJson)) {
-        createGraphic({
-          graphicProperties: graphicProperties,
-          geometryJson: geometryJson
-        }).then(function (graphic) {
-          _this3.update(graphic, _this3.state.graphic);
+      var needSync = function needSync(name) {
+        return !prevProps && name in _this3.props || prevProps && prevProps[name] !== _this3.props[name];
+      };
 
-          _this3.setState({
-            graphic: graphic
+      if (prevGraphic) {
+        if (needSync('properties')) {
+          this.update(prevGraphic, properties);
+        } else if (needSync('json')) {
+          createGraphic({
+            properties: properties,
+            json: json
+          }).then(function (graphic) {
+            _this3.setState({
+              graphic: graphic
+            }, function () {
+              _this3.replace(graphic, prevGraphic);
+            });
           });
-        });
+        }
       } // process selected
 
 
-      if (graphic && selected) {
-        mapView.whenLayerView(layer).then(function (layerView) {
-          _this3.highlight = highlight(layerView, [graphic]);
-        });
-      } else if (graphic && !selected && this.highlight) {
-        this.highlight.remove();
-        this.highlight = null;
+      if (selectable) {
+        if (selected && !this.highlightHandler) {
+          this.highlight();
+        } else if (!selected && this.highlightHandler) {
+          this.clearHighlight();
+        }
+      } else {
+        this.clearHighlight();
       }
     }
   }, {
     key: "bindEvents",
-    value: function bindEvents() {
+    value: function bindEvents(graphic) {
       var _this4 = this;
 
-      var mapView = this.props.mapView;
-      var graphic = this.state.graphic;
-      this.handlers = [mapView.on('click', function (e) {
-        mapView.hitTest(e).then(function (_ref3) {
+      var view = this.props.view;
+      this.eventHandlers = [view.on('click', function (e) {
+        view.hitTest(e).then(function (_ref3) {
           var results = _ref3.results;
           var clicked = results.find(function (r) {
             return r.graphic === graphic;
@@ -159,18 +164,21 @@ function (_Component) {
   }, {
     key: "unbindEvents",
     value: function unbindEvents() {
-      this.handlers.forEach(function (h) {
+      this.eventHandlers.forEach(function (h) {
         return h.remove();
       });
+      this.eventHandlers = [];
     }
   }, {
     key: "onClick",
     value: function onClick(e) {
       var _this$props3 = this.props,
+          onClick = _this$props3.onClick,
           onSelect = _this$props3.onSelect,
           selected = _this$props3.selected,
           selectable = _this$props3.selectable;
       var graphic = this.state.graphic;
+      onClick && onClick(e);
 
       if (!selectable) {
         return;
@@ -179,8 +187,28 @@ function (_Component) {
       onSelect && onSelect(e, this);
     }
   }, {
+    key: "highlight",
+    value: function highlight() {
+      var _this5 = this;
+
+      var _this$props4 = this.props,
+          view = _this$props4.view,
+          layer = _this$props4.layer;
+      var graphic = this.state.graphic;
+      view.whenLayerView(layer).then(function (layerView) {
+        _this5.highlightHandler = utils.highlight(layerView, [graphic]);
+      });
+    }
+  }, {
+    key: "clearHighlight",
+    value: function clearHighlight() {
+      this.highlightHandler.remove();
+      this.highlightHandler = null;
+    }
+  }, {
     key: "add",
     value: function add(graphic) {
+      console.log('add graphic');
       var layer = this.props.layer;
 
       if (layer.type === 'graphics') {
@@ -190,10 +218,13 @@ function (_Component) {
           addFeatures: [graphic]
         });
       }
+
+      this.bindEvents(graphic);
     }
   }, {
     key: "remove",
     value: function remove(graphic) {
+      console.log('remove graphic');
       var layer = this.props.layer;
 
       if (layer.type === 'graphics') {
@@ -203,48 +234,47 @@ function (_Component) {
           deleteFeatures: [graphic]
         });
       }
+
+      this.unbindEvents();
     }
   }, {
     key: "update",
-    value: function update(graphic, oldGraphic) {
-      var _this$props4 = this.props,
-          layer = _this$props4.layer,
-          bizIdField = _this$props4.bizIdField;
-      var bizId = graphic.attributes[bizIdField];
+    value: function update(graphic, properties) {
+      console.log('update graphic');
+      graphic.set(properties);
+    }
+    /**
+     * remove old graphic and add a new one
+     * events will be binded again
+     */
+
+  }, {
+    key: "replace",
+    value: function replace(graphic, oldGraphic) {
+      console.log('replace graphic');
+      var _this$props5 = this.props,
+          layer = _this$props5.layer,
+          selected = _this$props5.selected;
+      this.unbindEvents();
+      selected && this.clearHighlight();
 
       if (layer.type === 'graphics') {
-        // find by key
-        // remove old one
-        // add new one
         layer.remove(oldGraphic);
         layer.add(graphic);
       } else if (layer.type === 'feature') {
-        /* layer.applyEdits({
-          updateFeatures: [graphic]
-        }) */
-        // objectId of feature will change each time the graphic added into the featureLayer
-        // so here we need to find the objectId by business id
-        // and then replace the objectId then do the update
-        var query = layer.createQuery();
-        query.where += " AND ".concat(bizIdField, " = '").concat(bizId, "'");
-        layer.queryFeatures(query).then(function (_ref4) {
-          var features = _ref4.features;
-
-          if (features.length === 0) {
-            return;
-          }
-
-          var objectId = features[0].attributes[layer.objectIdField];
-          graphic.attributes[layer.objectIdField] = objectId;
-          layer.applyEdits({
-            updateFeatures: [graphic]
-          });
+        layer.applyEdits({
+          deleteFeatures: [oldGraphic],
+          addFeatures: [graphic]
         });
       }
+
+      this.bindEvents(graphic);
+      selected && this.highlight();
     }
   }, {
     key: "render",
     value: function render() {
+      console.log('Graphic.render', this.props);
       return null;
     }
   }]);
@@ -253,21 +283,21 @@ function (_Component) {
 }(Component);
 
 Graphic.propTypes = {
+  // esri/Graphic constructor related props
+  view: PropTypes.object.isRequired,
   layer: PropTypes.object.isRequired,
-  geometryJson: PropTypes.object,
-  graphicProperties: PropTypes.object,
-  // if geometryJson passed, graphicProperties will be ignored
-  bizIdField: PropTypes.string,
+  properties: PropTypes.object,
+  // properties has higher priority than json when constructing a graphic
+  json: PropTypes.object,
+  // 
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
   editable: PropTypes.bool,
   editing: PropTypes.bool
 };
 Graphic.defaultProps = {
-  geometryJson: null,
-  graphicProperties: null,
-  bizIdField: 'bizId',
-  keyAttribute: KEY_ATTRIBUTE,
+  properties: null,
+  json: null,
   selectable: true,
   selected: false,
   editable: true,
@@ -275,8 +305,12 @@ Graphic.defaultProps = {
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
-Graphic.getKey = function (graphicReactInstance) {
-  return graphicReactInstance.state.graphic.attributes.key;
+Graphic.getKey = function (props) {
+  var _ref4 = props.properties || props.json,
+      _ref4$attributes = _ref4.attributes,
+      attributes = _ref4$attributes === void 0 ? {} : _ref4$attributes;
+
+  return attributes.key;
 };
 
 export default Graphic;

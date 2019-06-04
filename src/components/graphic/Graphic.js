@@ -1,34 +1,29 @@
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 import { loadModules } from 'esri-module-loader'
-import { highlight } from './highlight'
+import * as utils from './utils'
 
 const KEY_ATTRIBUTE = 'key'
 
-const createGraphic = ({ graphicProperties, geometryJson }) => {
+const createGraphic = ({ properties, json }) => {
   return loadModules([
     'esri/Graphic'
   ]).then(({ Graphic }) => {
-    let graphic
-    if (geometryJson) {
-      // notice that: 
-      // symbol.type like `esriXXX` can only be handled by fromJSON
-      // symbol.type like 'simple-line' can only be handled by new Graphic
-      graphic = Graphic.fromJSON(geometryJson)
-    } else if (graphicProperties) {
-      graphic = new Graphic(graphicProperties)
+    if (properties) {
+      return new Graphic(properties)
+    } else if (json) {
+      return Graphic.fromJSON(json)
     } else {
-      throw new Error('geometryJson and graphicProperties cannot to be empty at the same time')
+      throw new Error('properties and json cannot to be empty at the same time')
     }
-    return graphic
   })
 }
 
 /**
  * usage:
  *  <GraphicsLayer>
-      <Graphic key="" geometryJson={} />
-      <Graphic key="" graphicProperties={} />
+      <Graphic key="" json={} />
+      <Graphic key="" properties={} />
     </GraphicsLayer>
  */
 class Graphic extends Component {
@@ -41,60 +36,64 @@ class Graphic extends Component {
       graphic: null
     }
 
-    this.highlight = null
+    this.highlightHandler = null
+    this.eventHandlers = []
   }
 
-  componentWillMount () {
+  componentDidMount () {
     // load and add to graphicsLayer/featureLayer
-    const { graphicProperties, geometryJson } = this.props
-    createGraphic({
-      graphicProperties, geometryJson
-    }).then(graphic => {
-      this.add(graphic)
+    const { properties, json } = this.props
+    createGraphic({ properties, json }).then(graphic => {
       this.setState({ graphic })
+      this.add(graphic)
     })
   }
 
   componentWillUnmount () {
-    this.remove(this.state.graphic)
+    const { graphic } = this.state
+    if (graphic) {
+      this.remove(graphic)
+      this.highlightHandler = null
+    }
   }
 
-  componentDidUpdate (prevProps) {
-    const { graphicProperties: prevGraphicProperties, geometryJson: prevGeometryJson } = prevProps
-    const { mapView, layer, graphicProperties, geometryJson, selected } = this.props
-    const { graphic } = this.state
-    if (
-      graphic && (
-        prevGraphicProperties !== graphicProperties ||
-        prevGeometryJson !== geometryJson
-      )
-    ) {
-      createGraphic({
-        graphicProperties, geometryJson
-      }).then(graphic => {
-        this.update(graphic, this.state.graphic)
-        this.setState({ graphic })
-      })
+  componentDidUpdate (prevProps, prevState) {
+    const { graphic: prevGraphic } = prevState
+    const { properties, json, selected, selectable } = this.props
+
+    const needSync = name => (!prevProps && name in this.props) || (prevProps && prevProps[name] !== this.props[name])
+
+    if (prevGraphic) {
+      if (needSync('properties')) {
+        this.update(prevGraphic, properties)
+      } else if (needSync('json')) {
+        createGraphic({ properties, json }).then(graphic => {
+          this.setState({ graphic }, () => {
+            this.replace(graphic, prevGraphic)
+          })
+        })
+      }
     }
 
     // process selected
-    if (graphic && selected) {
-      mapView.whenLayerView(layer).then(layerView => {
-        this.highlight = highlight(layerView, [graphic])
-      })
-    } else if (graphic && !selected && this.highlight) {
-      this.highlight.remove()
-      this.highlight = null
+    if (selectable) {
+      if (selected && !this.highlightHandler) {
+        this.highlight()
+      } else if (!selected && this.highlightHandler) {
+        this.clearHighlight()
+      }
+    } else {
+      this.clearHighlight()
     }
+    
   }
 
-  bindEvents () {
-    const { mapView } = this.props
-    const { graphic } = this.state
-    this.handlers = [
-      mapView.on('click', e => {
-        mapView.hitTest(e).then(({ results }) => {
-          const clicked = results.find(r => r.graphic === graphic)
+  bindEvents (graphic) {
+    const { view } = this.props
+    this.eventHandlers = [
+      view.on('click', e => {
+        view.hitTest(e).then(({ results }) => {
+          const clicked = results.find(r => r.graphic === graphic)          
           if (clicked) {
             this.onClick(e)
           }
@@ -104,12 +103,16 @@ class Graphic extends Component {
   }
 
   unbindEvents () {
-    this.handlers.forEach(h => h.remove())
+    this.eventHandlers.forEach(h => h.remove())
+    this.eventHandlers = []
   }
 
   onClick (e) {
-    const { onSelect, selected, selectable } = this.props
+    const { onClick, onSelect, selected, selectable } = this.props
     const { graphic } = this.state
+
+    onClick && onClick(e)
+
     if (!selectable) {
       return
     }
@@ -117,7 +120,21 @@ class Graphic extends Component {
     onSelect && onSelect(e, this)
   }
 
+  highlight () {
+    const { view, layer } = this.props
+    const { graphic } = this.state
+    view.whenLayerView(layer).then(layerView => {
+      this.highlightHandler = utils.highlight(layerView, [graphic])
+    })
+  }
+
+  clearHighlight () {
+    this.highlightHandler.remove()
+    this.highlightHandler = null
+  }
+
   add (graphic) {
+    console.log('add graphic')
     const { layer } = this.props
     if (layer.type === 'graphics') {
       layer.add(graphic)
@@ -126,9 +143,12 @@ class Graphic extends Component {
         addFeatures: [graphic]
       })
     }
+
+    this.bindEvents(graphic)
   }
 
   remove (graphic) {
+    console.log('remove graphic')
     const { layer } = this.props
     if (layer.type === 'graphics') {
       layer.remove(graphic)
@@ -137,53 +157,52 @@ class Graphic extends Component {
         deleteFeatures: [graphic]
       })
     }
+
+    this.unbindEvents()
   }
 
-  update (graphic, oldGraphic) {
-    const { layer, bizIdField } = this.props
-    const bizId = graphic.attributes[bizIdField]
+  update (graphic, properties) {
+    console.log('update graphic')
+    graphic.set(properties)
+  }
+
+  /**
+   * remove old graphic and add a new one
+   * events will be binded again
+   */
+  replace (graphic, oldGraphic) {
+    console.log('replace graphic')
+    const { layer, selected } = this.props
+    
+    this.unbindEvents()
+    selected && this.clearHighlight()
 
     if (layer.type === 'graphics') {
-      // find by key
-      // remove old one
-      // add new one
       layer.remove(oldGraphic)
       layer.add(graphic)
     } else if (layer.type === 'feature') {
-      /* layer.applyEdits({
-        updateFeatures: [graphic]
-      }) */
-
-      // objectId of feature will change each time the graphic added into the featureLayer
-      // so here we need to find the objectId by business id
-      // and then replace the objectId then do the update
-      const query = layer.createQuery()
-      query.where += ` AND ${bizIdField} = '${bizId}'`
-      layer.queryFeatures(query).then(({ features }) => {
-        if (features.length === 0) {
-          return
-        }
-
-        const objectId = features[0].attributes[layer.objectIdField]
-        graphic.attributes[layer.objectIdField] = objectId
-
-        layer.applyEdits({
-          updateFeatures: [graphic]
-        })
+      layer.applyEdits({
+        deleteFeatures: [oldGraphic],
+        addFeatures: [graphic]
       })
     }
+
+    this.bindEvents(graphic)
+    selected && this.highlight()
   }
 
   render () {
+    console.log('Graphic.render', this.props)
     return null
   }
 }
 
 Graphic.propTypes = {
+  // esri/Graphic constructor related props
+  view: PropTypes.object.isRequired,
   layer: PropTypes.object.isRequired,
-  geometryJson: PropTypes.object,
-  graphicProperties: PropTypes.object, // if geometryJson passed, graphicProperties will be ignored
-  bizIdField: PropTypes.string,
+  properties: PropTypes.object, // properties has higher priority than json when constructing a graphic
+  json: PropTypes.object, // 
 
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
@@ -193,10 +212,8 @@ Graphic.propTypes = {
 }
 
 Graphic.defaultProps = {
-  geometryJson: null,
-  graphicProperties: null,
-  bizIdField: 'bizId',
-  keyAttribute: KEY_ATTRIBUTE,
+  properties: null,
+  json: null,
 
   selectable: true,
   selected: false,
@@ -207,8 +224,9 @@ Graphic.defaultProps = {
 
 
 Graphic.keyAttribute = KEY_ATTRIBUTE
-Graphic.getKey = graphicReactInstance => {
-  return graphicReactInstance.state.graphic.attributes.key
+Graphic.getKey = props => {
+  const { attributes = {} } = props.properties || props.json
+  return attributes.key
 }
 
 export default Graphic

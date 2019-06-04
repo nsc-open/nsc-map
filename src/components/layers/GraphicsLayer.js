@@ -1,6 +1,7 @@
 import React, { Component, Children } from 'react'
 import PropTypes from 'prop-types'
 import { loadModules } from 'esri-module-loader'
+import Graphic from '../graphic/Graphic'
 
 /**
  * usage:
@@ -14,7 +15,9 @@ class GraphicsLayer extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      layer: null
+      layer: null,
+      selectedKeys: [],
+      editingKeys: []
     }
   }
 
@@ -29,16 +32,16 @@ class GraphicsLayer extends Component {
     // ================ selectedKeys =================
     if (props.selectable) {
       if (needSync('selectedKeys')) {
-        newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
+        //newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
       } else if (!prevProps && props.defaultSelectedKeys) {
-        newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
+        //newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
       }
     }
 
     return newState
   }
 
-  componentWillMount () {
+  componentDidMount () {
     loadModules([
       'esri/layers/GraphicsLayer'
     ]).then(({ GraphicsLayer }) => {
@@ -65,21 +68,26 @@ class GraphicsLayer extends Component {
     }
   }
 
-  render () {
-    console.log('GraphicsLayer render')
-    const { children = [] } = this.props
-    const { layer, selectedKeys } = this.state
+  graphicClickHandler = e => {
+    console.log('click graphic', e)
+  }
 
+  render () {
+    console.log('GraphicsLayer render', this)
+    const { view, children = [], selectedKeys } = this.props
+    const { layer, editingKeys } = this.state
+    
     if (layer) {
       return Children.map(children, child => {
-        const graphicKey = Graphic.getKey(child)
+        const graphicKey = Graphic.getKey(child.props)
         return React.cloneElement(child, {
+          view,
           layer,
           selected: selectedKeys.includes(graphicKey),
           editing: editingKeys.includes(graphicKey),
           selectable: true,
           editable: true,
-          
+          onClick: this.graphicClickHandler
         })
       })
     } else {
@@ -90,7 +98,7 @@ class GraphicsLayer extends Component {
 
 GraphicsLayer.propTypes = {
   map: PropTypes.object.isRequired,
-  mapView: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   properties: PropTypes.object,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.element),
@@ -108,7 +116,6 @@ GraphicsLayer.propTypes = {
   onLoad: PropTypes.func,
   onSelect: PropTypes.func,
   onHover: PropTypes.func
-
 }
 
 GraphicsLayer.defaultProps = {

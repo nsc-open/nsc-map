@@ -8,17 +8,20 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 import { loadModules } from 'esri-module-loader';
+import Graphic from '../graphic/Graphic';
 /**
  * usage:
  *  <GraphicsLayer selectedKeys={[]}>
@@ -38,15 +41,22 @@ function (_Component) {
     _classCallCheck(this, GraphicsLayer);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphicsLayer).call(this, props));
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicClickHandler", function (e) {
+      console.log('click graphic', e);
+    });
+
     _this.state = {
-      layer: null
+      layer: null,
+      selectedKeys: [],
+      editingKeys: []
     };
     return _this;
   }
 
   _createClass(GraphicsLayer, [{
-    key: "componentWillMount",
-    value: function componentWillMount() {
+    key: "componentDidMount",
+    value: function componentDidMount() {
       var _this2 = this;
 
       loadModules(['esri/layers/GraphicsLayer']).then(function (_ref) {
@@ -82,22 +92,29 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      console.log('GraphicsLayer render');
-      var _this$props$children = this.props.children,
-          children = _this$props$children === void 0 ? [] : _this$props$children;
+      var _this3 = this;
+
+      console.log('GraphicsLayer render', this);
+      var _this$props = this.props,
+          view = _this$props.view,
+          _this$props$children = _this$props.children,
+          children = _this$props$children === void 0 ? [] : _this$props$children,
+          selectedKeys = _this$props.selectedKeys;
       var _this$state = this.state,
           layer = _this$state.layer,
-          selectedKeys = _this$state.selectedKeys;
+          editingKeys = _this$state.editingKeys;
 
       if (layer) {
         return Children.map(children, function (child) {
-          var graphicKey = Graphic.getKey(child);
+          var graphicKey = Graphic.getKey(child.props);
           return React.cloneElement(child, {
+            view: view,
             layer: layer,
             selected: selectedKeys.includes(graphicKey),
             editing: editingKeys.includes(graphicKey),
             selectable: true,
-            editable: true
+            editable: true,
+            onClick: _this3.graphicClickHandler
           });
         });
       } else {
@@ -118,10 +135,8 @@ function (_Component) {
 
 
       if (props.selectable) {
-        if (needSync('selectedKeys')) {
-          newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
-        } else if (!prevProps && props.defaultSelectedKeys) {
-          newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
+        if (needSync('selectedKeys')) {//newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
+        } else if (!prevProps && props.defaultSelectedKeys) {//newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
         }
       }
 
@@ -134,7 +149,7 @@ function (_Component) {
 
 GraphicsLayer.propTypes = {
   map: PropTypes.object.isRequired,
-  mapView: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   properties: PropTypes.object,
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.element), PropTypes.element]),
   selectable: PropTypes.bool.isRequired,
