@@ -25,7 +25,7 @@ export default class extends Component {
 
   componentDidMount () {
     window.graphicsLayer = this
-    // return
+    return
     let i = 0
     setInterval(() => {
       console.log('---------------------')

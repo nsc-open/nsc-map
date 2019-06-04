@@ -1,5 +1,13 @@
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -42,8 +50,24 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphicsLayer).call(this, props));
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicClickHandler", function (e) {
-      console.log('click graphic', e);
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicSelectHandler", function (e, _ref) {
+      var key = _ref.key,
+          selected = _ref.selected,
+          graphic = _ref.graphic;
+      console.log('select graphic', key, graphic, e);
+      var selectedKeys = _this.state.selectedKeys;
+
+      if (selected) {
+        !selectedKeys.includes(key) && _this.setState({
+          selectedKeys: [].concat(_toConsumableArray(selectedKeys), [key])
+        });
+      } else {
+        _this.setState({
+          selectedKeys: selectedKeys.filter(function (k) {
+            return k !== key;
+          })
+        });
+      }
     });
 
     _this.state = {
@@ -59,8 +83,8 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      loadModules(['esri/layers/GraphicsLayer']).then(function (_ref) {
-        var GraphicsLayer = _ref.GraphicsLayer;
+      loadModules(['esri/layers/GraphicsLayer']).then(function (_ref2) {
+        var GraphicsLayer = _ref2.GraphicsLayer;
         var _this2$props = _this2.props,
             map = _this2$props.map,
             onLoad = _this2$props.onLoad;
@@ -98,11 +122,11 @@ function (_Component) {
       var _this$props = this.props,
           view = _this$props.view,
           _this$props$children = _this$props.children,
-          children = _this$props$children === void 0 ? [] : _this$props$children,
-          selectedKeys = _this$props.selectedKeys;
+          children = _this$props$children === void 0 ? [] : _this$props$children;
       var _this$state = this.state,
           layer = _this$state.layer,
-          editingKeys = _this$state.editingKeys;
+          editingKeys = _this$state.editingKeys,
+          selectedKeys = _this$state.selectedKeys;
 
       if (layer) {
         return Children.map(children, function (child) {
@@ -114,7 +138,7 @@ function (_Component) {
             editing: editingKeys.includes(graphicKey),
             selectable: true,
             editable: true,
-            onClick: _this3.graphicClickHandler
+            onSelect: _this3.graphicSelectHandler
           });
         });
       } else {

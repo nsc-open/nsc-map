@@ -68,14 +68,21 @@ class GraphicsLayer extends Component {
     }
   }
 
-  graphicClickHandler = e => {
-    console.log('click graphic', e)
+  graphicSelectHandler = (e, { key, selected, graphic }) => {
+    console.log('select graphic', key, graphic, e)
+    const { selectedKeys } = this.state
+    if (selected) {
+      !selectedKeys.includes(key) && this.setState({ selectedKeys: [...selectedKeys, key] })
+    } else {
+      this.setState({ selectedKeys: selectedKeys.filter(k => k !== key) })
+    }
+    
   }
 
   render () {
     console.log('GraphicsLayer render', this)
-    const { view, children = [], selectedKeys } = this.props
-    const { layer, editingKeys } = this.state
+    const { view, children = [],  } = this.props
+    const { layer, editingKeys, selectedKeys } = this.state
     
     if (layer) {
       return Children.map(children, child => {
@@ -87,7 +94,7 @@ class GraphicsLayer extends Component {
           editing: editingKeys.includes(graphicKey),
           selectable: true,
           editable: true,
-          onClick: this.graphicClickHandler
+          onSelect: this.graphicSelectHandler
         })
       })
     } else {

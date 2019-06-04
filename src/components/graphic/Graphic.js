@@ -110,10 +110,8 @@ class Graphic extends Component {
     this.eventHandlers = [
       view.on('click', e => {
         view.hitTest(e).then(({ results }) => {
-          const clicked = results.find(r => r.graphic === graphic)          
-          if (clicked) {
-            this.onClick(e)
-          }
+          const hit = results.find(r => r.graphic === graphic)
+          this.onClick(e, hit)
         })
       })
     ]
@@ -137,17 +135,14 @@ class Graphic extends Component {
     }
   }
 
-  onClick (e) {
-    const { onClick, onSelect, selected, selectable } = this.props
+  onClick (e, hit) {
+    const { onSelect, selectable } = this.props
     const { graphic } = this.state
+    const key = graphic.attributes[Graphic.keyAttribute]
 
-    onClick && onClick(e)
-
-    if (!selectable) {
-      return
+    if (selectable) {
+      onSelect && onSelect(e, { key, graphic, selected: hit ? true : false })
     }
-
-    onSelect && onSelect(e, this)
   }
 
   highlight (graphic) {
@@ -256,8 +251,7 @@ Graphic.defaultProps = {
   editable: true,
   editing: false,
 
-  onClick: null,
-  onSelect: null,
+  onSelect: (e, graphic) => {},
   onEdit: null
 }
 

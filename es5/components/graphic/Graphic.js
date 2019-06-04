@@ -168,13 +168,11 @@ function (_Component) {
       this.eventHandlers = [view.on('click', function (e) {
         view.hitTest(e).then(function (_ref3) {
           var results = _ref3.results;
-          var clicked = results.find(function (r) {
+          var hit = results.find(function (r) {
             return r.graphic === graphic;
           });
 
-          if (clicked) {
-            _this4.onClick(e);
-          }
+          _this4.onClick(e, hit);
         });
       })];
     }
@@ -206,20 +204,20 @@ function (_Component) {
     }
   }, {
     key: "onClick",
-    value: function onClick(e) {
+    value: function onClick(e, hit) {
       var _this$props4 = this.props,
-          onClick = _this$props4.onClick,
           onSelect = _this$props4.onSelect,
-          selected = _this$props4.selected,
           selectable = _this$props4.selectable;
       var graphic = this.state.graphic;
-      onClick && onClick(e);
+      var key = graphic.attributes[Graphic.keyAttribute];
 
-      if (!selectable) {
-        return;
+      if (selectable) {
+        onSelect && onSelect(e, {
+          key: key,
+          graphic: graphic,
+          selected: hit ? true : false
+        });
       }
-
-      onSelect && onSelect(e, this);
     }
   }, {
     key: "highlight",
@@ -340,8 +338,7 @@ Graphic.defaultProps = {
   selected: false,
   editable: true,
   editing: false,
-  onClick: null,
-  onSelect: null,
+  onSelect: function onSelect(e, graphic) {},
   onEdit: null
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
