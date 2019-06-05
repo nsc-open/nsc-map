@@ -68,6 +68,26 @@ class GraphicsLayer extends Component {
     }
   }
 
+  /**
+   * Only update the value which is not in props
+   */
+  setUncontrolledState = (state) => {
+    let needSync = false
+    const newState = {}
+
+    Object.keys(state).forEach(name => {
+      if (name in this.props) {
+        return
+      }
+      needSync = true
+      newState[name] = state[name]
+    })
+
+    if (needSync) {
+      this.setState(newState)
+    }
+  }
+
   graphicSelectHandler = (e, { key, selected, graphic }) => {
     console.log('select graphic', key, graphic, e)
     const { selectedKeys } = this.state

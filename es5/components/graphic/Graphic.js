@@ -164,7 +164,10 @@ function (_Component) {
     value: function bindEvents(graphic) {
       var _this4 = this;
 
-      var view = this.props.view;
+      var _this$props3 = this.props,
+          view = _this$props3.view,
+          hoverable = _this$props3.hoverable,
+          hoverCursor = _this$props3.hoverCursor;
       this.eventHandlers = [view.on('click', function (e) {
         view.hitTest(e).then(function (_ref3) {
           var results = _ref3.results;
@@ -173,6 +176,20 @@ function (_Component) {
           });
 
           _this4.onClick(e, hit);
+        });
+      }), view.on('pointer-move', function (e) {
+        if (!hoverable) {
+          return;
+        }
+
+        view.cursor = 'auto';
+        view.hitTest(e).then(function (_ref4) {
+          var results = _ref4.results;
+          results.forEach(function (r) {
+            if (r.graphic === graphic) {
+              view.cursor = hoverCursor || 'pointer';
+            }
+          });
         });
       })];
     }
@@ -193,9 +210,9 @@ function (_Component) {
   }, {
     key: "syncGraphicStatus",
     value: function syncGraphicStatus(graphic) {
-      var _this$props3 = this.props,
-          selectable = _this$props3.selectable,
-          selected = _this$props3.selected;
+      var _this$props4 = this.props,
+          selectable = _this$props4.selectable,
+          selected = _this$props4.selected;
 
       if (selectable && selected) {
         this.clearHighlight();
@@ -205,9 +222,9 @@ function (_Component) {
   }, {
     key: "onClick",
     value: function onClick(e, hit) {
-      var _this$props4 = this.props,
-          onSelect = _this$props4.onSelect,
-          selectable = _this$props4.selectable;
+      var _this$props5 = this.props,
+          onSelect = _this$props5.onSelect,
+          selectable = _this$props5.selectable;
       var graphic = this.state.graphic;
       var key = graphic.attributes[Graphic.keyAttribute];
 
@@ -225,9 +242,9 @@ function (_Component) {
       var _this5 = this;
 
       console.log('higlight graphic');
-      var _this$props5 = this.props,
-          view = _this$props5.view,
-          layer = _this$props5.layer;
+      var _this$props6 = this.props,
+          view = _this$props6.view,
+          layer = _this$props6.layer;
       view.whenLayerView(layer).then(function (layerView) {
         _this5.highlightHandler = utils.highlight(layerView, [graphic]);
       });
@@ -326,6 +343,8 @@ Graphic.propTypes = {
   // properties has higher priority than json when constructing a graphic
   json: PropTypes.object,
   // 
+  hoverable: PropTypes.bool,
+  hoverCursor: PropTypes.string,
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
   editable: PropTypes.bool,
@@ -334,6 +353,8 @@ Graphic.propTypes = {
 Graphic.defaultProps = {
   properties: null,
   json: null,
+  hoverable: true,
+  hoverCursor: 'pointer',
   selectable: true,
   selected: false,
   editable: true,
@@ -344,9 +365,9 @@ Graphic.defaultProps = {
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
 Graphic.getKey = function (props) {
-  var _ref4 = props.properties || props.json,
-      _ref4$attributes = _ref4.attributes,
-      attributes = _ref4$attributes === void 0 ? {} : _ref4$attributes;
+  var _ref5 = props.properties || props.json,
+      _ref5$attributes = _ref5.attributes,
+      attributes = _ref5$attributes === void 0 ? {} : _ref5$attributes;
 
   return attributes.key;
 };

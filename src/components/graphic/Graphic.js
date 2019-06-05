@@ -106,12 +106,25 @@ class Graphic extends Component {
   }
 
   bindEvents (graphic) {
-    const { view } = this.props
+    const { view, hoverable, hoverCursor } = this.props
     this.eventHandlers = [
       view.on('click', e => {
         view.hitTest(e).then(({ results }) => {
           const hit = results.find(r => r.graphic === graphic)
           this.onClick(e, hit)
+        })
+      }),
+      view.on('pointer-move', e => {
+        if (!hoverable) {
+          return
+        }
+        view.cursor = 'auto'
+        view.hitTest(e).then(({ results }) => {
+          results.forEach(r => {
+            if (r.graphic === graphic) {
+              view.cursor = hoverCursor || 'pointer'
+            }
+          })
         })
       })
     ]
@@ -232,6 +245,9 @@ Graphic.propTypes = {
   properties: PropTypes.object, // properties has higher priority than json when constructing a graphic
   json: PropTypes.object, // 
 
+  hoverable: PropTypes.bool,
+  hoverCursor: PropTypes.string,
+
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
 
@@ -244,6 +260,9 @@ Graphic.propTypes = {
 Graphic.defaultProps = {
   properties: null,
   json: null,
+
+  hoverable: true,
+  hoverCursor: 'pointer',
 
   selectable: true,
   selected: false,

@@ -50,6 +50,23 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphicsLayer).call(this, props));
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "setUncontrolledState", function (state) {
+      var needSync = false;
+      var newState = {};
+      Object.keys(state).forEach(function (name) {
+        if (name in _this.props) {
+          return;
+        }
+
+        needSync = true;
+        newState[name] = state[name];
+      });
+
+      if (needSync) {
+        _this.setState(newState);
+      }
+    });
+
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicSelectHandler", function (e, _ref) {
       var key = _ref.key,
           selected = _ref.selected,
@@ -113,6 +130,10 @@ function (_Component) {
         // TODO
       }
     }
+    /**
+     * Only update the value which is not in props
+     */
+
   }, {
     key: "render",
     value: function render() {
