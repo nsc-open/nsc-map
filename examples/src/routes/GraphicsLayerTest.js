@@ -17,7 +17,8 @@ export default class extends Component {
     map: null,
     graphics: geometryJsons,
     selectable: true,
-    selectedKeys: ['1']
+    selectedKeys: [],
+    editingKeys: []
   }
 
   onLoad = (map, view) => {
@@ -47,7 +48,7 @@ export default class extends Component {
   }
 
   render () {
-    const { map, graphics, selectedKeys, selectable } = this.state
+    const { map, graphics, selectedKeys, editingKeys, selectable } = this.state
     return (
       <Map onLoad={this.onLoad}>
       {map ?
@@ -55,6 +56,7 @@ export default class extends Component {
         selectedKeys={selectedKeys}
         onSelect={this.onSelect}
         selectable={selectable}
+        editingKeys={editingKeys}
       >
         {graphics.map((g, i) => <Graphic key={i} json={g} />)}
       </GraphicsLayer>

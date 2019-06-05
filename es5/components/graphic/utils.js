@@ -1,3 +1,4 @@
+import { loadModules } from 'esri-module-loader';
 import * as geometryUtils from '../../utils/geometry';
 /**
  * due to the reason that highlight GraphicsLayer is only support in SceneView.
@@ -76,4 +77,81 @@ export var highlight = function highlight(layerView) {
       }
     };
   }
+};
+export var addGraphic = function addGraphic(layer, graphic) {
+  if (layer.type === 'graphics') {
+    layer.add(graphic);
+  } else if (layer.type === 'feature') {
+    layer.applyEdits({
+      addFeatures: [graphic]
+    });
+  }
+};
+export var removeGraphic = function removeGraphic(layer, graphic) {
+  if (layer.type === 'graphics') {
+    layer.remove(graphic);
+  } else if (layer.type === 'feature') {
+    layer.applyEdits({
+      deleteFeatures: [graphic]
+    });
+  }
+};
+export var updateGraphic = function updateGraphic(layer, graphic, _ref2) {
+  var properties = _ref2.properties,
+      json = _ref2.json;
+  console.log('-> updateGraphic', properties, json);
+
+  var _update = function _update(properties) {
+    graphic.set(properties);
+
+    if (layer.type === 'feature') {
+      layer.applyEdits({
+        updateFeatures: [graphic]
+      });
+    }
+  };
+
+  if (json) {
+    createGraphic({
+      json: json
+    }).then(function (graphic) {
+      var geometry = graphic.geometry,
+          symbol = graphic.symbol,
+          attributes = graphic.attributes;
+
+      _update({
+        geometry: geometry,
+        symbol: symbol,
+        attributes: attributes
+      });
+    });
+  } else {
+    _update(properties);
+  }
+};
+export var replaceGraphic = function replaceGraphic(layer, graphic, oldGraphic) {
+  if (layer.type === 'graphics') {
+    layer.remove(oldGraphic);
+    layer.add(graphic);
+  } else if (layer.type === 'feature') {
+    layer.applyEdits({
+      deleteFeatures: [oldGraphic],
+      addFeatures: [graphic]
+    });
+  }
+};
+export var createGraphic = function createGraphic(_ref3) {
+  var properties = _ref3.properties,
+      json = _ref3.json;
+  return loadModules(['esri/Graphic']).then(function (_ref4) {
+    var Graphic = _ref4.Graphic;
+
+    if (properties) {
+      return new Graphic(properties);
+    } else if (json) {
+      return Graphic.fromJSON(json);
+    } else {
+      throw new Error('properties and json cannot to be empty at the same time');
+    }
+  });
 };

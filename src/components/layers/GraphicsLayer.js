@@ -129,11 +129,14 @@ class GraphicsLayer extends Component {
         return React.cloneElement(child, {
           view,
           layer,
-          selected: selectedKeys.includes(graphicKey),
-          editing: editingKeys.includes(graphicKey),
           selectable: true,
+          selected: selectedKeys.includes(graphicKey),
+          onSelect: this.graphicSelectHandler,
           editable: true,
-          onSelect: this.graphicSelectHandler
+          editing: editingKeys.includes(graphicKey),
+          
+          
+          
         })
       })
     } else {
@@ -170,6 +173,7 @@ GraphicsLayer.defaultProps = {
   properties: null,
 
   selectable: true,
+  editable: true,
   hoverable: true,
   onLoad: layer => {},
   onSelect: () => {},

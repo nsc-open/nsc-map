@@ -18,25 +18,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import { loadModules } from 'esri-module-loader';
-import * as utils from './utils';
+import StateManager from './state';
 var KEY_ATTRIBUTE = 'key';
-
-var createGraphic = function createGraphic(_ref) {
-  var properties = _ref.properties,
-      json = _ref.json;
-  return loadModules(['esri/Graphic']).then(function (_ref2) {
-    var Graphic = _ref2.Graphic;
-
-    if (properties) {
-      return new Graphic(properties);
-    } else if (json) {
-      return Graphic.fromJSON(json);
-    } else {
-      throw new Error('properties and json cannot to be empty at the same time');
-    }
-  });
-};
 /**
  * usage:
  *  <GraphicsLayer>
@@ -44,7 +27,6 @@ var createGraphic = function createGraphic(_ref) {
       <Graphic key="" properties={} />
     </GraphicsLayer>
  */
-
 
 var Graphic =
 /*#__PURE__*/
@@ -56,15 +38,8 @@ function (_Component) {
 
     _classCallCheck(this, Graphic);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Graphic).call(this, props)); // because of componentDidUpdate() won't be triggered for the initial rendering
-    // so set graphic as state will solve this problem, once graphic is created and setState, component will trigger componentDidUpdate() automatically
-    // otherwise, hightlight logic needs to be there in componentWillMount() for one more time
-
-    _this.state = {
-      graphic: null
-    };
-    _this.highlightHandler = null;
-    _this.eventHandlers = [];
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Graphic).call(this, props));
+    _this.stateManager = null;
     return _this;
   }
 
@@ -73,256 +48,73 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      // load and add to graphicsLayer/featureLayer
+      window.g = this;
       var _this$props = this.props,
+          view = _this$props.view,
+          layer = _this$props.layer,
           properties = _this$props.properties,
           json = _this$props.json;
-      createGraphic({
+      this.stateManager = new StateManager({
+        view: view,
+        layer: layer
+      });
+      this.stateManager.init({
         properties: properties,
         json: json
-      }).then(function (graphic) {
-        _this2.setState({
-          graphic: graphic
-        });
+      });
+      this.stateManager.on('click', function (_ref) {
+        var e = _ref.e,
+            hit = _ref.hit;
+
+        _this2.onClick(e, hit);
+      });
+      this.stateManager.on('hover', function (_ref2) {
+        var e = _ref2.e,
+            hit = _ref2.hit;
+        // this.onHover(e, hit)
+        view.cursor = hit ? 'pointer' : 'auto';
       });
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      var graphic = this.state.graphic;
-
-      if (graphic) {
-        this.remove(graphic);
-      }
-    }
-  }, {
-    key: "shouldComponentUpdate",
-    value: function shouldComponentUpdate(nextProps, nextState) {
-      // only when graphic is created, this component should be updated
-      // or, this to ensure state.graphic always has value in componentDidUpdate
-      if (!nextState.graphic) {
-        return false;
-      } else {
-        return true;
-      }
+      this.stateManager.destroy();
     }
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps, prevState) {
       var _this3 = this;
 
-      var prevGraphic = prevState.graphic;
       var _this$props2 = this.props,
           properties = _this$props2.properties,
           json = _this$props2.json,
           selected = _this$props2.selected,
-          selectable = _this$props2.selectable;
-      var graphic = this.state.graphic;
+          selectable = _this$props2.selectable,
+          editing = _this$props2.editing;
 
       var needSync = function needSync(name) {
         return !prevProps && name in _this3.props || prevProps && prevProps[name] !== _this3.props[name];
       }; // graphic instance create or update
 
 
-      if (needSync('json')) {
-        createGraphic({
+      if (needSync('json') || needSync('properties')) {
+        this.stateManager.update({
           properties: properties,
           json: json
-        }).then(function (graphic) {
-          _this3.setState({
-            graphic: graphic
-          });
         });
-        return; // this return to ensure new graphic will be do replace in above statement
-      }
-
-      if (needSync('properties')) {
-        this.update(graphic, properties);
-      }
-
-      if (graphic !== prevGraphic) {
-        if (!prevGraphic) {
-          this.add(graphic);
-        } else {
-          this.replace(graphic, prevGraphic);
-        }
       } // process selected
 
 
       if (selectable) {
         if (needSync('selected') && selected) {
-          this.highlight(graphic);
+          this.stateManager.select();
         } else if (needSync('selected') && !selected) {
-          this.clearHighlight();
+          this.stateManager.deselect();
         }
-      } else {
-        this.clearHighlight();
-      }
-    }
-  }, {
-    key: "bindEvents",
-    value: function bindEvents(graphic) {
-      var _this4 = this;
+      } // edit
 
-      var _this$props3 = this.props,
-          view = _this$props3.view,
-          hoverable = _this$props3.hoverable,
-          hoverCursor = _this$props3.hoverCursor;
-      this.eventHandlers = [view.on('click', function (e) {
-        view.hitTest(e).then(function (_ref3) {
-          var results = _ref3.results;
-          var hit = results.find(function (r) {
-            return r.graphic === graphic;
-          });
 
-          _this4.onClick(e, hit);
-        });
-      }), view.on('pointer-move', function (e) {
-        if (!hoverable) {
-          return;
-        }
-
-        view.cursor = 'auto';
-        view.hitTest(e).then(function (_ref4) {
-          var results = _ref4.results;
-          results.forEach(function (r) {
-            if (r.graphic === graphic) {
-              view.cursor = hoverCursor || 'pointer';
-            }
-          });
-        });
-      })];
-    }
-  }, {
-    key: "unbindEvents",
-    value: function unbindEvents() {
-      this.eventHandlers.forEach(function (h) {
-        return h.remove();
-      });
-      this.eventHandlers = [];
-    }
-    /**
-     * when graphic instance changes (like replace graphic) but other status like selected not change,
-     * the selected process logic in componentDidUpdate() won't refresh the highlight
-     * in this case, manually sync is required
-     */
-
-  }, {
-    key: "syncGraphicStatus",
-    value: function syncGraphicStatus(graphic) {
-      var _this$props4 = this.props,
-          selectable = _this$props4.selectable,
-          selected = _this$props4.selected;
-
-      if (selectable && selected) {
-        this.clearHighlight();
-        this.highlight(graphic);
-      }
-    }
-  }, {
-    key: "onClick",
-    value: function onClick(e, hit) {
-      var _this$props5 = this.props,
-          onSelect = _this$props5.onSelect,
-          selectable = _this$props5.selectable;
-      var graphic = this.state.graphic;
-      var key = graphic.attributes[Graphic.keyAttribute];
-
-      if (selectable) {
-        onSelect && onSelect(e, {
-          key: key,
-          graphic: graphic,
-          selected: hit ? true : false
-        });
-      }
-    }
-  }, {
-    key: "highlight",
-    value: function highlight(graphic) {
-      var _this5 = this;
-
-      console.log('higlight graphic');
-      var _this$props6 = this.props,
-          view = _this$props6.view,
-          layer = _this$props6.layer;
-      view.whenLayerView(layer).then(function (layerView) {
-        _this5.highlightHandler = utils.highlight(layerView, [graphic]);
-      });
-    }
-  }, {
-    key: "clearHighlight",
-    value: function clearHighlight() {
-      console.log('clearHighlight graphic');
-
-      if (this.highlightHandler) {
-        this.highlightHandler.remove();
-        this.highlightHandler = null;
-      }
-    }
-  }, {
-    key: "add",
-    value: function add(graphic) {
-      console.log('add graphic');
-      var layer = this.props.layer;
-
-      if (layer.type === 'graphics') {
-        layer.add(graphic);
-      } else if (layer.type === 'feature') {
-        layer.applyEdits({
-          addFeatures: [graphic]
-        });
-      }
-
-      this.bindEvents(graphic);
-      this.syncGraphicStatus(graphic); // sync status
-    }
-  }, {
-    key: "remove",
-    value: function remove(graphic) {
-      console.log('remove graphic');
-      var layer = this.props.layer;
-
-      if (layer.type === 'graphics') {
-        layer.remove(graphic);
-      } else if (layer.type === 'feature') {
-        layer.applyEdits({
-          deleteFeatures: [graphic]
-        });
-      }
-
-      this.unbindEvents();
-      this.clearHighlight();
-    }
-  }, {
-    key: "update",
-    value: function update(graphic, properties) {
-      console.log('update graphic');
-      graphic.set(properties);
-    }
-    /**
-     * remove old graphic and add a new one
-     * events will be binded again
-     */
-
-  }, {
-    key: "replace",
-    value: function replace(graphic, oldGraphic) {
-      console.log('replace graphic');
-      var layer = this.props.layer;
-      this.unbindEvents();
-
-      if (layer.type === 'graphics') {
-        layer.remove(oldGraphic);
-        layer.add(graphic);
-      } else if (layer.type === 'feature') {
-        layer.applyEdits({
-          deleteFeatures: [oldGraphic],
-          addFeatures: [graphic]
-        });
-      }
-
-      this.bindEvents(graphic);
-      this.syncGraphicStatus(graphic); // sync status
+      if (needSync('editing')) {}
     }
   }, {
     key: "render",
@@ -345,8 +137,10 @@ Graphic.propTypes = {
   // 
   hoverable: PropTypes.bool,
   hoverCursor: PropTypes.string,
+  onHover: PropTypes.func,
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
+  onSelect: PropTypes.func,
   editable: PropTypes.bool,
   editing: PropTypes.bool
 };
@@ -359,19 +153,19 @@ Graphic.defaultProps = {
   selected: false,
   editable: true,
   editing: false,
-  onSelect: function onSelect(e, _ref5) {
-    var key = _ref5.key,
-        graphic = _ref5.graphic,
-        selected = _ref5.selected;
+  onSelect: function onSelect(e, _ref3) {
+    var key = _ref3.key,
+        graphic = _ref3.graphic,
+        selected = _ref3.selected;
   },
   onEdit: null
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
 Graphic.getKey = function (props) {
-  var _ref6 = props.properties || props.json,
-      _ref6$attributes = _ref6.attributes,
-      attributes = _ref6$attributes === void 0 ? {} : _ref6$attributes;
+  var _ref4 = props.properties || props.json,
+      _ref4$attributes = _ref4.attributes,
+      attributes = _ref4$attributes === void 0 ? {} : _ref4$attributes;
 
   return attributes.key;
 };

@@ -1,4 +1,6 @@
+import { loadModules } from 'esri-module-loader'
 import * as geometryUtils from '../../utils/geometry'
+
 
 /**
  * due to the reason that highlight GraphicsLayer is only support in SceneView.
@@ -40,7 +42,7 @@ export const highlight = (layerView, targets = [], options) => {
     targets.forEach((t, i) => {
       originSymbolMapping[i] = t.clone().symbol
       t.symbol = highlightGraphics[i].symbol
-    })    
+    })
     return {
       remove: () => {
         targets.forEach((t, i) => {
@@ -58,4 +60,71 @@ export const highlight = (layerView, targets = [], options) => {
       }
     }
   }
+}
+
+export const addGraphic = (layer, graphic) => {
+  if (layer.type === 'graphics') {
+    layer.add(graphic)
+  } else if (layer.type === 'feature') {
+    layer.applyEdits({
+      addFeatures: [graphic]
+    })
+  }
+}
+
+export const removeGraphic = (layer, graphic) => {
+  if (layer.type === 'graphics') {
+    layer.remove(graphic)
+  } else if (layer.type === 'feature') {
+    layer.applyEdits({
+      deleteFeatures: [graphic]
+    })
+  }
+}
+
+export const updateGraphic = (layer, graphic, { properties, json }) => {
+  console.log('-> updateGraphic', properties, json)
+  const _update = (properties) => {
+    graphic.set(properties)
+    if (layer.type === 'feature') {
+      layer.applyEdits({
+        updateFeatures: [graphic]
+      })
+    }
+  }
+
+  if (json) {
+    createGraphic({ json }).then(graphic => {
+      const { geometry, symbol, attributes } = graphic
+      _update({ geometry, symbol, attributes })
+    })
+  } else {
+    _update(properties)
+  }
+}
+
+export const replaceGraphic = (layer, graphic, oldGraphic) => {
+  if (layer.type === 'graphics') {
+    layer.remove(oldGraphic)
+    layer.add(graphic)
+  } else if (layer.type === 'feature') {
+    layer.applyEdits({
+      deleteFeatures: [oldGraphic],
+      addFeatures: [graphic]
+    })
+  }
+}
+
+export const createGraphic = ({ properties, json }) => {
+  return loadModules([
+    'esri/Graphic'
+  ]).then(({ Graphic }) => {
+    if (properties) {
+      return new Graphic(properties)
+    } else if (json) {
+      return Graphic.fromJSON(json)
+    } else {
+      throw new Error('properties and json cannot to be empty at the same time')
+    }
+  })
 }

@@ -188,11 +188,11 @@ function (_Component) {
           return React.cloneElement(child, {
             view: view,
             layer: layer,
-            selected: selectedKeys.includes(graphicKey),
-            editing: editingKeys.includes(graphicKey),
             selectable: true,
+            selected: selectedKeys.includes(graphicKey),
+            onSelect: _this4.graphicSelectHandler,
             editable: true,
-            onSelect: _this4.graphicSelectHandler
+            editing: editingKeys.includes(graphicKey)
           });
         });
       } else {
@@ -251,6 +251,7 @@ GraphicsLayer.defaultProps = {
   children: [],
   properties: null,
   selectable: true,
+  editable: true,
   hoverable: true,
   onLoad: function onLoad(layer) {},
   onSelect: function onSelect() {},
