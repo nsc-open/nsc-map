@@ -3,6 +3,10 @@ import PropTypes from 'prop-types'
 import { loadModules } from 'esri-module-loader'
 import Graphic from '../graphic/Graphic'
 
+const createLayer = properties => {
+  return loadModules(['esri/layers/GraphicsLayer']).then(({ GraphicsLayer }) => new GraphicsLayer(properties))
+}
+
 /**
  * usage:
  *  <GraphicsLayer selectedKeys={[]}>
@@ -23,18 +27,20 @@ class GraphicsLayer extends Component {
 
   static getDerivedStateFromProps (props, prevState) {
     const { prevProps } = prevState
-    const newState = {
-      prevProps: props,
-    }
-
+    const newState = { prevProps: props }
     const needSync = name => (!prevProps && name in props) || (prevProps && prevProps[name] !== props[name])
 
     // ================ selectedKeys =================
     if (props.selectable) {
       if (needSync('selectedKeys')) {
-        //newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
-      } else if (!prevProps && props.defaultSelectedKeys) {
-        //newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
+        newState.selectedKeys = props.selectedKeys
+      }
+    }
+
+    // ================ editingKeys =================
+    if (props.editable) {
+      if (needSync('editingKeys')) {
+        newState.editingKeys = props.editingKeys
       }
     }
 
@@ -42,13 +48,10 @@ class GraphicsLayer extends Component {
   }
 
   componentDidMount () {
-    loadModules([
-      'esri/layers/GraphicsLayer'
-    ]).then(({ GraphicsLayer }) => {
-      const { map, onLoad } = this.props
-      const layer = new GraphicsLayer()
-      map.add(layer)
+    const { properties, map, onLoad } = this.props
+    createLayer(properties).then(layer => {
       this.setState({ layer })
+      map.add(layer)
       onLoad(layer)
     })
   }
@@ -57,14 +60,25 @@ class GraphicsLayer extends Component {
     this.props.map.remove(this.state.layer)
   }
 
+  shouldComponentUpdate (nextProps, nextState) {
+    // only when layer is created, this component should be updated
+    // or, this to ensure state.layer always has value in componentDidUpdate
+    if (!nextState.layer) {
+      return false
+    } else {
+      return true
+    }
+  }
+
   componentDidUpdate (prevProps) {
     const { properties } = this.props
     const { layer } = this.state
 
+    const needSync = name => (!prevProps && name in this.props) || (prevProps && prevProps[name] !== this.props[name])
+
     // update graphicsLayer properties
-    if (properties !== prevProps.properties) {
-      // layer.set(properties)
-      // TODO
+    if (needSync('properties')) {
+      layer.set(properties)
     }
   }
 
@@ -83,25 +97,30 @@ class GraphicsLayer extends Component {
       newState[name] = state[name]
     })
 
+    console.log('needsync', needSync)
     if (needSync) {
       this.setState(newState)
     }
   }
 
   graphicSelectHandler = (e, { key, selected, graphic }) => {
-    console.log('select graphic', key, graphic, e)
+    const { onSelect } = this.props
     const { selectedKeys } = this.state
-    if (selected) {
-      !selectedKeys.includes(key) && this.setState({ selectedKeys: [...selectedKeys, key] })
-    } else {
-      this.setState({ selectedKeys: selectedKeys.filter(k => k !== key) })
+    let newSelectedKeys = []
+
+    if (selected && !selectedKeys.includes(key)) {
+      newSelectedKeys = [...selectedKeys, key]
+    } else if (!selected) {
+      newSelectedKeys = selectedKeys.filter(k => k !== key)
     }
-    
+
+    this.setUncontrolledState({ selectedKeys: newSelectedKeys })
+    onSelect && onSelect(newSelectedKeys, { event: e, key, selected, graphic })
   }
 
   render () {
     console.log('GraphicsLayer render', this)
-    const { view, children = [],  } = this.props
+    const { view, children = [] } = this.props
     const { layer, editingKeys, selectedKeys } = this.state
     
     if (layer) {
@@ -127,6 +146,7 @@ GraphicsLayer.propTypes = {
   map: PropTypes.object.isRequired,
   view: PropTypes.object.isRequired,
   properties: PropTypes.object,
+
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.element),
     PropTypes.element
@@ -148,6 +168,7 @@ GraphicsLayer.propTypes = {
 GraphicsLayer.defaultProps = {
   children: [],
   properties: null,
+
   selectable: true,
   hoverable: true,
   onLoad: layer => {},

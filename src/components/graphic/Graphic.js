@@ -270,7 +270,7 @@ Graphic.defaultProps = {
   editable: true,
   editing: false,
 
-  onSelect: (e, graphic) => {},
+  onSelect: (e, { key, graphic, selected }) => {},
   onEdit: null
 }
 

@@ -359,15 +359,19 @@ Graphic.defaultProps = {
   selected: false,
   editable: true,
   editing: false,
-  onSelect: function onSelect(e, graphic) {},
+  onSelect: function onSelect(e, _ref5) {
+    var key = _ref5.key,
+        graphic = _ref5.graphic,
+        selected = _ref5.selected;
+  },
   onEdit: null
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
 Graphic.getKey = function (props) {
-  var _ref5 = props.properties || props.json,
-      _ref5$attributes = _ref5.attributes,
-      attributes = _ref5$attributes === void 0 ? {} : _ref5$attributes;
+  var _ref6 = props.properties || props.json,
+      _ref6$attributes = _ref6.attributes,
+      attributes = _ref6$attributes === void 0 ? {} : _ref6$attributes;
 
   return attributes.key;
 };

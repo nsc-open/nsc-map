@@ -30,6 +30,13 @@ import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 import { loadModules } from 'esri-module-loader';
 import Graphic from '../graphic/Graphic';
+
+var createLayer = function createLayer(properties) {
+  return loadModules(['esri/layers/GraphicsLayer']).then(function (_ref) {
+    var GraphicsLayer = _ref.GraphicsLayer;
+    return new GraphicsLayer(properties);
+  });
+};
 /**
  * usage:
  *  <GraphicsLayer selectedKeys={[]}>
@@ -37,6 +44,7 @@ import Graphic from '../graphic/Graphic';
       <Graphic key="" graphicProperties={} />
     </GraphicsLayer>
  */
+
 
 var GraphicsLayer =
 /*#__PURE__*/
@@ -61,30 +69,39 @@ function (_Component) {
         needSync = true;
         newState[name] = state[name];
       });
+      console.log('needsync', needSync);
 
       if (needSync) {
         _this.setState(newState);
       }
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicSelectHandler", function (e, _ref) {
-      var key = _ref.key,
-          selected = _ref.selected,
-          graphic = _ref.graphic;
-      console.log('select graphic', key, graphic, e);
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicSelectHandler", function (e, _ref2) {
+      var key = _ref2.key,
+          selected = _ref2.selected,
+          graphic = _ref2.graphic;
+      var onSelect = _this.props.onSelect;
       var selectedKeys = _this.state.selectedKeys;
+      var newSelectedKeys = [];
 
-      if (selected) {
-        !selectedKeys.includes(key) && _this.setState({
-          selectedKeys: [].concat(_toConsumableArray(selectedKeys), [key])
-        });
-      } else {
-        _this.setState({
-          selectedKeys: selectedKeys.filter(function (k) {
-            return k !== key;
-          })
+      if (selected && !selectedKeys.includes(key)) {
+        newSelectedKeys = [].concat(_toConsumableArray(selectedKeys), [key]);
+      } else if (!selected) {
+        newSelectedKeys = selectedKeys.filter(function (k) {
+          return k !== key;
         });
       }
+
+      _this.setUncontrolledState({
+        selectedKeys: newSelectedKeys
+      });
+
+      onSelect && onSelect(newSelectedKeys, {
+        event: e,
+        key: key,
+        selected: selected,
+        graphic: graphic
+      });
     });
 
     _this.state = {
@@ -100,18 +117,16 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      loadModules(['esri/layers/GraphicsLayer']).then(function (_ref2) {
-        var GraphicsLayer = _ref2.GraphicsLayer;
-        var _this2$props = _this2.props,
-            map = _this2$props.map,
-            onLoad = _this2$props.onLoad;
-        var layer = new GraphicsLayer();
-        map.add(layer);
-
+      var _this$props = this.props,
+          properties = _this$props.properties,
+          map = _this$props.map,
+          onLoad = _this$props.onLoad;
+      createLayer(properties).then(function (layer) {
         _this2.setState({
           layer: layer
         });
 
+        map.add(layer);
         onLoad(layer);
       });
     }
@@ -121,13 +136,31 @@ function (_Component) {
       this.props.map.remove(this.state.layer);
     }
   }, {
+    key: "shouldComponentUpdate",
+    value: function shouldComponentUpdate(nextProps, nextState) {
+      // only when layer is created, this component should be updated
+      // or, this to ensure state.layer always has value in componentDidUpdate
+      if (!nextState.layer) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      var properties = this.props.properties;
-      var layer = this.state.layer; // update graphicsLayer properties
+      var _this3 = this;
 
-      if (properties !== prevProps.properties) {// layer.set(properties)
-        // TODO
+      var properties = this.props.properties;
+      var layer = this.state.layer;
+
+      var needSync = function needSync(name) {
+        return !prevProps && name in _this3.props || prevProps && prevProps[name] !== _this3.props[name];
+      }; // update graphicsLayer properties
+
+
+      if (needSync('properties')) {
+        layer.set(properties);
       }
     }
     /**
@@ -137,13 +170,13 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       console.log('GraphicsLayer render', this);
-      var _this$props = this.props,
-          view = _this$props.view,
-          _this$props$children = _this$props.children,
-          children = _this$props$children === void 0 ? [] : _this$props$children;
+      var _this$props2 = this.props,
+          view = _this$props2.view,
+          _this$props2$children = _this$props2.children,
+          children = _this$props2$children === void 0 ? [] : _this$props2$children;
       var _this$state = this.state,
           layer = _this$state.layer,
           editingKeys = _this$state.editingKeys,
@@ -159,7 +192,7 @@ function (_Component) {
             editing: editingKeys.includes(graphicKey),
             selectable: true,
             editable: true,
-            onSelect: _this3.graphicSelectHandler
+            onSelect: _this4.graphicSelectHandler
           });
         });
       } else {
@@ -180,8 +213,15 @@ function (_Component) {
 
 
       if (props.selectable) {
-        if (needSync('selectedKeys')) {//newState.selectedKeys = calcSelectedKeys(props.selectedKeys, props);
-        } else if (!prevProps && props.defaultSelectedKeys) {//newState.selectedKeys = calcSelectedKeys(props.defaultSelectedKeys, props);
+        if (needSync('selectedKeys')) {
+          newState.selectedKeys = props.selectedKeys;
+        }
+      } // ================ editingKeys =================
+
+
+      if (props.editable) {
+        if (needSync('editingKeys')) {
+          newState.editingKeys = props.editingKeys;
         }
       }
 
