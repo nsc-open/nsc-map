@@ -247,9 +247,11 @@ Graphic.propTypes = {
 
   hoverable: PropTypes.bool,
   hoverCursor: PropTypes.string,
+  onHover: PropTypes.func,
 
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
+  onSelect: PropTypes.func,
 
   editable: PropTypes.bool,
   editing: PropTypes.bool,
