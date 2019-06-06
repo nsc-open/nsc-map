@@ -62,6 +62,10 @@ export const highlight = (layerView, targets = [], options) => {
   }
 }
 
+export const json2Properties = json => {
+  return createGraphic({ json }).then(({ attributes, geometry, symbol }) => ({ attributes, geometry, symbol }))
+}
+
 export const addGraphic = (layer, graphic) => {
   if (layer.type === 'graphics') {
     layer.add(graphic)
@@ -115,8 +119,4 @@ export const createGraphic = ({ properties, json }) => {
       throw new Error('properties and json cannot to be empty at the same time')
     }
   })
-}
-
-export const json2Properties = json => {
-  return createGraphic({ json }).then(({ attributes, geometry, symbol }) => ({ attributes, geometry, symbol }))
 }

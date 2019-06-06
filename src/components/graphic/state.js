@@ -218,13 +218,17 @@ export default class StateManager extends EventEmitter {
     this.layer = layer
     this.graphic = null
     this.eventHandlers = []
-
+    this.destroying = false
     this.state = new BaseState()
   }
 
   init ({ properties, json }) {
     this.changeState('initializing')
     utils.createGraphic({ properties, json }).then(graphic => {
+      if (this.destroying) {
+        return
+      }
+
       this.graphic = graphic
       utils.addGraphic(this.layer, graphic)
       this.bindEvents()
@@ -233,6 +237,7 @@ export default class StateManager extends EventEmitter {
   }
 
   destroy () {
+    this.destroying = true
     this.state.destroy()
     this.unbindEvents()
     utils.removeGraphic(this.layer, this.graphic)
@@ -244,7 +249,7 @@ export default class StateManager extends EventEmitter {
       view.on('click', e => {
         view.hitTest(e).then(({ results }) => {
           const hit = results.find(r => r.graphic === graphic)
-          this.emit('click', { e, hit })
+          this.emit('select', { e, hit })
         })
       }),
       view.on('pointer-move', e => {
@@ -287,7 +292,7 @@ export default class StateManager extends EventEmitter {
       this.state.update(properties)
     }
   }
-  
+
   select () {
     this.state.select()
   }

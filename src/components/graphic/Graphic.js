@@ -18,30 +18,21 @@ class Graphic extends Component {
   }
 
   componentDidMount () {
-    window.g = this
     const { view, layer, properties, json } = this.props
     this.stateManager = new StateManager({ view, layer })
     this.stateManager.init({ properties, json })
-    this.stateManager.on('click', ({ e, hit }) => {
-      this.onClick(e, hit)
-    })
-    this.stateManager.on('hover', ({ e, hit }) => {
-      // this.onHover(e, hit)
-      view.cursor = hit ? 'pointer' : 'auto'
-    })
-    this.stateManager.on('edit', ({ graphic, e }) => {
-      const { onEdit } = this.props
-      onEdit({ graphic, e, key: Graphic.getKey({ properties: graphic }) })
-    })
+    this.stateManager.on('select', this.selectHandler)
+    this.stateManager.on('hover', this.hoverHandler)
+    this.stateManager.on('edit', this.editHandler)
   }
 
   componentWillUnmount () {
     this.stateManager.destroy()
+    this.stateManager = null
   }
 
-  componentDidUpdate (prevProps, prevState) {
+  componentDidUpdate (prevProps) {
     const { properties, json, selected, selectable, editing } = this.props
-
     const needSync = name => (!prevProps && name in this.props) || (prevProps && prevProps[name] !== this.props[name])
     
     // graphic instance create or update
@@ -66,10 +57,25 @@ class Graphic extends Component {
         this.stateManager.quitEdit()
       }
     }
-    
   }
 
+  selectHandler = ({ e, hit }) => {
+    const { onSelect } = this.props
+    onSelect && onSelect()
+  }
 
+  hoverHandler = ({ e, hit }) => {
+    const { view, hoverable, hoverCursor = 'pointer', onHover } = this.props
+    if (hoverable) {
+      view.cursor = hit ? hoverCursor : 'auto'
+      onHover && onHover()
+    }
+  }
+
+  editHandler = ({ graphic, e }) => {
+    const { onEdit } = this.props
+    onEdit && onEdit({ graphic, e, key: Graphic.getKey({ properties: graphic }) })
+  }
 
   render () {
     return null
