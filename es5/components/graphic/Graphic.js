@@ -139,6 +139,7 @@ function (_Component) {
 
 
       if (needSync('json') || needSync('properties')) {
+        console.log('needsync json or pro');
         this.stateManager.update({
           properties: properties,
           json: json
@@ -157,6 +158,9 @@ function (_Component) {
 
       if (editable) {
         if (needSync('editing')) {
+          console.log('needsync editing');
+          return;
+
           if (editing) {
             this.stateManager.edit();
           } else {
@@ -168,6 +172,7 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
+      console.log('Graphic.render', this);
       return null;
     }
   }]);

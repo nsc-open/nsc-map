@@ -218,6 +218,7 @@ function (_BaseState4) {
     _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Editing).call(this, props));
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this5)), "sketchEventHandler", function (e) {
+      return;
       console.log('sketch event', e);
       var graphic = e.graphics[0];
 
@@ -255,7 +256,8 @@ function (_BaseState4) {
     value: function init() {
       var _this6 = this;
 
-      // new sketch
+      return; // new sketch
+
       loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer']).then(function (_ref) {
         var SketchViewModel = _ref.SketchViewModel,
             GraphicsLayer = _ref.GraphicsLayer;
@@ -266,12 +268,13 @@ function (_BaseState4) {
 
         var _this6$stateManager = _this6.stateManager,
             view = _this6$stateManager.view,
-            graphic = _this6$stateManager.graphic;
+            graphic = _this6$stateManager.graphic,
+            layer = _this6$stateManager.layer;
         var tempGraphicsLayer = new GraphicsLayer();
         var clonedGraphic = graphic.clone();
         view.map.add(tempGraphicsLayer);
         tempGraphicsLayer.add(clonedGraphic);
-        graphic.visible = false;
+        utils.hideGraphic(layer, graphic);
         var sketch = new SketchViewModel({
           view: view,
           layer: tempGraphicsLayer,
@@ -293,21 +296,23 @@ function (_BaseState4) {
   }, {
     key: "destroy",
     value: function destroy() {
+      return;
       this.destroying = true; // destroy sketch, clonedGraphic, tempGraphicsLayer
 
       var _this$stateManager5 = this.stateManager,
           view = _this$stateManager5.view,
-          graphic = _this$stateManager5.graphic;
+          graphic = _this$stateManager5.graphic,
+          layer = _this$stateManager5.layer;
       this.tempGraphicsLayer.remove(this.clonedGraphic);
       view.map.remove(this.tempGraphicsLayer);
-      graphic.visible = true;
+      utils.showGraphic(layer, graphic);
       this.sketch.cancel(); // if stored updated symbol, restore it
 
       if (this.symbolProperty) {
         var _this$stateManager6 = this.stateManager,
-            layer = _this$stateManager6.layer,
+            _layer = _this$stateManager6.layer,
             _graphic = _this$stateManager6.graphic;
-        utils.updateGraphic(layer, _graphic, {
+        utils.updateGraphic(_layer, _graphic, {
           symbol: this.symbolProperty
         });
       }
@@ -320,6 +325,7 @@ function (_BaseState4) {
   }, {
     key: "update",
     value: function update(properties) {
+      return;
       var _this$stateManager7 = this.stateManager,
           layer = _this$stateManager7.layer,
           graphic = _this$stateManager7.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
@@ -437,11 +443,20 @@ function (_EventEmitter) {
 
       var view = this.view,
           graphic = this.graphic;
+
+      var isSame = function isSame(g1, g2) {
+        if (_this9.layer.type === 'graphics') {
+          return g1 === g2;
+        } else if (_this9.layer.type === 'feature') {
+          return g1.attributes.key === g2.attributes.key;
+        }
+      };
+
       this.eventHandlers = [view.on('click', function (e) {
         view.hitTest(e).then(function (_ref4) {
           var results = _ref4.results;
           var hit = !!results.find(function (r) {
-            return r.graphic === graphic;
+            return isSame(r.graphic, graphic);
           });
 
           _this9.emit('select', {
@@ -454,7 +469,7 @@ function (_EventEmitter) {
         view.hitTest(e).then(function (_ref5) {
           var results = _ref5.results;
           var hit = !!results.find(function (r) {
-            return r.graphic === graphic;
+            return isSame(r.graphic, graphic);
           });
 
           _this9.emit('hover', {
@@ -487,6 +502,7 @@ function (_EventEmitter) {
         'selected': Selected,
         'editing': Editing
       }[stateKey];
+      console.log('changeState ======>', stateKey, this.graphic ? this.graphic.attributes.key : 'null');
       this.state = new StateClass(this);
     }
     /***** actions *****/

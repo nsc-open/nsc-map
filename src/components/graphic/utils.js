@@ -89,9 +89,27 @@ export const removeGraphic = (layer, graphic) => {
 export const updateGraphic = (layer, graphic, properties) => {
   graphic.set(properties)
   if (layer.type === 'feature') {
+    console.log('applyEdits updateFeatures', graphic)
     layer.applyEdits({
       updateFeatures: [graphic]
     })
+  }
+}
+
+export const hideGraphic = (layer, graphic) => {
+  if (layer.type === 'graphics') {
+    graphic.visible = false
+  } else if (layer.type === 'feature') {
+    const id = graphic.attributes[layer.objectIdField]
+    layer.definitionExpression = `${layer.objectIdField} <> ${id}`
+  }
+}
+
+export const showGraphic = (layer, graphic) => {
+  if (layer.type === 'graphics') {
+    graphic.visible = true
+  } else if (layer.type === 'feature') {
+    layer.definitionExpression = null
   }
 }
 

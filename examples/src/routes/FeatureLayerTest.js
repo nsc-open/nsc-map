@@ -4,37 +4,75 @@ import FeatureLayer from 'nsc-map/components/layers/FeatureLayer'
 import Graphic from 'nsc-map/components/graphic/Graphic'
 import { polygon1, polygon2 } from 'mock/geometry-jsons'
 
+const geometryJsons = [polygon1, polygon2].map((p, i) => {
+  p.attributes.key = i + ''
+  return p
+})
+
+window.changeFeature = () => {
+  window.featureLayer.featureLayer.applyEdits({
+    updateFeatures: [{
+      attributes: {
+        key: '1',
+        ObjectID: 2
+      },
+      geometry: {"type":"polygon","spatialReference":{"wkid":102100},"rings":[[[-7211276.613588262,3802755.0318591143],[-7354878.7567115845,2090288.1170993866],[-8928936.356528472,2971858.417348545],[-8559303.466083396,4160237.9546233397],[-7211276.613588262,3802755.0318591143]]]}
+    }]
+  })
+}
+
 export default class extends Component {
 
   state = {
-    graphics: [polygon1]
-  }
-
-  componentDidMount () {
-    window.add = () =>  this.addGraphic()
-  }
-
-  addGraphic () {
-    this.setState({
-      graphics: [...this.state.graphics, polygon2]
-    })
+    graphics: geometryJsons,
+    selectedKeys: [],
+    editingKeys: []
   }
   
   onLoad = (map, view) => {
-    this.setState({ map: map })
+    this.setState({ map, view })
+  }
+
+  onSelect = (selectedKeys, details) => {
+    console.log('=> onSelect', selectedKeys, details)
+    this.setState({ selectedKeys })
+  }
+
+  onEdit = ({ graphic, e, key }) => {
+    console.log('=> onEdit', graphic, key)
+    const { graphics } = this.state
+    const match = graphics.find(g => g.attributes.key === key)
+    this.setState({
+      graphics: [
+        ...graphics.filter(g => g.attributes.key !== key),
+        {
+          ...match,
+          geometry: graphic.toJSON().geometry
+        }
+      ]
+    })
   }
 
   render () {
-    const { graphics } = this.state
+    window.featureLayer = this
+    const { graphics, selectedKeys, editingKeys } = this.state
+    console.log('FeatureLayerTest.render', this)
     return (
       <Map
         onLoad={this.onLoad}
       >
-        <FeatureLayer featureLayerProperties={{
+        <FeatureLayer properties={{
             source: [],
             geometryType: 'polygon',
             objectIdField: 'ObjectID',
             displayField: 'ObjectID',
+            fields: [{
+              name: 'ObjectID',
+              type: 'string'
+            }, {
+              name: 'key',
+              type: 'string'
+            }],
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {
@@ -46,11 +84,16 @@ export default class extends Component {
                 }
               }
             }
-          }}>
-          {graphics.map((g, i) => <Graphic
-            key={i}
-            geometryJson={g}
-          />)}
+          }}
+          onLoad={l => this.featureLayer = l}
+          selectable={true}
+          selectedKeys={selectedKeys}
+          onSelect={this.onSelect}
+          
+          editingKeys={editingKeys}
+          onEdit={this.onEdit}
+        >
+          {graphics.map((g, i) => <Graphic key={i} json={g} />)}
         </FeatureLayer>
       </Map>
     )

@@ -37,6 +37,7 @@ class Graphic extends Component {
     
     // graphic instance create or update
     if (needSync('json') || needSync('properties')) {
+      console.log('needsync json or pro')
       this.stateManager.update({ properties, json })
     }
 
@@ -52,6 +53,8 @@ class Graphic extends Component {
     // edit
     if (editable) {
       if (needSync('editing')) {
+        console.log('needsync editing')
+        return
         if (editing) {
           this.stateManager.edit()
         } else {
@@ -85,6 +88,7 @@ class Graphic extends Component {
   }
 
   render () {
+    console.log('Graphic.render', this)
     return null
   }
 }

@@ -112,6 +112,7 @@ class Editing extends BaseState {
   }
 
   init () {
+    return
     // new sketch
     loadModules([
       'esri/widgets/Sketch/SketchViewModel',
@@ -121,12 +122,12 @@ class Editing extends BaseState {
         return // before modules loaded, destroy might be called
       }
 
-      const { view, graphic } = this.stateManager
+      const { view, graphic, layer } = this.stateManager
       const tempGraphicsLayer = new GraphicsLayer()
       const clonedGraphic = graphic.clone()
       view.map.add(tempGraphicsLayer)
       tempGraphicsLayer.add(clonedGraphic)
-      graphic.visible = false
+      utils.hideGraphic(layer, graphic)
 
       const sketch = new SketchViewModel({
         view,
@@ -146,13 +147,14 @@ class Editing extends BaseState {
   }
 
   destroy () {
+    return
     this.destroying = true
 
     // destroy sketch, clonedGraphic, tempGraphicsLayer
-    const { view, graphic } = this.stateManager
+    const { view, graphic, layer } = this.stateManager
     this.tempGraphicsLayer.remove(this.clonedGraphic)
     view.map.remove(this.tempGraphicsLayer)
-    graphic.visible = true
+    utils.showGraphic(layer, graphic)
     this.sketch.cancel()
 
     // if stored updated symbol, restore it
@@ -167,7 +169,8 @@ class Editing extends BaseState {
     this.symbolProperty = null
   }
 
-  sketchEventHandler = e => {    
+  sketchEventHandler = e => {
+    return
     console.log('sketch event', e)
     const graphic = e.graphics[0]
     if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
@@ -183,6 +186,7 @@ class Editing extends BaseState {
   }
 
   update (properties) {
+    return
     const { layer, graphic } = this.stateManager
     // if trying to change symbol, it will be stored and updated with this symbol after exit this state
     // in this state, symbol won't be change coz it uses the highlight symbol
@@ -258,16 +262,23 @@ export default class StateManager extends EventEmitter {
 
   bindEvents () {
     const { view, graphic } = this
+    const isSame = (g1, g2) => {
+      if (this.layer.type === 'graphics') {
+        return g1 === g2
+      } else if (this.layer.type === 'feature') {
+        return g1.attributes.key === g2.attributes.key
+      }
+    }
     this.eventHandlers = [
       view.on('click', e => {
         view.hitTest(e).then(({ results }) => {
-          const hit = !!results.find(r => r.graphic === graphic)
+          const hit = !!results.find(r => isSame(r.graphic, graphic))
           this.emit('select', { event: e, hit, graphic })
         })
       }),
       view.on('pointer-move', e => {
         view.hitTest(e).then(({ results }) => {
-          const hit = !!results.find(r => r.graphic === graphic)
+          const hit = !!results.find(r => isSame(r.graphic, graphic))
           this.emit('hover', { event: e, hit, graphic })
         })
       })
@@ -291,6 +302,7 @@ export default class StateManager extends EventEmitter {
       'selected': Selected,
       'editing': Editing
     })[stateKey]
+    console.log('changeState ======>', stateKey, this.graphic ? this.graphic.attributes.key : 'null')
 
     this.state = new StateClass(this)
   }

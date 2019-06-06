@@ -114,9 +114,25 @@ export var updateGraphic = function updateGraphic(layer, graphic, properties) {
   graphic.set(properties);
 
   if (layer.type === 'feature') {
+    console.log('applyEdits updateFeatures', graphic);
     layer.applyEdits({
       updateFeatures: [graphic]
     });
+  }
+};
+export var hideGraphic = function hideGraphic(layer, graphic) {
+  if (layer.type === 'graphics') {
+    graphic.visible = false;
+  } else if (layer.type === 'feature') {
+    var id = graphic.attributes[layer.objectIdField];
+    layer.definitionExpression = "".concat(layer.objectIdField, " <> ").concat(id);
+  }
+};
+export var showGraphic = function showGraphic(layer, graphic) {
+  if (layer.type === 'graphics') {
+    graphic.visible = true;
+  } else if (layer.type === 'feature') {
+    layer.definitionExpression = null;
   }
 };
 export var replaceGraphic = function replaceGraphic(layer, graphic, oldGraphic) {
