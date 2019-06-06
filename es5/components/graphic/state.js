@@ -1,3 +1,5 @@
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
@@ -17,6 +19,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 import EventEmitter from 'eventemitter3';
+import { loadModules } from 'esri-module-loader';
 import * as utils from './utils';
 
 var BaseState =
@@ -67,34 +70,8 @@ function (_BaseState) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Initializing).call(this, props));
     _this.key = 'initializing';
-
-    _this.init();
-
     return _this;
   }
-
-  _createClass(Initializing, [{
-    key: "init",
-    value: function init() {}
-  }, {
-    key: "destroy",
-    value: function destroy() {}
-  }, {
-    key: "update",
-    value: function update() {}
-  }, {
-    key: "select",
-    value: function select() {}
-  }, {
-    key: "deselect",
-    value: function deselect() {}
-  }, {
-    key: "edit",
-    value: function edit() {}
-  }, {
-    key: "quitEdit",
-    value: function quitEdit() {}
-  }]);
 
   return Initializing;
 }(BaseState);
@@ -118,20 +95,13 @@ function (_BaseState2) {
   }
 
   _createClass(Normal, [{
-    key: "init",
-    value: function init() {}
-  }, {
-    key: "destroy",
-    value: function destroy() {}
-  }, {
     key: "update",
     value: function update(properties) {
+      console.log('Normal.update', properties);
       var _this$stateManager = this.stateManager,
           layer = _this$stateManager.layer,
           graphic = _this$stateManager.graphic;
-      utils.updateGraphic(layer, graphic, {
-        properties: properties
-      });
+      utils.updateGraphic(layer, graphic, properties);
     }
   }, {
     key: "select",
@@ -139,17 +109,9 @@ function (_BaseState2) {
       this.stateManager.changeState('selected');
     }
   }, {
-    key: "deselect",
-    value: function deselect() {// do nothing
-    }
-  }, {
     key: "edit",
     value: function edit() {
       this.stateManager.changeState('editing');
-    }
-  }, {
-    key: "quitEdit",
-    value: function quitEdit() {// do nothing
     }
   }]);
 
@@ -181,37 +143,39 @@ function (_BaseState3) {
     value: function init() {
       var _this4 = this;
 
-      console.log('selected.init');
       var _this$stateManager2 = this.stateManager,
           view = _this$stateManager2.view,
           layer = _this$stateManager2.layer,
           graphic = _this$stateManager2.graphic;
       view.whenLayerView(layer).then(function (layerView) {
-        console.log('selected.init highlight');
         _this4.highlightHandler = utils.highlight(layerView, [graphic]);
       });
     }
   }, {
     key: "destroy",
     value: function destroy() {
-      console.log('Select destroy', this.highlightHandler);
-
       if (this.highlightHandler) {
         this.highlightHandler.remove();
         this.highlightHandler = null;
       } // if stored updated symbol, restore it
 
 
-      if (this.symbolProperty) {//const { layer, graphic } = this.stateManager
-        //utils.updateGraphic(layer, graphic, { symbol: this.symbolProperty })
+      if (this.symbolProperty) {
+        var _this$stateManager3 = this.stateManager,
+            layer = _this$stateManager3.layer,
+            graphic = _this$stateManager3.graphic;
+        utils.updateGraphic(layer, graphic, {
+          symbol: this.symbolProperty
+        });
+        this.symbolProperty = null;
       }
     }
   }, {
     key: "update",
     value: function update(properties) {
-      var _this$stateManager3 = this.stateManager,
-          layer = _this$stateManager3.layer,
-          graphic = _this$stateManager3.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
+      var _this$stateManager4 = this.stateManager,
+          layer = _this$stateManager4.layer,
+          graphic = _this$stateManager4.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
       // in this state, symbol won't be change coz it uses the highlight symbol
 
       if ('symbol' in properties) {
@@ -221,15 +185,9 @@ function (_BaseState3) {
       var geometry = properties.geometry,
           attributes = properties.attributes;
       utils.updateGraphic(layer, graphic, {
-        properties: {
-          geometry: geometry,
-          attributes: attributes
-        }
+        geometry: geometry,
+        attributes: attributes
       });
-    }
-  }, {
-    key: "select",
-    value: function select() {// do nothing, already in selected state
     }
   }, {
     key: "deselect",
@@ -240,10 +198,6 @@ function (_BaseState3) {
     key: "edit",
     value: function edit() {
       this.stateManager.changeState('editing');
-    }
-  }, {
-    key: "quitEdit",
-    value: function quitEdit() {// do nothing
     }
   }]);
 
@@ -262,10 +216,32 @@ function (_BaseState4) {
     _classCallCheck(this, Editing);
 
     _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Editing).call(this, props));
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this5)), "sketchEventHandler", function (e) {
+      var graphic = e.graphics[0];
+
+      if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
+        _this5.editing = true;
+      } else if (e.toolEventInfo && e.toolEventInfo.type.endsWith('-stop')) {
+        _this5.editing = false;
+      }
+
+      if (_this5.editing) {
+        // emit only when there is sketch update happened (geometry updated)
+        _this5.stateManager.emit('edit', {
+          graphic: graphic,
+          e: e
+        });
+      }
+    });
+
     _this5.key = 'editing';
     _this5.clonedGraphic = null;
     _this5.tempGraphicsLayer = null;
     _this5.symbolProperty = null;
+    _this5.sketch = null;
+    _this5.editing = false;
+    _this5.destroying = false;
 
     _this5.init();
 
@@ -274,56 +250,101 @@ function (_BaseState4) {
 
   _createClass(Editing, [{
     key: "init",
-    value: function init() {// new sketch
+    value: function init() {
+      var _this6 = this;
+
+      // new sketch
+      loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer']).then(function (_ref) {
+        var SketchViewModel = _ref.SketchViewModel,
+            GraphicsLayer = _ref.GraphicsLayer;
+
+        if (_this6.destroying) {
+          return; // before modules loaded, destroy might be called
+        }
+
+        var _this6$stateManager = _this6.stateManager,
+            view = _this6$stateManager.view,
+            graphic = _this6$stateManager.graphic;
+        var tempGraphicsLayer = new GraphicsLayer();
+        var clonedGraphic = graphic.clone();
+        view.map.add(tempGraphicsLayer);
+        tempGraphicsLayer.add(clonedGraphic);
+        graphic.visible = false;
+        var sketch = new SketchViewModel({
+          view: view,
+          layer: tempGraphicsLayer,
+          updateOnGraphicClick: false,
+          defaultUpdateOptions: {
+            tool: 'reshape'
+          }
+        }); // have to do the update async, otherwise sketch would not able to see clonedGraphic added into the layer
+
+        setTimeout(function () {
+          return sketch.update([clonedGraphic]);
+        }, 0);
+        sketch.on(['update', 'undo', 'redo'], _this6.sketchEventHandler);
+        _this6.tempGraphicsLayer = tempGraphicsLayer;
+        _this6.clonedGraphic = clonedGraphic;
+        _this6.sketch = sketch;
+      });
     }
   }, {
     key: "destroy",
     value: function destroy() {
-      // destroy sketch, clonedGraphic, tempGraphicsLayer
-      // if stored updated symbol, restore it
+      this.destroying = true; // destroy sketch, clonedGraphic, tempGraphicsLayer
+
+      var _this$stateManager5 = this.stateManager,
+          view = _this$stateManager5.view,
+          graphic = _this$stateManager5.graphic;
+      this.tempGraphicsLayer.remove(this.clonedGraphic);
+      view.map.remove(this.tempGraphicsLayer);
+      graphic.visible = true;
+      this.sketch.cancel(); // if stored updated symbol, restore it
+
       if (this.symbolProperty) {
-        var _this$stateManager4 = this.stateManager,
-            layer = _this$stateManager4.layer,
-            graphic = _this$stateManager4.graphic;
-        utils.updateGraphic(layer, graphic, {
-          properties: {
-            symbol: this.symbolProperty
-          }
+        var _this$stateManager6 = this.stateManager,
+            layer = _this$stateManager6.layer,
+            _graphic = _this$stateManager6.graphic;
+        utils.updateGraphic(layer, _graphic, {
+          symbol: this.symbolProperty
         });
       }
+
+      this.sketch = null;
+      this.tempGraphicsLayer = null;
+      this.clonedGraphic = null;
+      this.symbolProperty = null;
     }
   }, {
     key: "update",
     value: function update(properties) {
-      var _this$stateManager5 = this.stateManager,
-          layer = _this$stateManager5.layer,
-          graphic = _this$stateManager5.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
+      var _this$stateManager7 = this.stateManager,
+          layer = _this$stateManager7.layer,
+          graphic = _this$stateManager7.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
       // in this state, symbol won't be change coz it uses the highlight symbol
 
       if ('symbol' in properties) {
         this.symbolProperty = properties.symbol;
-      }
+      } // update origin graphic
+
 
       var geometry = properties.geometry,
           attributes = properties.attributes;
       utils.updateGraphic(layer, graphic, {
-        properties: {
+        geometry: geometry,
+        attributes: attributes
+      }); // update clonedGraphic
+
+      if (this.editing) {// if the update is caused by sketch.update, then ignore the clonedGraphic update
+      } else {
+        // if the update is caused from outside (not from the sketch update), need to update clonedGraphic, and make it sketch update mode again
+        this.sketch.cancel();
+        utils.updateGraphic(this.tempGraphicsLayer, this.clonedGraphic, {
           geometry: geometry,
           attributes: attributes
-        }
-      });
-    }
-  }, {
-    key: "select",
-    value: function select() {// do nothing
-    }
-  }, {
-    key: "deselect",
-    value: function deselect() {// do nothing
-    }
-  }, {
-    key: "edit",
-    value: function edit() {// do nothing
+        });
+        this.sketch.update([this.clonedGraphic]);
+      }
     }
   }, {
     key: "quitEdit",
@@ -334,47 +355,51 @@ function (_BaseState4) {
 
   return Editing;
 }(BaseState);
+/**
+ * events: click, hover, edit
+ */
+
 
 var StateManager =
 /*#__PURE__*/
 function (_EventEmitter) {
   _inherits(StateManager, _EventEmitter);
 
-  function StateManager(_ref) {
-    var _this6;
+  function StateManager(_ref2) {
+    var _this7;
 
-    var view = _ref.view,
-        layer = _ref.layer;
+    var view = _ref2.view,
+        layer = _ref2.layer;
 
     _classCallCheck(this, StateManager);
 
-    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(StateManager).call(this));
-    _this6.view = view;
-    _this6.layer = layer;
-    _this6.graphic = null;
-    _this6.eventHandlers = [];
-    _this6.state = new BaseState();
-    return _this6;
+    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(StateManager).call(this));
+    _this7.view = view;
+    _this7.layer = layer;
+    _this7.graphic = null;
+    _this7.eventHandlers = [];
+    _this7.state = new BaseState();
+    return _this7;
   }
 
   _createClass(StateManager, [{
     key: "init",
-    value: function init(_ref2) {
-      var _this7 = this;
+    value: function init(_ref3) {
+      var _this8 = this;
 
-      var properties = _ref2.properties,
-          json = _ref2.json;
+      var properties = _ref3.properties,
+          json = _ref3.json;
       this.changeState('initializing');
       utils.createGraphic({
         properties: properties,
         json: json
       }).then(function (graphic) {
-        _this7.graphic = graphic;
-        utils.addGraphic(_this7.layer, graphic);
+        _this8.graphic = graphic;
+        utils.addGraphic(_this8.layer, graphic);
 
-        _this7.bindEvents();
+        _this8.bindEvents();
 
-        _this7.changeState('normal');
+        _this8.changeState('normal');
       });
     }
   }, {
@@ -385,38 +410,32 @@ function (_EventEmitter) {
       utils.removeGraphic(this.layer, this.graphic);
     }
   }, {
-    key: "update",
-    value: function update(params) {
-      console.log('update =>');
-      this.state.update(params);
-    }
-  }, {
     key: "bindEvents",
     value: function bindEvents() {
-      var _this8 = this;
+      var _this9 = this;
 
       var view = this.view,
           graphic = this.graphic;
       this.eventHandlers = [view.on('click', function (e) {
-        view.hitTest(e).then(function (_ref3) {
-          var results = _ref3.results;
-          var hit = results.find(function (r) {
-            return r.graphic === graphic;
-          });
-
-          _this8.emit('click', {
-            e: e,
-            hit: hit
-          });
-        });
-      }), view.on('pointer-move', function (e) {
         view.hitTest(e).then(function (_ref4) {
           var results = _ref4.results;
           var hit = results.find(function (r) {
             return r.graphic === graphic;
           });
 
-          _this8.emit('hover', {
+          _this9.emit('click', {
+            e: e,
+            hit: hit
+          });
+        });
+      }), view.on('pointer-move', function (e) {
+        view.hitTest(e).then(function (_ref5) {
+          var results = _ref5.results;
+          var hit = results.find(function (r) {
+            return r.graphic === graphic;
+          });
+
+          _this9.emit('hover', {
             e: e,
             hit: hit
           });
@@ -440,25 +459,39 @@ function (_EventEmitter) {
       }
 
       var StateClass = {
-        'normal': Normal,
         'initializing': Initializing,
-        'editing': Editing,
-        'selected': Selected
+        'normal': Normal,
+        'selected': Selected,
+        'editing': Editing
       }[stateKey];
       this.state = new StateClass(this);
     }
     /***** actions *****/
 
   }, {
+    key: "update",
+    value: function update(_ref6) {
+      var _this10 = this;
+
+      var properties = _ref6.properties,
+          json = _ref6.json;
+
+      if (json) {
+        utils.json2Properties(json).then(function (properties) {
+          _this10.state.update(properties);
+        });
+      } else {
+        this.state.update(properties);
+      }
+    }
+  }, {
     key: "select",
     value: function select() {
-      console.log('select');
       this.state.select();
     }
   }, {
     key: "deselect",
     value: function deselect() {
-      console.log('deselect');
       this.state.deselect();
     }
   }, {

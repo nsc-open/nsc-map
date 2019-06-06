@@ -104,6 +104,19 @@ function (_Component) {
       });
     });
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicEditHandler", function (_ref3) {
+      var graphic = _ref3.graphic,
+          e = _ref3.e,
+          key = _ref3.key;
+      console.log('key edit', key, graphic, e);
+
+      _this.props.onEdit({
+        graphic: graphic,
+        e: e,
+        key: key
+      });
+    });
+
     _this.state = {
       layer: null,
       selectedKeys: [],
@@ -172,7 +185,6 @@ function (_Component) {
     value: function render() {
       var _this4 = this;
 
-      console.log('GraphicsLayer render', this);
       var _this$props2 = this.props,
           view = _this$props2.view,
           _this$props2$children = _this$props2.children,
@@ -192,7 +204,8 @@ function (_Component) {
             selected: selectedKeys.includes(graphicKey),
             onSelect: _this4.graphicSelectHandler,
             editable: true,
-            editing: editingKeys.includes(graphicKey)
+            editing: editingKeys.includes(graphicKey),
+            onEdit: _this4.graphicEditHandler
           });
         });
       } else {

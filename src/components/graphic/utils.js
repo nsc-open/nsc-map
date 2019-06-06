@@ -82,24 +82,12 @@ export const removeGraphic = (layer, graphic) => {
   }
 }
 
-export const updateGraphic = (layer, graphic, { properties, json }) => {
-  console.log('-> updateGraphic', properties, json)
-  const _update = (properties) => {
-    graphic.set(properties)
-    if (layer.type === 'feature') {
-      layer.applyEdits({
-        updateFeatures: [graphic]
-      })
-    }
-  }
-
-  if (json) {
-    createGraphic({ json }).then(graphic => {
-      const { geometry, symbol, attributes } = graphic
-      _update({ geometry, symbol, attributes })
+export const updateGraphic = (layer, graphic, properties) => {
+  graphic.set(properties)
+  if (layer.type === 'feature') {
+    layer.applyEdits({
+      updateFeatures: [graphic]
     })
-  } else {
-    _update(properties)
   }
 }
 
@@ -127,4 +115,8 @@ export const createGraphic = ({ properties, json }) => {
       throw new Error('properties and json cannot to be empty at the same time')
     }
   })
+}
+
+export const json2Properties = json => {
+  return createGraphic({ json }).then(({ attributes, geometry, symbol }) => ({ attributes, geometry, symbol }))
 }

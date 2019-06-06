@@ -118,8 +118,12 @@ class GraphicsLayer extends Component {
     onSelect && onSelect(newSelectedKeys, { event: e, key, selected, graphic })
   }
 
+  graphicEditHandler = ({ graphic, e, key }) => {
+    console.log('key edit', key, graphic, e)
+    this.props.onEdit({ graphic, e, key })
+  }
+
   render () {
-    console.log('GraphicsLayer render', this)
     const { view, children = [] } = this.props
     const { layer, editingKeys, selectedKeys } = this.state
     
@@ -134,7 +138,7 @@ class GraphicsLayer extends Component {
           onSelect: this.graphicSelectHandler,
           editable: true,
           editing: editingKeys.includes(graphicKey),
-          
+          onEdit: this.graphicEditHandler
           
           
         })

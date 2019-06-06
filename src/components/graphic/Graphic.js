@@ -29,6 +29,10 @@ class Graphic extends Component {
       // this.onHover(e, hit)
       view.cursor = hit ? 'pointer' : 'auto'
     })
+    this.stateManager.on('edit', ({ graphic, e }) => {
+      const { onEdit } = this.props
+      onEdit({ graphic, e, key: Graphic.getKey({ properties: graphic }) })
+    })
   }
 
   componentWillUnmount () {
@@ -56,7 +60,11 @@ class Graphic extends Component {
 
     // edit
     if (needSync('editing')) {
-      
+      if (editing) {
+        this.stateManager.edit()
+      } else {
+        this.stateManager.quitEdit()
+      }
     }
     
   }
@@ -64,7 +72,6 @@ class Graphic extends Component {
 
 
   render () {
-    console.log('Graphic.render', this.props)
     return null
   }
 }
@@ -104,7 +111,7 @@ Graphic.defaultProps = {
   editing: false,
 
   onSelect: (e, { key, graphic, selected }) => {},
-  onEdit: null
+  onEdit: null // all sketch events will be dispatched here
 }
 
 

@@ -96,37 +96,13 @@ export var removeGraphic = function removeGraphic(layer, graphic) {
     });
   }
 };
-export var updateGraphic = function updateGraphic(layer, graphic, _ref2) {
-  var properties = _ref2.properties,
-      json = _ref2.json;
-  console.log('-> updateGraphic', properties, json);
+export var updateGraphic = function updateGraphic(layer, graphic, properties) {
+  graphic.set(properties);
 
-  var _update = function _update(properties) {
-    graphic.set(properties);
-
-    if (layer.type === 'feature') {
-      layer.applyEdits({
-        updateFeatures: [graphic]
-      });
-    }
-  };
-
-  if (json) {
-    createGraphic({
-      json: json
-    }).then(function (graphic) {
-      var geometry = graphic.geometry,
-          symbol = graphic.symbol,
-          attributes = graphic.attributes;
-
-      _update({
-        geometry: geometry,
-        symbol: symbol,
-        attributes: attributes
-      });
+  if (layer.type === 'feature') {
+    layer.applyEdits({
+      updateFeatures: [graphic]
     });
-  } else {
-    _update(properties);
   }
 };
 export var replaceGraphic = function replaceGraphic(layer, graphic, oldGraphic) {
@@ -140,11 +116,11 @@ export var replaceGraphic = function replaceGraphic(layer, graphic, oldGraphic) 
     });
   }
 };
-export var createGraphic = function createGraphic(_ref3) {
-  var properties = _ref3.properties,
-      json = _ref3.json;
-  return loadModules(['esri/Graphic']).then(function (_ref4) {
-    var Graphic = _ref4.Graphic;
+export var createGraphic = function createGraphic(_ref2) {
+  var properties = _ref2.properties,
+      json = _ref2.json;
+  return loadModules(['esri/Graphic']).then(function (_ref3) {
+    var Graphic = _ref3.Graphic;
 
     if (properties) {
       return new Graphic(properties);
@@ -153,5 +129,19 @@ export var createGraphic = function createGraphic(_ref3) {
     } else {
       throw new Error('properties and json cannot to be empty at the same time');
     }
+  });
+};
+export var json2Properties = function json2Properties(json) {
+  return createGraphic({
+    json: json
+  }).then(function (_ref4) {
+    var attributes = _ref4.attributes,
+        geometry = _ref4.geometry,
+        symbol = _ref4.symbol;
+    return {
+      attributes: attributes,
+      geometry: geometry,
+      symbol: symbol
+    };
   });
 };

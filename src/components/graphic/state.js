@@ -1,4 +1,5 @@
 import EventEmitter from 'eventemitter3'
+import { loadModules } from 'esri-module-loader'
 import * as utils from './utils'
 
 class BaseState {
@@ -19,15 +20,7 @@ class Initializing extends BaseState {
   constructor (props) {
     super(props)
     this.key = 'initializing'
-    this.init()
   }
-  init () {}
-  destroy () {}
-  update () {}
-  select () {}
-  deselect () {}
-  edit () {}
-  quitEdit () {}
 }
 
 class Normal extends BaseState {
@@ -37,28 +30,18 @@ class Normal extends BaseState {
     this.init()
   }
 
-  init () {}
-  destroy () {}
-
   update (properties) {
+    console.log('Normal.update', properties)
     const { layer, graphic } = this.stateManager
-    utils.updateGraphic(layer, graphic, { properties })
+    utils.updateGraphic(layer, graphic, properties)
   }
 
   select () {
     this.stateManager.changeState('selected')
   }
 
-  deselect () {
-    // do nothing
-  }
-
   edit () {
     this.stateManager.changeState('editing')
-  }
-
-  quitEdit () {
-    // do nothing
   }
 }
 
@@ -73,16 +56,13 @@ class Selected extends BaseState {
   }
 
   init () {
-    console.log('selected.init')
     const { view, layer, graphic } = this.stateManager
     view.whenLayerView(layer).then(layerView => {
-      console.log('selected.init highlight')
       this.highlightHandler = utils.highlight(layerView, [graphic])
     })
   }
 
   destroy () {
-    console.log('Select destroy', this.highlightHandler)
     if (this.highlightHandler) {
       this.highlightHandler.remove()
       this.highlightHandler = null
@@ -90,9 +70,10 @@ class Selected extends BaseState {
 
     // if stored updated symbol, restore it
     if (this.symbolProperty) {
-      //const { layer, graphic } = this.stateManager
-      //utils.updateGraphic(layer, graphic, { symbol: this.symbolProperty })
-    }
+      const { layer, graphic } = this.stateManager
+      utils.updateGraphic(layer, graphic, { symbol: this.symbolProperty })
+      this.symbolProperty = null
+    } 
   }
   
   update (properties) {
@@ -103,11 +84,7 @@ class Selected extends BaseState {
       this.symbolProperty = properties.symbol
     }
     const { geometry, attributes } = properties
-    utils.updateGraphic(layer, graphic, { properties: { geometry, attributes } })
-  }
-
-  select () {
-    // do nothing, already in selected state
+    utils.updateGraphic(layer, graphic, { geometry, attributes })
   }
 
   deselect () {
@@ -116,10 +93,6 @@ class Selected extends BaseState {
 
   edit () {
     this.stateManager.changeState('editing')
-  }
-
-  quitEdit () {
-    // do nothing
   }
 }
 
@@ -131,22 +104,79 @@ class Editing extends BaseState {
     this.clonedGraphic = null
     this.tempGraphicsLayer = null
     this.symbolProperty = null
+    this.sketch = null
+    this.editing = false
+    this.destroying = false
     this.init()
   }
 
   init () {
     // new sketch
+    loadModules([
+      'esri/widgets/Sketch/SketchViewModel',
+      'esri/layers/GraphicsLayer'
+    ]).then(({ SketchViewModel, GraphicsLayer }) => {
+      if (this.destroying) {
+        return // before modules loaded, destroy might be called
+      }
+
+      const { view, graphic } = this.stateManager
+      const tempGraphicsLayer = new GraphicsLayer()
+      const clonedGraphic = graphic.clone()
+      view.map.add(tempGraphicsLayer)
+      tempGraphicsLayer.add(clonedGraphic)
+      graphic.visible = false
+
+      const sketch = new SketchViewModel({
+        view,
+        layer: tempGraphicsLayer,
+        updateOnGraphicClick: false,
+        defaultUpdateOptions: { tool: 'reshape' }
+      })
+
+      // have to do the update async, otherwise sketch would not able to see clonedGraphic added into the layer
+      setTimeout(() => sketch.update([clonedGraphic]), 0)
+      sketch.on(['update', 'undo', 'redo'], this.sketchEventHandler)
+
+      this.tempGraphicsLayer = tempGraphicsLayer
+      this.clonedGraphic = clonedGraphic
+      this.sketch = sketch
+    })
   }
 
   destroy () {
-    // destroy sketch, clonedGraphic, tempGraphicsLayer
+    this.destroying = true
 
-    
+    // destroy sketch, clonedGraphic, tempGraphicsLayer
+    const { view, graphic } = this.stateManager
+    this.tempGraphicsLayer.remove(this.clonedGraphic)
+    view.map.remove(this.tempGraphicsLayer)
+    graphic.visible = true
+    this.sketch.cancel()
 
     // if stored updated symbol, restore it
     if (this.symbolProperty) {
       const { layer, graphic } = this.stateManager
-      utils.updateGraphic(layer, graphic, { properties: { symbol: this.symbolProperty } })
+      utils.updateGraphic(layer, graphic, { symbol: this.symbolProperty })
+    }
+
+    this.sketch = null
+    this.tempGraphicsLayer = null
+    this.clonedGraphic = null
+    this.symbolProperty = null
+  }
+
+  sketchEventHandler = e => {    
+    const graphic = e.graphics[0]
+    if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
+      this.editing = true
+    } else if (e.toolEventInfo && e.toolEventInfo.type.endsWith('-stop')) {
+      this.editing = false
+    }
+
+    if (this.editing) {
+      // emit only when there is sketch update happened (geometry updated)
+      this.stateManager.emit('edit', { graphic, e })
     }
   }
 
@@ -157,20 +187,20 @@ class Editing extends BaseState {
     if ('symbol' in properties) {
       this.symbolProperty = properties.symbol
     }
+
+    // update origin graphic
     const { geometry, attributes } = properties
-    utils.updateGraphic(layer, graphic, { properties: { geometry, attributes } })
-  }
+    utils.updateGraphic(layer, graphic, { geometry, attributes })
 
-  select () {
-    // do nothing
-  }
-
-  deselect () {
-    // do nothing
-  }
-
-  edit () {
-    // do nothing
+    // update clonedGraphic
+    if (this.editing) {
+      // if the update is caused by sketch.update, then ignore the clonedGraphic update
+    } else {
+      // if the update is caused from outside (not from the sketch update), need to update clonedGraphic, and make it sketch update mode again
+      this.sketch.cancel()
+      utils.updateGraphic(this.tempGraphicsLayer, this.clonedGraphic, { geometry, attributes })
+      this.sketch.update([this.clonedGraphic])
+    }
   }
 
   quitEdit () {
@@ -178,6 +208,9 @@ class Editing extends BaseState {
   }
 }
 
+/**
+ * events: click, hover, edit
+ */
 export default class StateManager extends EventEmitter {
   constructor ({ view, layer }) {
     super()
@@ -203,11 +236,6 @@ export default class StateManager extends EventEmitter {
     this.state.destroy()
     this.unbindEvents()
     utils.removeGraphic(this.layer, this.graphic)
-  }
-
-  update (params) {
-    console.log('update =>')
-    this.state.update(params)
   }
 
   bindEvents () {
@@ -240,25 +268,31 @@ export default class StateManager extends EventEmitter {
     }
 
     const StateClass = ({
-      'normal': Normal,
       'initializing': Initializing,
-      'editing': Editing,
-      'selected': Selected
+      'normal': Normal,
+      'selected': Selected,
+      'editing': Editing
     })[stateKey]
 
     this.state = new StateClass(this)
   }
 
   /***** actions *****/
+  update ({ properties, json }) {
+    if (json) {
+      utils.json2Properties(json).then(properties => {
+        this.state.update(properties)
+      })
+    } else {
+      this.state.update(properties)
+    }
+  }
   
-
   select () {
-    console.log('select')
     this.state.select()
   }
   
   deselect () {
-    console.log('deselect')
     this.state.deselect()
   }
 

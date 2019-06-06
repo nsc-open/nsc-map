@@ -74,6 +74,18 @@ function (_Component) {
         // this.onHover(e, hit)
         view.cursor = hit ? 'pointer' : 'auto';
       });
+      this.stateManager.on('edit', function (_ref3) {
+        var graphic = _ref3.graphic,
+            e = _ref3.e;
+        var onEdit = _this2.props.onEdit;
+        onEdit({
+          graphic: graphic,
+          e: e,
+          key: Graphic.getKey({
+            properties: graphic
+          })
+        });
+      });
     }
   }, {
     key: "componentWillUnmount",
@@ -114,12 +126,17 @@ function (_Component) {
       } // edit
 
 
-      if (needSync('editing')) {}
+      if (needSync('editing')) {
+        if (editing) {
+          this.stateManager.edit();
+        } else {
+          this.stateManager.quitEdit();
+        }
+      }
     }
   }, {
     key: "render",
     value: function render() {
-      console.log('Graphic.render', this.props);
       return null;
     }
   }]);
@@ -153,19 +170,20 @@ Graphic.defaultProps = {
   selected: false,
   editable: true,
   editing: false,
-  onSelect: function onSelect(e, _ref3) {
-    var key = _ref3.key,
-        graphic = _ref3.graphic,
-        selected = _ref3.selected;
+  onSelect: function onSelect(e, _ref4) {
+    var key = _ref4.key,
+        graphic = _ref4.graphic,
+        selected = _ref4.selected;
   },
-  onEdit: null
+  onEdit: null // all sketch events will be dispatched here
+
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
 Graphic.getKey = function (props) {
-  var _ref4 = props.properties || props.json,
-      _ref4$attributes = _ref4.attributes,
-      attributes = _ref4$attributes === void 0 ? {} : _ref4$attributes;
+  var _ref5 = props.properties || props.json,
+      _ref5$attributes = _ref5.attributes,
+      attributes = _ref5$attributes === void 0 ? {} : _ref5$attributes;
 
   return attributes.key;
 };
