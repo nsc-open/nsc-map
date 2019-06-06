@@ -37,14 +37,6 @@ var createLayer = function createLayer(properties) {
     return new GraphicsLayer(properties);
   });
 };
-/**
- * usage:
- *  <GraphicsLayer selectedKeys={[]}>
-      <Graphic key="" highlight highlightSymbol={} geometryJson={} />
-      <Graphic key="" graphicProperties={} />
-    </GraphicsLayer>
- */
-
 
 var GraphicsLayer =
 /*#__PURE__*/
@@ -69,17 +61,17 @@ function (_Component) {
         needSync = true;
         newState[name] = state[name];
       });
-      console.log('needsync', needSync);
 
       if (needSync) {
         _this.setState(newState);
       }
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicSelectHandler", function (e, _ref2) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "selectHandler", function (_ref2) {
       var key = _ref2.key,
           selected = _ref2.selected,
-          graphic = _ref2.graphic;
+          graphic = _ref2.graphic,
+          event = _ref2.event;
       var onSelect = _this.props.onSelect;
       var selectedKeys = _this.state.selectedKeys;
       var newSelectedKeys = [];
@@ -97,24 +89,38 @@ function (_Component) {
       });
 
       onSelect && onSelect(newSelectedKeys, {
-        event: e,
+        event: event,
         key: key,
         selected: selected,
         graphic: graphic
       });
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "graphicEditHandler", function (_ref3) {
-      var graphic = _ref3.graphic,
-          e = _ref3.e,
-          key = _ref3.key;
-      console.log('key edit', key, graphic, e);
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "editHandler", function (event) {
+      var onEdit = _this.props.onEdit;
+      onEdit && onEdit(event);
+    });
 
-      _this.props.onEdit({
-        graphic: graphic,
-        e: e,
-        key: key
-      });
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "hoverHandler", function (event) {
+      var _this$props = _this.props,
+          onHover = _this$props.onHover,
+          view = _this$props.view,
+          hoverCursor = _this$props.hoverCursor;
+      var key = event.key,
+          hover = event.hover; // TODO: this will have issue if there are more than one graphicsLayer, coz there is only one mapView at a time
+
+      /* if (hover && !this.hoverKeys.includes(key)) {
+        this.hoverKeys.push(key)
+      } else if (!hover) {
+        this.hoverKeys = this.hoverKeys.filter(k => k !== key)
+      }
+      if (this.hoverKeys.length > 0) {
+        view.cursor = hoverCursor
+      } else {
+        view.cursor = 'auto'
+      } */
+
+      onHover && onHover(event);
     });
 
     _this.state = {
@@ -122,6 +128,7 @@ function (_Component) {
       selectedKeys: [],
       editingKeys: []
     };
+    _this.hoverKeys = [];
     return _this;
   }
 
@@ -130,17 +137,17 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      var _this$props = this.props,
-          properties = _this$props.properties,
-          map = _this$props.map,
-          onLoad = _this$props.onLoad;
+      var _this$props2 = this.props,
+          properties = _this$props2.properties,
+          map = _this$props2.map,
+          onLoad = _this$props2.onLoad;
       createLayer(properties).then(function (layer) {
         _this2.setState({
           layer: layer
         });
 
         map.add(layer);
-        onLoad(layer);
+        onLoad && onLoad(layer);
       });
     }
   }, {
@@ -185,10 +192,14 @@ function (_Component) {
     value: function render() {
       var _this4 = this;
 
-      var _this$props2 = this.props,
-          view = _this$props2.view,
-          _this$props2$children = _this$props2.children,
-          children = _this$props2$children === void 0 ? [] : _this$props2$children;
+      var _this$props3 = this.props,
+          view = _this$props3.view,
+          _this$props3$children = _this$props3.children,
+          children = _this$props3$children === void 0 ? [] : _this$props3$children,
+          selectable = _this$props3.selectable,
+          editable = _this$props3.editable,
+          hoverable = _this$props3.hoverable,
+          hoverCursor = _this$props3.hoverCursor;
       var _this$state = this.state,
           layer = _this$state.layer,
           editingKeys = _this$state.editingKeys,
@@ -200,12 +211,15 @@ function (_Component) {
           return React.cloneElement(child, {
             view: view,
             layer: layer,
-            selectable: true,
+            selectable: selectable,
             selected: selectedKeys.includes(graphicKey),
-            onSelect: _this4.graphicSelectHandler,
-            editable: true,
+            onSelect: _this4.selectHandler,
+            editable: editable,
             editing: editingKeys.includes(graphicKey),
-            onEdit: _this4.graphicEditHandler
+            onEdit: _this4.editHandler,
+            hoverable: hoverable,
+            hoverCursor: hoverCursor,
+            onHover: _this4.hoverHandler
           });
         });
       } else {
@@ -249,25 +263,23 @@ GraphicsLayer.propTypes = {
   map: PropTypes.object.isRequired,
   view: PropTypes.object.isRequired,
   properties: PropTypes.object,
+  onLoad: PropTypes.func,
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.element), PropTypes.element]),
   selectable: PropTypes.bool.isRequired,
-  hoverable: PropTypes.bool.isRequired,
   selectedKeys: PropTypes.array,
-  editingKeys: PropTypes.array,
-  // hoverKeys: PropTypes.array // hover 是不需要 keys 去控制的，hover 一定是鼠标 hover 事件触发，不应该由外部去控制
-  sketch: PropTypes.func,
-  onLoad: PropTypes.func,
   onSelect: PropTypes.func,
-  onHover: PropTypes.func
+  hoverable: PropTypes.bool.isRequired,
+  hoverCursor: PropTypes.string,
+  onHover: PropTypes.func,
+  editable: PropTypes.bool,
+  editingKeys: PropTypes.array,
+  onEdit: PropTypes.func
 };
 GraphicsLayer.defaultProps = {
   children: [],
   properties: null,
   selectable: true,
-  editable: true,
   hoverable: true,
-  onLoad: function onLoad(layer) {},
-  onSelect: function onSelect() {},
-  onHover: function onHover() {}
+  editable: true
 };
 export default GraphicsLayer;

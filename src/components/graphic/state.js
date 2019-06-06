@@ -107,6 +107,7 @@ class Editing extends BaseState {
     this.sketch = null
     this.editing = false
     this.destroying = false
+    this.selected = false
     this.init()
   }
 
@@ -167,6 +168,7 @@ class Editing extends BaseState {
   }
 
   sketchEventHandler = e => {    
+    console.log('sketch event', e)
     const graphic = e.graphics[0]
     if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
       this.editing = true
@@ -176,7 +178,7 @@ class Editing extends BaseState {
 
     if (this.editing) {
       // emit only when there is sketch update happened (geometry updated)
-      this.stateManager.emit('edit', { graphic, e })
+      this.stateManager.emit('edit', { graphic, event: e })
     }
   }
 
@@ -203,13 +205,24 @@ class Editing extends BaseState {
     }
   }
 
+  select () {
+    this.selected = true
+  }
+
+  deselect () {
+    this.selected = false
+  }
+
   quitEdit () {
-    this.stateManager.changeState(this.stateManager.prevState || 'normal')
+    this.stateManager.changeState(this.selected ? 'selected' : 'normal')
   }
 }
 
 /**
- * events: click, hover, edit
+ * events: 
+ *    select: ({ e, hit }) => {}
+ *    hover: ()
+ *    edit
  */
 export default class StateManager extends EventEmitter {
   constructor ({ view, layer }) {
@@ -248,14 +261,14 @@ export default class StateManager extends EventEmitter {
     this.eventHandlers = [
       view.on('click', e => {
         view.hitTest(e).then(({ results }) => {
-          const hit = results.find(r => r.graphic === graphic)
-          this.emit('select', { e, hit })
+          const hit = !!results.find(r => r.graphic === graphic)
+          this.emit('select', { event: e, hit, graphic })
         })
       }),
       view.on('pointer-move', e => {
         view.hitTest(e).then(({ results }) => {
-          const hit = results.find(r => r.graphic === graphic)
-          this.emit('hover', { e, hit })
+          const hit = !!results.find(r => r.graphic === graphic)
+          this.emit('hover', { event: e, hit, graphic })
         })
       })
     ]
@@ -284,12 +297,12 @@ export default class StateManager extends EventEmitter {
 
   /***** actions *****/
   update ({ properties, json }) {
-    if (json) {
+    if (properties) {
+      this.state.update(properties)
+    } else {
       utils.json2Properties(json).then(properties => {
         this.state.update(properties)
       })
-    } else {
-      this.state.update(properties)
     }
   }
 

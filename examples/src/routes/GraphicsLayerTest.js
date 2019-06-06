@@ -83,9 +83,10 @@ export default class extends Component {
       <Map onLoad={this.onLoad}>
       {map ?
       <GraphicsLayer
+        selectable={selectable}
         selectedKeys={selectedKeys}
         onSelect={this.onSelect}
-        selectable={selectable}
+        
         editingKeys={editingKeys}
         onEdit={this.onEdit}
       >

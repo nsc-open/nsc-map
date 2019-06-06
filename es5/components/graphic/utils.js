@@ -78,6 +78,20 @@ export var highlight = function highlight(layerView) {
     };
   }
 };
+export var json2Properties = function json2Properties(json) {
+  return createGraphic({
+    json: json
+  }).then(function (_ref2) {
+    var attributes = _ref2.attributes,
+        geometry = _ref2.geometry,
+        symbol = _ref2.symbol;
+    return {
+      attributes: attributes,
+      geometry: geometry,
+      symbol: symbol
+    };
+  });
+};
 export var addGraphic = function addGraphic(layer, graphic) {
   if (layer.type === 'graphics') {
     layer.add(graphic);
@@ -116,11 +130,11 @@ export var replaceGraphic = function replaceGraphic(layer, graphic, oldGraphic) 
     });
   }
 };
-export var createGraphic = function createGraphic(_ref2) {
-  var properties = _ref2.properties,
-      json = _ref2.json;
-  return loadModules(['esri/Graphic']).then(function (_ref3) {
-    var Graphic = _ref3.Graphic;
+export var createGraphic = function createGraphic(_ref3) {
+  var properties = _ref3.properties,
+      json = _ref3.json;
+  return loadModules(['esri/Graphic']).then(function (_ref4) {
+    var Graphic = _ref4.Graphic;
 
     if (properties) {
       return new Graphic(properties);
@@ -129,19 +143,5 @@ export var createGraphic = function createGraphic(_ref2) {
     } else {
       throw new Error('properties and json cannot to be empty at the same time');
     }
-  });
-};
-export var json2Properties = function json2Properties(json) {
-  return createGraphic({
-    json: json
-  }).then(function (_ref4) {
-    var attributes = _ref4.attributes,
-        geometry = _ref4.geometry,
-        symbol = _ref4.symbol;
-    return {
-      attributes: attributes,
-      geometry: geometry,
-      symbol: symbol
-    };
   });
 };

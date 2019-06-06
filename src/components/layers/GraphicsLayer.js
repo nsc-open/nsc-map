@@ -7,13 +7,6 @@ const createLayer = properties => {
   return loadModules(['esri/layers/GraphicsLayer']).then(({ GraphicsLayer }) => new GraphicsLayer(properties))
 }
 
-/**
- * usage:
- *  <GraphicsLayer selectedKeys={[]}>
-      <Graphic key="" highlight highlightSymbol={} geometryJson={} />
-      <Graphic key="" graphicProperties={} />
-    </GraphicsLayer>
- */
 class GraphicsLayer extends Component {
 
   constructor (props) {
@@ -23,6 +16,7 @@ class GraphicsLayer extends Component {
       selectedKeys: [],
       editingKeys: []
     }
+    this.hoverKeys = []
   }
 
   static getDerivedStateFromProps (props, prevState) {
@@ -52,7 +46,7 @@ class GraphicsLayer extends Component {
     createLayer(properties).then(layer => {
       this.setState({ layer })
       map.add(layer)
-      onLoad(layer)
+      onLoad && onLoad(layer)
     })
   }
 
@@ -73,7 +67,6 @@ class GraphicsLayer extends Component {
   componentDidUpdate (prevProps) {
     const { properties } = this.props
     const { layer } = this.state
-
     const needSync = name => (!prevProps && name in this.props) || (prevProps && prevProps[name] !== this.props[name])
 
     // update graphicsLayer properties
@@ -97,13 +90,12 @@ class GraphicsLayer extends Component {
       newState[name] = state[name]
     })
 
-    console.log('needsync', needSync)
     if (needSync) {
       this.setState(newState)
     }
   }
 
-  graphicSelectHandler = (e, { key, selected, graphic }) => {
+  selectHandler = ({ key, selected, graphic, event }) => {
     const { onSelect } = this.props
     const { selectedKeys } = this.state
     let newSelectedKeys = []
@@ -115,16 +107,34 @@ class GraphicsLayer extends Component {
     }
 
     this.setUncontrolledState({ selectedKeys: newSelectedKeys })
-    onSelect && onSelect(newSelectedKeys, { event: e, key, selected, graphic })
+    onSelect && onSelect(newSelectedKeys, { event, key, selected, graphic })
   }
 
-  graphicEditHandler = ({ graphic, e, key }) => {
-    console.log('key edit', key, graphic, e)
-    this.props.onEdit({ graphic, e, key })
+  editHandler = event => {
+    const { onEdit } = this.props
+    onEdit && onEdit(event)
+  }
+
+  hoverHandler = event => {
+    const { onHover, view, hoverCursor } = this.props
+    const { key, hover } = event
+    // TODO: this will have issue if there are more than one graphicsLayer, coz there is only one mapView at a time
+    
+    /* if (hover && !this.hoverKeys.includes(key)) {
+      this.hoverKeys.push(key)
+    } else if (!hover) {
+      this.hoverKeys = this.hoverKeys.filter(k => k !== key)
+    }
+    if (this.hoverKeys.length > 0) {
+      view.cursor = hoverCursor
+    } else {
+      view.cursor = 'auto'
+    } */
+    onHover && onHover(event)
   }
 
   render () {
-    const { view, children = [] } = this.props
+    const { view, children = [], selectable, editable, hoverable, hoverCursor } = this.props
     const { layer, editingKeys, selectedKeys } = this.state
     
     if (layer) {
@@ -133,14 +143,18 @@ class GraphicsLayer extends Component {
         return React.cloneElement(child, {
           view,
           layer,
-          selectable: true,
+
+          selectable,
           selected: selectedKeys.includes(graphicKey),
-          onSelect: this.graphicSelectHandler,
-          editable: true,
+          onSelect: this.selectHandler,
+
+          editable,
           editing: editingKeys.includes(graphicKey),
-          onEdit: this.graphicEditHandler
-          
-          
+          onEdit: this.editHandler,
+
+          hoverable,
+          hoverCursor,
+          onHover: this.hoverHandler
         })
       })
     } else {
@@ -153,35 +167,31 @@ GraphicsLayer.propTypes = {
   map: PropTypes.object.isRequired,
   view: PropTypes.object.isRequired,
   properties: PropTypes.object,
-
+  onLoad: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.element),
     PropTypes.element
   ]), 
 
   selectable: PropTypes.bool.isRequired,
-  hoverable: PropTypes.bool.isRequired,
   selectedKeys: PropTypes.array,
-  editingKeys: PropTypes.array,
-  // hoverKeys: PropTypes.array // hover 是不需要 keys 去控制的，hover 一定是鼠标 hover 事件触发，不应该由外部去控制
-
-  sketch: PropTypes.func,
-
-  onLoad: PropTypes.func,
   onSelect: PropTypes.func,
-  onHover: PropTypes.func
+
+  hoverable: PropTypes.bool.isRequired,
+  hoverCursor: PropTypes.string,
+  onHover: PropTypes.func,
+
+  editable: PropTypes.bool,
+  editingKeys: PropTypes.array,
+  onEdit: PropTypes.func
 }
 
 GraphicsLayer.defaultProps = {
   children: [],
   properties: null,
-
   selectable: true,
-  editable: true,
   hoverable: true,
-  onLoad: layer => {},
-  onSelect: () => {},
-  onHover: () => {}
+  editable: true
 }
 
 export default GraphicsLayer

@@ -218,6 +218,7 @@ function (_BaseState4) {
     _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Editing).call(this, props));
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this5)), "sketchEventHandler", function (e) {
+      console.log('sketch event', e);
       var graphic = e.graphics[0];
 
       if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
@@ -230,7 +231,7 @@ function (_BaseState4) {
         // emit only when there is sketch update happened (geometry updated)
         _this5.stateManager.emit('edit', {
           graphic: graphic,
-          e: e
+          event: e
         });
       }
     });
@@ -242,6 +243,7 @@ function (_BaseState4) {
     _this5.sketch = null;
     _this5.editing = false;
     _this5.destroying = false;
+    _this5.selected = false;
 
     _this5.init();
 
@@ -347,16 +349,29 @@ function (_BaseState4) {
       }
     }
   }, {
+    key: "select",
+    value: function select() {
+      this.selected = true;
+    }
+  }, {
+    key: "deselect",
+    value: function deselect() {
+      this.selected = false;
+    }
+  }, {
     key: "quitEdit",
     value: function quitEdit() {
-      this.stateManager.changeState(this.stateManager.prevState || 'normal');
+      this.stateManager.changeState(this.selected ? 'selected' : 'normal');
     }
   }]);
 
   return Editing;
 }(BaseState);
 /**
- * events: click, hover, edit
+ * events: 
+ *    select: ({ e, hit }) => {}
+ *    hover: ()
+ *    edit
  */
 
 
@@ -378,6 +393,7 @@ function (_EventEmitter) {
     _this7.layer = layer;
     _this7.graphic = null;
     _this7.eventHandlers = [];
+    _this7.destroying = false;
     _this7.state = new BaseState();
     return _this7;
   }
@@ -394,6 +410,10 @@ function (_EventEmitter) {
         properties: properties,
         json: json
       }).then(function (graphic) {
+        if (_this8.destroying) {
+          return;
+        }
+
         _this8.graphic = graphic;
         utils.addGraphic(_this8.layer, graphic);
 
@@ -405,6 +425,7 @@ function (_EventEmitter) {
   }, {
     key: "destroy",
     value: function destroy() {
+      this.destroying = true;
       this.state.destroy();
       this.unbindEvents();
       utils.removeGraphic(this.layer, this.graphic);
@@ -419,25 +440,27 @@ function (_EventEmitter) {
       this.eventHandlers = [view.on('click', function (e) {
         view.hitTest(e).then(function (_ref4) {
           var results = _ref4.results;
-          var hit = results.find(function (r) {
+          var hit = !!results.find(function (r) {
             return r.graphic === graphic;
           });
 
-          _this9.emit('click', {
-            e: e,
-            hit: hit
+          _this9.emit('select', {
+            event: e,
+            hit: hit,
+            graphic: graphic
           });
         });
       }), view.on('pointer-move', function (e) {
         view.hitTest(e).then(function (_ref5) {
           var results = _ref5.results;
-          var hit = results.find(function (r) {
+          var hit = !!results.find(function (r) {
             return r.graphic === graphic;
           });
 
           _this9.emit('hover', {
-            e: e,
-            hit: hit
+            event: e,
+            hit: hit,
+            graphic: graphic
           });
         });
       })];
@@ -476,12 +499,12 @@ function (_EventEmitter) {
       var properties = _ref6.properties,
           json = _ref6.json;
 
-      if (json) {
+      if (properties) {
+        this.state.update(properties);
+      } else {
         utils.json2Properties(json).then(function (properties) {
           _this10.state.update(properties);
         });
-      } else {
-        this.state.update(properties);
       }
     }
   }, {

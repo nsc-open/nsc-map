@@ -32,7 +32,7 @@ class Graphic extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { properties, json, selected, selectable, editing } = this.props
+    const { properties, json, selected, selectable, editable, editing } = this.props
     const needSync = name => (!prevProps && name in this.props) || (prevProps && prevProps[name] !== this.props[name])
     
     // graphic instance create or update
@@ -50,31 +50,38 @@ class Graphic extends Component {
     }
 
     // edit
-    if (needSync('editing')) {
-      if (editing) {
-        this.stateManager.edit()
-      } else {
-        this.stateManager.quitEdit()
+    if (editable) {
+      if (needSync('editing')) {
+        if (editing) {
+          this.stateManager.edit()
+        } else {
+          this.stateManager.quitEdit()
+        }
       }
     }
   }
 
-  selectHandler = ({ e, hit }) => {
+  selectHandler = ({ event, graphic, hit: selected }) => {
     const { onSelect } = this.props
-    onSelect && onSelect()
+    onSelect && onSelect({
+      selected, graphic, event,
+      key: Graphic.getKey({ properties: graphic })
+    })
   }
 
-  hoverHandler = ({ e, hit }) => {
-    const { view, hoverable, hoverCursor = 'pointer', onHover } = this.props
+  hoverHandler = ({ event, graphic, hit: hover }) => {
+    const { hoverable, onHover } = this.props
     if (hoverable) {
-      view.cursor = hit ? hoverCursor : 'auto'
-      onHover && onHover()
+      onHover && onHover({
+        hover, graphic, event,
+        key: Graphic.getKey({ properties: graphic })
+      })
     }
   }
 
-  editHandler = ({ graphic, e }) => {
+  editHandler = ({ graphic, event }) => {
     const { onEdit } = this.props
-    onEdit && onEdit({ graphic, e, key: Graphic.getKey({ properties: graphic }) })
+    onEdit && onEdit({ graphic, event, key: Graphic.getKey({ properties: graphic }) })
   }
 
   render () {
@@ -83,41 +90,42 @@ class Graphic extends Component {
 }
 
 Graphic.propTypes = {
-  // esri/Graphic constructor related props
+  // construction related
   view: PropTypes.object.isRequired,
   layer: PropTypes.object.isRequired,
-  properties: PropTypes.object, // properties has higher priority than json when constructing a graphic
-  json: PropTypes.object, // 
+  properties: PropTypes.object, // properties has higher priority than json
+  json: PropTypes.object,
 
+  // hover related
   hoverable: PropTypes.bool,
   hoverCursor: PropTypes.string,
   onHover: PropTypes.func,
 
+  // select related
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
   onSelect: PropTypes.func,
 
+  // edit related
   editable: PropTypes.bool,
   editing: PropTypes.bool,
+  onEdit: PropTypes.func,
 
   
 }
 
 Graphic.defaultProps = {
-  properties: null,
-  json: null,
-
   hoverable: true,
   hoverCursor: 'pointer',
+  onHover: null,
 
   selectable: true,
   selected: false,
+  onSelect: null,
 
   editable: true,
   editing: false,
-
-  onSelect: (e, { key, graphic, selected }) => {},
-  onEdit: null // all sketch events will be dispatched here
+  onEdit: null
 }
 
 

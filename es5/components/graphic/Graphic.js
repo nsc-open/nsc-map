@@ -8,13 +8,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 import { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -39,6 +41,55 @@ function (_Component) {
     _classCallCheck(this, Graphic);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Graphic).call(this, props));
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "selectHandler", function (_ref) {
+      var event = _ref.event,
+          graphic = _ref.graphic,
+          selected = _ref.hit;
+      var onSelect = _this.props.onSelect;
+      onSelect && onSelect({
+        selected: selected,
+        graphic: graphic,
+        event: event,
+        key: Graphic.getKey({
+          properties: graphic
+        })
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "hoverHandler", function (_ref2) {
+      var event = _ref2.event,
+          graphic = _ref2.graphic,
+          hover = _ref2.hit;
+      var _this$props = _this.props,
+          hoverable = _this$props.hoverable,
+          onHover = _this$props.onHover;
+
+      if (hoverable) {
+        onHover && onHover({
+          hover: hover,
+          graphic: graphic,
+          event: event,
+          key: Graphic.getKey({
+            properties: graphic
+          })
+        });
+      }
+    });
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "editHandler", function (_ref3) {
+      var graphic = _ref3.graphic,
+          event = _ref3.event;
+      var onEdit = _this.props.onEdit;
+      onEdit && onEdit({
+        graphic: graphic,
+        event: event,
+        key: Graphic.getKey({
+          properties: graphic
+        })
+      });
+    });
+
     _this.stateManager = null;
     return _this;
   }
@@ -46,14 +97,11 @@ function (_Component) {
   _createClass(Graphic, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this2 = this;
-
-      window.g = this;
-      var _this$props = this.props,
-          view = _this$props.view,
-          layer = _this$props.layer,
-          properties = _this$props.properties,
-          json = _this$props.json;
+      var _this$props2 = this.props,
+          view = _this$props2.view,
+          layer = _this$props2.layer,
+          properties = _this$props2.properties,
+          json = _this$props2.json;
       this.stateManager = new StateManager({
         view: view,
         layer: layer
@@ -62,50 +110,31 @@ function (_Component) {
         properties: properties,
         json: json
       });
-      this.stateManager.on('click', function (_ref) {
-        var e = _ref.e,
-            hit = _ref.hit;
-
-        _this2.onClick(e, hit);
-      });
-      this.stateManager.on('hover', function (_ref2) {
-        var e = _ref2.e,
-            hit = _ref2.hit;
-        // this.onHover(e, hit)
-        view.cursor = hit ? 'pointer' : 'auto';
-      });
-      this.stateManager.on('edit', function (_ref3) {
-        var graphic = _ref3.graphic,
-            e = _ref3.e;
-        var onEdit = _this2.props.onEdit;
-        onEdit({
-          graphic: graphic,
-          e: e,
-          key: Graphic.getKey({
-            properties: graphic
-          })
-        });
-      });
+      this.stateManager.on('select', this.selectHandler);
+      this.stateManager.on('hover', this.hoverHandler);
+      this.stateManager.on('edit', this.editHandler);
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       this.stateManager.destroy();
+      this.stateManager = null;
     }
   }, {
     key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps, prevState) {
-      var _this3 = this;
+    value: function componentDidUpdate(prevProps) {
+      var _this2 = this;
 
-      var _this$props2 = this.props,
-          properties = _this$props2.properties,
-          json = _this$props2.json,
-          selected = _this$props2.selected,
-          selectable = _this$props2.selectable,
-          editing = _this$props2.editing;
+      var _this$props3 = this.props,
+          properties = _this$props3.properties,
+          json = _this$props3.json,
+          selected = _this$props3.selected,
+          selectable = _this$props3.selectable,
+          editable = _this$props3.editable,
+          editing = _this$props3.editing;
 
       var needSync = function needSync(name) {
-        return !prevProps && name in _this3.props || prevProps && prevProps[name] !== _this3.props[name];
+        return !prevProps && name in _this2.props || prevProps && prevProps[name] !== _this2.props[name];
       }; // graphic instance create or update
 
 
@@ -126,11 +155,13 @@ function (_Component) {
       } // edit
 
 
-      if (needSync('editing')) {
-        if (editing) {
-          this.stateManager.edit();
-        } else {
-          this.stateManager.quitEdit();
+      if (editable) {
+        if (needSync('editing')) {
+          if (editing) {
+            this.stateManager.edit();
+          } else {
+            this.stateManager.quitEdit();
+          }
         }
       }
     }
@@ -145,45 +176,42 @@ function (_Component) {
 }(Component);
 
 Graphic.propTypes = {
-  // esri/Graphic constructor related props
+  // construction related
   view: PropTypes.object.isRequired,
   layer: PropTypes.object.isRequired,
   properties: PropTypes.object,
-  // properties has higher priority than json when constructing a graphic
+  // properties has higher priority than json
   json: PropTypes.object,
-  // 
+  // hover related
   hoverable: PropTypes.bool,
   hoverCursor: PropTypes.string,
   onHover: PropTypes.func,
+  // select related
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
   onSelect: PropTypes.func,
+  // edit related
   editable: PropTypes.bool,
-  editing: PropTypes.bool
+  editing: PropTypes.bool,
+  onEdit: PropTypes.func
 };
 Graphic.defaultProps = {
-  properties: null,
-  json: null,
   hoverable: true,
   hoverCursor: 'pointer',
+  onHover: null,
   selectable: true,
   selected: false,
+  onSelect: null,
   editable: true,
   editing: false,
-  onSelect: function onSelect(e, _ref4) {
-    var key = _ref4.key,
-        graphic = _ref4.graphic,
-        selected = _ref4.selected;
-  },
-  onEdit: null // all sketch events will be dispatched here
-
+  onEdit: null
 };
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
 Graphic.getKey = function (props) {
-  var _ref5 = props.properties || props.json,
-      _ref5$attributes = _ref5.attributes,
-      attributes = _ref5$attributes === void 0 ? {} : _ref5$attributes;
+  var _ref4 = props.properties || props.json,
+      _ref4$attributes = _ref4.attributes,
+      attributes = _ref4$attributes === void 0 ? {} : _ref4$attributes;
 
   return attributes.key;
 };
