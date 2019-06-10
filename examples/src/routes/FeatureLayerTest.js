@@ -9,18 +9,6 @@ const geometryJsons = [polygon1, polygon2].map((p, i) => {
   return p
 })
 
-window.changeFeature = () => {
-  window.featureLayer.featureLayer.applyEdits({
-    updateFeatures: [{
-      attributes: {
-        key: '1',
-        ObjectID: 2
-      },
-      geometry: {"type":"polygon","spatialReference":{"wkid":102100},"rings":[[[-7211276.613588262,3802755.0318591143],[-7354878.7567115845,2090288.1170993866],[-8928936.356528472,2971858.417348545],[-8559303.466083396,4160237.9546233397],[-7211276.613588262,3802755.0318591143]]]}
-    }]
-  })
-}
-
 export default class extends Component {
 
   state = {
@@ -28,9 +16,26 @@ export default class extends Component {
     selectedKeys: [],
     editingKeys: []
   }
+
+  updateGeometry () {
+    const { graphics } = this.state
+    const key = '1'
+    const match = graphics.find(g => g.attributes.key === key)
+    this.setState({
+      graphics: [
+        ...graphics.filter(g => g.attributes.key !== key),
+        {
+          ...match,
+          geometry: {"type":"polygon","spatialReference":{"wkid":102100},"rings":[[[-7211276.613588262,3802755.0318591143],[-7354878.7567115845,2090288.1170993866],[-8928936.356528472,2971858.417348545],[-8559303.466083396,4160237.9546233397],[-7211276.613588262,3802755.0318591143]]]}
+        }
+      ]
+    })
+  }
   
   onLoad = (map, view) => {
-    this.setState({ map, view })
+    this.setState({ map, view }, () => {
+      setTimeout(() => this.updateGeometry(), 2000)
+    })
   }
 
   onSelect = (selectedKeys, details) => {
