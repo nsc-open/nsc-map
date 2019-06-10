@@ -166,8 +166,9 @@ function (_Component) {
       }; // update graphicsLayer properties
 
 
-      if (needSync('properties')) {
-        layer.set(properties);
+      if (needSync('properties')) {// TODO properties should be considered as static props, set properties automatically would cause featureLayer issue
+        // like, source been reset, you need to apply adds again
+        // layer.set(properties)
       }
     }
     /**

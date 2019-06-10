@@ -158,9 +158,6 @@ function (_Component) {
 
       if (editable) {
         if (needSync('editing')) {
-          console.log('needsync editing');
-          return;
-
           if (editing) {
             this.stateManager.edit();
           } else {

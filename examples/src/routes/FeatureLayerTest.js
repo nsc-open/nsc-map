@@ -73,6 +73,7 @@ export default class extends Component {
               name: 'key',
               type: 'string'
             }],
+            // spatialReference: { wkid:102100 },
             renderer: {
               type: "simple", // autocasts as new SimpleRenderer()
               symbol: {

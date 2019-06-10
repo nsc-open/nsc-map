@@ -97,7 +97,6 @@ function (_BaseState2) {
   _createClass(Normal, [{
     key: "update",
     value: function update(properties) {
-      console.log('Normal.update', properties);
       var _this$stateManager = this.stateManager,
           layer = _this$stateManager.layer,
           graphic = _this$stateManager.graphic;
@@ -218,8 +217,6 @@ function (_BaseState4) {
     _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Editing).call(this, props));
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this5)), "sketchEventHandler", function (e) {
-      return;
-      console.log('sketch event', e);
       var graphic = e.graphics[0];
 
       if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
@@ -256,8 +253,7 @@ function (_BaseState4) {
     value: function init() {
       var _this6 = this;
 
-      return; // new sketch
-
+      // new sketch
       loadModules(['esri/widgets/Sketch/SketchViewModel', 'esri/layers/GraphicsLayer']).then(function (_ref) {
         var SketchViewModel = _ref.SketchViewModel,
             GraphicsLayer = _ref.GraphicsLayer;
@@ -296,27 +292,32 @@ function (_BaseState4) {
   }, {
     key: "destroy",
     value: function destroy() {
-      return;
-      this.destroying = true; // destroy sketch, clonedGraphic, tempGraphicsLayer
-
+      // destroy sketch, clonedGraphic, tempGraphicsLayer
       var _this$stateManager5 = this.stateManager,
           view = _this$stateManager5.view,
           graphic = _this$stateManager5.graphic,
           layer = _this$stateManager5.layer;
-      this.tempGraphicsLayer.remove(this.clonedGraphic);
-      view.map.remove(this.tempGraphicsLayer);
-      utils.showGraphic(layer, graphic);
-      this.sketch.cancel(); // if stored updated symbol, restore it
+      this.destroying = true;
+
+      if (layer.type === 'feature') {
+        // need to apply update from clonedGraphic to feature
+        utils.showGraphic(layer, graphic); // need to restore the hidden feature firts, otherwise not able to do the update later
+
+        utils.updateGraphic(layer, graphic, {
+          geometry: this.clonedGraphic.geometry
+        }); // update the feature the sketched geometry
+      } // if stored updated symbol, restore it
+
 
       if (this.symbolProperty) {
-        var _this$stateManager6 = this.stateManager,
-            _layer = _this$stateManager6.layer,
-            _graphic = _this$stateManager6.graphic;
-        utils.updateGraphic(_layer, _graphic, {
+        utils.updateGraphic(layer, graphic, {
           symbol: this.symbolProperty
         });
       }
 
+      this.tempGraphicsLayer.remove(this.clonedGraphic);
+      view.map.remove(this.tempGraphicsLayer);
+      this.sketch.cancel();
       this.sketch = null;
       this.tempGraphicsLayer = null;
       this.clonedGraphic = null;
@@ -325,10 +326,9 @@ function (_BaseState4) {
   }, {
     key: "update",
     value: function update(properties) {
-      return;
-      var _this$stateManager7 = this.stateManager,
-          layer = _this$stateManager7.layer,
-          graphic = _this$stateManager7.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
+      var _this$stateManager6 = this.stateManager,
+          layer = _this$stateManager6.layer,
+          graphic = _this$stateManager6.graphic; // if trying to change symbol, it will be stored and updated with this symbol after exit this state
       // in this state, symbol won't be change coz it uses the highlight symbol
 
       if ('symbol' in properties) {
@@ -502,7 +502,7 @@ function (_EventEmitter) {
         'selected': Selected,
         'editing': Editing
       }[stateKey];
-      console.log('changeState ======>', stateKey, this.graphic ? this.graphic.attributes.key : 'null');
+      console.log("changeState ======> ".concat(this.state.key, " from to ").concat(stateKey), this.graphic);
       this.state = new StateClass(this);
     }
     /***** actions *****/

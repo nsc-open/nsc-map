@@ -31,7 +31,6 @@ class Normal extends BaseState {
   }
 
   update (properties) {
-    console.log('Normal.update', properties)
     const { layer, graphic } = this.stateManager
     utils.updateGraphic(layer, graphic, properties)
   }
@@ -112,7 +111,6 @@ class Editing extends BaseState {
   }
 
   init () {
-    return
     // new sketch
     loadModules([
       'esri/widgets/Sketch/SketchViewModel',
@@ -147,21 +145,23 @@ class Editing extends BaseState {
   }
 
   destroy () {
-    return
-    this.destroying = true
-
     // destroy sketch, clonedGraphic, tempGraphicsLayer
     const { view, graphic, layer } = this.stateManager
-    this.tempGraphicsLayer.remove(this.clonedGraphic)
-    view.map.remove(this.tempGraphicsLayer)
-    utils.showGraphic(layer, graphic)
-    this.sketch.cancel()
+    this.destroying = true
+
+    if (layer.type === 'feature') { // need to apply update from clonedGraphic to feature
+      utils.showGraphic(layer, graphic) // need to restore the hidden feature firts, otherwise not able to do the update later
+      utils.updateGraphic(layer, graphic, { geometry: this.clonedGraphic.geometry }) // update the feature the sketched geometry
+    }
 
     // if stored updated symbol, restore it
     if (this.symbolProperty) {
-      const { layer, graphic } = this.stateManager
       utils.updateGraphic(layer, graphic, { symbol: this.symbolProperty })
     }
+
+    this.tempGraphicsLayer.remove(this.clonedGraphic)
+    view.map.remove(this.tempGraphicsLayer)
+    this.sketch.cancel()
 
     this.sketch = null
     this.tempGraphicsLayer = null
@@ -170,8 +170,6 @@ class Editing extends BaseState {
   }
 
   sketchEventHandler = e => {
-    return
-    console.log('sketch event', e)
     const graphic = e.graphics[0]
     if (e.state === 'active' && e.toolEventInfo && e.toolEventInfo.type.endsWith('-start')) {
       this.editing = true
@@ -186,7 +184,6 @@ class Editing extends BaseState {
   }
 
   update (properties) {
-    return
     const { layer, graphic } = this.stateManager
     // if trying to change symbol, it will be stored and updated with this symbol after exit this state
     // in this state, symbol won't be change coz it uses the highlight symbol
@@ -302,7 +299,7 @@ export default class StateManager extends EventEmitter {
       'selected': Selected,
       'editing': Editing
     })[stateKey]
-    console.log('changeState ======>', stateKey, this.graphic ? this.graphic.attributes.key : 'null')
+    console.log(`changeState ======> ${this.state.key} from to ${stateKey}`, this.graphic)
 
     this.state = new StateClass(this)
   }

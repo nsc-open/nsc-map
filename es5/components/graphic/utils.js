@@ -114,7 +114,6 @@ export var updateGraphic = function updateGraphic(layer, graphic, properties) {
   graphic.set(properties);
 
   if (layer.type === 'feature') {
-    console.log('applyEdits updateFeatures', graphic);
     layer.applyEdits({
       updateFeatures: [graphic]
     });
