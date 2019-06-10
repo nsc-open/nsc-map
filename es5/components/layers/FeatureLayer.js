@@ -1,13 +1,5 @@
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -67,44 +59,49 @@ function (_Component) {
       }
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "selectHandler", function (_ref) {
-      var key = _ref.key,
-          selected = _ref.selected,
-          graphic = _ref.graphic,
-          event = _ref.event;
-      console.log('=-->', key, selected);
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "clickHandler", function () {
+      var hittedGraphics = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var event = arguments.length > 1 ? arguments[1] : undefined;
       var onSelect = _this.props.onSelect;
-      var selectedKeys = _this.state.selectedKeys;
-      var newSelectedKeys = [];
-
-      if (selected && !selectedKeys.includes(key)) {
-        newSelectedKeys = [].concat(_toConsumableArray(selectedKeys), [key]);
-      } else if (!selected) {
-        newSelectedKeys = selectedKeys.filter(function (k) {
-          return k !== key;
-        });
-      }
+      var selectedKeys = hittedGraphics.map(function (g) {
+        return g.attributes.key;
+      });
 
       _this.setUncontrolledState({
-        selectedKeys: newSelectedKeys
+        selectedKeys: selectedKeys
       });
 
-      onSelect && onSelect(newSelectedKeys, {
-        event: event,
-        key: key,
-        selected: selected,
-        graphic: graphic
+      onSelect && onSelect(selectedKeys, {
+        graphics: hittedGraphics,
+        event: event
       });
+    });
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "pointerMoveHandler", function () {
+      var hittedGraphics = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var event = arguments.length > 1 ? arguments[1] : undefined;
+      var _this$props = _this.props,
+          view = _this$props.view,
+          onHover = _this$props.onHover,
+          hoverCursor = _this$props.hoverCursor;
+      var keys = hittedGraphics.map(function (g) {
+        return g.attributes.key;
+      });
+
+      if (hittedGraphics.length > 0) {
+        view.cursor = hoverCursor;
+        onHover && onHover(keys, {
+          graphics: hittedGraphics,
+          event: event
+        });
+      } else {
+        view.cursor = 'auto';
+      }
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "editHandler", function (event) {
       var onEdit = _this.props.onEdit;
       onEdit && onEdit(event);
-    });
-
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "hoverHandler", function (event) {
-      var onHover = _this.props.onHover;
-      onHover && onHover(event);
     });
 
     _this.state = {
@@ -121,8 +118,8 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      loadModules(['FeatureLayer']).then(function (_ref2) {
-        var FeatureLayer = _ref2.FeatureLayer;
+      loadModules(['FeatureLayer']).then(function (_ref) {
+        var FeatureLayer = _ref.FeatureLayer;
         var _this2$props = _this2.props,
             properties = _this2$props.properties,
             onLoad = _this2$props.onLoad;
@@ -134,12 +131,15 @@ function (_Component) {
           layer: layer
         });
 
+        _this2.bindEvents();
+
         onLoad && onLoad(layer);
       });
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
+      this.unbindEvents();
       this.removeLayer(this.state.layer);
     }
   }, {
@@ -171,6 +171,42 @@ function (_Component) {
         // layer.set(properties)
       }
     }
+  }, {
+    key: "bindEvents",
+    value: function bindEvents() {
+      var _this4 = this;
+
+      var view = this.props.view;
+
+      var _hitted = function _hitted(results) {
+        return results.filter(function (r) {
+          return r.graphic.layer === _this4.state.layer;
+        }).map(function (r) {
+          return r.graphic;
+        });
+      };
+
+      this.eventHandlers = [view.on('click', function (e) {
+        view.hitTest(e).then(function (_ref2) {
+          var results = _ref2.results;
+
+          _this4.clickHandler(_hitted(results), e);
+        });
+      }), view.on('pointer-move', function (e) {
+        view.hitTest(e).then(function (_ref3) {
+          var results = _ref3.results;
+
+          _this4.pointerMoveHandler(_hitted(results), e);
+        });
+      })];
+    }
+  }, {
+    key: "unbindEvents",
+    value: function unbindEvents() {
+      this.eventHandlers.forEach(function (h) {
+        return h.remove();
+      });
+    }
     /**
      * Only update the value which is not in props
      */
@@ -178,9 +214,9 @@ function (_Component) {
   }, {
     key: "addLayer",
     value: function addLayer(layer) {
-      var _this$props = this.props,
-          map = _this$props.map,
-          parentLayer = _this$props.parentLayer;
+      var _this$props2 = this.props,
+          map = _this$props2.map,
+          parentLayer = _this$props2.parentLayer;
 
       if (parentLayer) {
         console.log('FeatureLayer parentLayer.add(layer)');
@@ -193,9 +229,9 @@ function (_Component) {
   }, {
     key: "removeLayer",
     value: function removeLayer(layer) {
-      var _this$props2 = this.props,
-          map = _this$props2.map,
-          parentLayer = _this$props2.parentLayer;
+      var _this$props3 = this.props,
+          map = _this$props3.map,
+          parentLayer = _this$props3.parentLayer;
 
       if (parentLayer) {
         parentLayer.remove(layer);
@@ -206,16 +242,15 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
-      var _this$props3 = this.props,
-          view = _this$props3.view,
-          _this$props3$children = _this$props3.children,
-          children = _this$props3$children === void 0 ? [] : _this$props3$children,
-          selectable = _this$props3.selectable,
-          editable = _this$props3.editable,
-          hoverable = _this$props3.hoverable,
-          hoverCursor = _this$props3.hoverCursor;
+      var _this$props4 = this.props,
+          view = _this$props4.view,
+          _this$props4$children = _this$props4.children,
+          children = _this$props4$children === void 0 ? [] : _this$props4$children,
+          selectable = _this$props4.selectable,
+          editable = _this$props4.editable,
+          hoverable = _this$props4.hoverable;
       var _this$state = this.state,
           layer = _this$state.layer,
           editingKeys = _this$state.editingKeys,
@@ -230,13 +265,10 @@ function (_Component) {
             layer: layer,
             selectable: selectable,
             selected: selectedKeys.includes(graphicKey),
-            onSelect: _this4.selectHandler,
             editable: editable,
             editing: editingKeys.includes(graphicKey),
-            onEdit: _this4.editHandler,
-            hoverable: hoverable,
-            hoverCursor: hoverCursor,
-            onHover: _this4.hoverHandler
+            onEdit: _this5.editHandler,
+            hoverable: hoverable
           });
         });
       } else {
@@ -299,6 +331,7 @@ FeatureLayer.defaultProps = {
   properties: null,
   selectable: true,
   hoverable: true,
+  hoverCursor: 'pointer',
   editable: true
 };
 export default FeatureLayer;

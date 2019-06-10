@@ -231,7 +231,6 @@ export default class StateManager extends EventEmitter {
     this.view = view
     this.layer = layer
     this.graphic = null
-    this.eventHandlers = []
     this.destroying = false
     this.state = new BaseState()
   }
@@ -245,7 +244,6 @@ export default class StateManager extends EventEmitter {
 
       this.graphic = graphic
       utils.addGraphic(this.layer, graphic)
-      this.bindEvents()
       this.changeState('normal')
     })
   }
@@ -253,38 +251,7 @@ export default class StateManager extends EventEmitter {
   destroy () {
     this.destroying = true
     this.state.destroy()
-    this.unbindEvents()
     utils.removeGraphic(this.layer, this.graphic)
-  }
-
-  bindEvents () {
-    const { view, graphic } = this
-    const isSame = (g1, g2) => {
-      if (this.layer.type === 'graphics') {
-        return g1 === g2
-      } else if (this.layer.type === 'feature') {
-        return g1.attributes.key === g2.attributes.key
-      }
-    }
-    this.eventHandlers = [
-      view.on('click', e => {
-        view.hitTest(e).then(({ results }) => {
-          const hit = !!results.find(r => isSame(r.graphic, graphic))
-          this.emit('select', { event: e, hit, graphic })
-        })
-      }),
-      view.on('pointer-move', e => {
-        view.hitTest(e).then(({ results }) => {
-          const hit = !!results.find(r => isSame(r.graphic, graphic))
-          this.emit('hover', { event: e, hit, graphic })
-        })
-      })
-    ]
-  }
-
-  unbindEvents () {
-    this.eventHandlers.forEach(h => h.remove())
-    this.eventHandlers = []
   }
 
   changeState (stateKey) {

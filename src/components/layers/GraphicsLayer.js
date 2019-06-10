@@ -46,11 +46,13 @@ class GraphicsLayer extends Component {
     createLayer(properties).then(layer => {
       this.setState({ layer })
       map.add(layer)
+      this.bindEvents()
       onLoad && onLoad(layer)
     })
   }
 
   componentWillUnmount () {
+    this.unbindEvents()
     this.props.map.remove(this.state.layer)
   }
 
@@ -75,6 +77,29 @@ class GraphicsLayer extends Component {
     }
   }
 
+  bindEvents () {
+    const { view } = this.props
+    const _hitted = results => results.filter(r => r.graphic.layer === this.state.layer).map(r => r.graphic)
+
+    this.eventHandlers = [
+      view.on('click', e => {
+        view.hitTest(e).then(({ results }) => {
+          this.clickHandler(_hitted(results), e)
+        })
+      }),
+      view.on('pointer-move', e => {
+        view.hitTest(e).then(({ results }) => {
+          this.pointerMoveHandler(_hitted(results), e)
+        })
+      })
+    ]
+    
+  }
+
+  unbindEvents () {
+    this.eventHandlers.forEach(h => h.remove())
+  }
+
   /**
    * Only update the value which is not in props
    */
@@ -95,19 +120,23 @@ class GraphicsLayer extends Component {
     }
   }
 
-  selectHandler = ({ key, selected, graphic, event }) => {
+  clickHandler = (hittedGraphics = [], event) => {
     const { onSelect } = this.props
-    const { selectedKeys } = this.state
-    let newSelectedKeys = []
+    const selectedKeys = hittedGraphics.map(g => g.attributes.key)
 
-    if (selected && !selectedKeys.includes(key)) {
-      newSelectedKeys = [...selectedKeys, key]
-    } else if (!selected) {
-      newSelectedKeys = selectedKeys.filter(k => k !== key)
+    this.setUncontrolledState({ selectedKeys })
+    onSelect && onSelect(selectedKeys, { graphics: hittedGraphics, event })
+  }
+
+  pointerMoveHandler = (hittedGraphics = [], event) => {
+    const { view, onHover, hoverCursor } = this.props
+    const keys = hittedGraphics.map(g => g.attributes.key)
+    if (hittedGraphics.length > 0) {
+      view.cursor = hoverCursor
+      onHover && onHover(keys, { graphics: hittedGraphics, event })
+    } else {
+      view.cursor = 'auto'
     }
-
-    this.setUncontrolledState({ selectedKeys: newSelectedKeys })
-    onSelect && onSelect(newSelectedKeys, { event, key, selected, graphic })
   }
 
   editHandler = event => {
@@ -115,26 +144,8 @@ class GraphicsLayer extends Component {
     onEdit && onEdit(event)
   }
 
-  hoverHandler = event => {
-    const { onHover, view, hoverCursor } = this.props
-    const { key, hover } = event
-    // TODO: this will have issue if there are more than one graphicsLayer, coz there is only one mapView at a time
-    
-    /* if (hover && !this.hoverKeys.includes(key)) {
-      this.hoverKeys.push(key)
-    } else if (!hover) {
-      this.hoverKeys = this.hoverKeys.filter(k => k !== key)
-    }
-    if (this.hoverKeys.length > 0) {
-      view.cursor = hoverCursor
-    } else {
-      view.cursor = 'auto'
-    } */
-    onHover && onHover(event)
-  }
-
   render () {
-    const { view, children = [], selectable, editable, hoverable, hoverCursor } = this.props
+    const { view, children = [], selectable, editable, hoverable } = this.props
     const { layer, editingKeys, selectedKeys } = this.state
     
     if (layer) {
@@ -146,15 +157,12 @@ class GraphicsLayer extends Component {
 
           selectable,
           selected: selectedKeys.includes(graphicKey),
-          onSelect: this.selectHandler,
 
           editable,
           editing: editingKeys.includes(graphicKey),
           onEdit: this.editHandler,
 
-          hoverable,
-          hoverCursor,
-          onHover: this.hoverHandler
+          hoverable
         })
       })
     } else {
@@ -191,6 +199,7 @@ GraphicsLayer.defaultProps = {
   properties: null,
   selectable: true,
   hoverable: true,
+  hoverCursor: 'pointer',
   editable: true
 }
 

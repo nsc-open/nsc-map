@@ -398,7 +398,6 @@ function (_EventEmitter) {
     _this7.view = view;
     _this7.layer = layer;
     _this7.graphic = null;
-    _this7.eventHandlers = [];
     _this7.destroying = false;
     _this7.state = new BaseState();
     return _this7;
@@ -423,8 +422,6 @@ function (_EventEmitter) {
         _this8.graphic = graphic;
         utils.addGraphic(_this8.layer, graphic);
 
-        _this8.bindEvents();
-
         _this8.changeState('normal');
       });
     }
@@ -433,60 +430,7 @@ function (_EventEmitter) {
     value: function destroy() {
       this.destroying = true;
       this.state.destroy();
-      this.unbindEvents();
       utils.removeGraphic(this.layer, this.graphic);
-    }
-  }, {
-    key: "bindEvents",
-    value: function bindEvents() {
-      var _this9 = this;
-
-      var view = this.view,
-          graphic = this.graphic;
-
-      var isSame = function isSame(g1, g2) {
-        if (_this9.layer.type === 'graphics') {
-          return g1 === g2;
-        } else if (_this9.layer.type === 'feature') {
-          return g1.attributes.key === g2.attributes.key;
-        }
-      };
-
-      this.eventHandlers = [view.on('click', function (e) {
-        view.hitTest(e).then(function (_ref4) {
-          var results = _ref4.results;
-          var hit = !!results.find(function (r) {
-            return isSame(r.graphic, graphic);
-          });
-
-          _this9.emit('select', {
-            event: e,
-            hit: hit,
-            graphic: graphic
-          });
-        });
-      }), view.on('pointer-move', function (e) {
-        view.hitTest(e).then(function (_ref5) {
-          var results = _ref5.results;
-          var hit = !!results.find(function (r) {
-            return isSame(r.graphic, graphic);
-          });
-
-          _this9.emit('hover', {
-            event: e,
-            hit: hit,
-            graphic: graphic
-          });
-        });
-      })];
-    }
-  }, {
-    key: "unbindEvents",
-    value: function unbindEvents() {
-      this.eventHandlers.forEach(function (h) {
-        return h.remove();
-      });
-      this.eventHandlers = [];
     }
   }, {
     key: "changeState",
@@ -509,17 +453,17 @@ function (_EventEmitter) {
 
   }, {
     key: "update",
-    value: function update(_ref6) {
-      var _this10 = this;
+    value: function update(_ref4) {
+      var _this9 = this;
 
-      var properties = _ref6.properties,
-          json = _ref6.json;
+      var properties = _ref4.properties,
+          json = _ref4.json;
 
       if (properties) {
         this.state.update(properties);
       } else {
         utils.json2Properties(json).then(function (properties) {
-          _this10.state.update(properties);
+          _this9.state.update(properties);
         });
       }
     }

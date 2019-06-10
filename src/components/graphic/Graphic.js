@@ -21,8 +21,6 @@ class Graphic extends Component {
     const { view, layer, properties, json } = this.props
     this.stateManager = new StateManager({ view, layer })
     this.stateManager.init({ properties, json })
-    this.stateManager.on('select', this.selectHandler)
-    this.stateManager.on('hover', this.hoverHandler)
     this.stateManager.on('edit', this.editHandler)
   }
 
@@ -62,24 +60,6 @@ class Graphic extends Component {
     }
   }
 
-  selectHandler = ({ event, graphic, hit: selected }) => {
-    const { onSelect } = this.props
-    onSelect && onSelect({
-      selected, graphic, event,
-      key: Graphic.getKey({ properties: graphic })
-    })
-  }
-
-  hoverHandler = ({ event, graphic, hit: hover }) => {
-    const { hoverable, onHover } = this.props
-    if (hoverable) {
-      onHover && onHover({
-        hover, graphic, event,
-        key: Graphic.getKey({ properties: graphic })
-      })
-    }
-  }
-
   editHandler = ({ graphic, event }) => {
     const { onEdit } = this.props
     onEdit && onEdit({ graphic, event, key: Graphic.getKey({ properties: graphic }) })
@@ -100,30 +80,22 @@ Graphic.propTypes = {
 
   // hover related
   hoverable: PropTypes.bool,
-  hoverCursor: PropTypes.string,
-  onHover: PropTypes.func,
 
   // select related
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
-  onSelect: PropTypes.func,
 
   // edit related
   editable: PropTypes.bool,
   editing: PropTypes.bool,
-  onEdit: PropTypes.func,
-
-  
+  onEdit: PropTypes.func
 }
 
 Graphic.defaultProps = {
   hoverable: true,
-  hoverCursor: 'pointer',
-  onHover: null,
 
   selectable: true,
   selected: false,
-  onSelect: null,
 
   editable: true,
   editing: false,

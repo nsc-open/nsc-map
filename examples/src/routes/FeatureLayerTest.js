@@ -34,13 +34,15 @@ export default class extends Component {
   
   onLoad = (map, view) => {
     this.setState({ map, view }, () => {
+      window.map = map
+      window.view = view
       setTimeout(() => this.updateGeometry(), 2000)
     })
   }
 
   onSelect = (selectedKeys, details) => {
     console.log('=> onSelect', selectedKeys, details)
-    this.setState({ selectedKeys })
+    this.setState({ editingKeys: selectedKeys })
   }
 
   onEdit = ({ graphic, e, key }) => {

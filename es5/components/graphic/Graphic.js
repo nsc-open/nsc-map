@@ -42,44 +42,9 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Graphic).call(this, props));
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "selectHandler", function (_ref) {
-      var event = _ref.event,
-          graphic = _ref.graphic,
-          selected = _ref.hit;
-      var onSelect = _this.props.onSelect;
-      onSelect && onSelect({
-        selected: selected,
-        graphic: graphic,
-        event: event,
-        key: Graphic.getKey({
-          properties: graphic
-        })
-      });
-    });
-
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "hoverHandler", function (_ref2) {
-      var event = _ref2.event,
-          graphic = _ref2.graphic,
-          hover = _ref2.hit;
-      var _this$props = _this.props,
-          hoverable = _this$props.hoverable,
-          onHover = _this$props.onHover;
-
-      if (hoverable) {
-        onHover && onHover({
-          hover: hover,
-          graphic: graphic,
-          event: event,
-          key: Graphic.getKey({
-            properties: graphic
-          })
-        });
-      }
-    });
-
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "editHandler", function (_ref3) {
-      var graphic = _ref3.graphic,
-          event = _ref3.event;
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "editHandler", function (_ref) {
+      var graphic = _ref.graphic,
+          event = _ref.event;
       var onEdit = _this.props.onEdit;
       onEdit && onEdit({
         graphic: graphic,
@@ -97,11 +62,11 @@ function (_Component) {
   _createClass(Graphic, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this$props2 = this.props,
-          view = _this$props2.view,
-          layer = _this$props2.layer,
-          properties = _this$props2.properties,
-          json = _this$props2.json;
+      var _this$props = this.props,
+          view = _this$props.view,
+          layer = _this$props.layer,
+          properties = _this$props.properties,
+          json = _this$props.json;
       this.stateManager = new StateManager({
         view: view,
         layer: layer
@@ -110,8 +75,6 @@ function (_Component) {
         properties: properties,
         json: json
       });
-      this.stateManager.on('select', this.selectHandler);
-      this.stateManager.on('hover', this.hoverHandler);
       this.stateManager.on('edit', this.editHandler);
     }
   }, {
@@ -125,13 +88,13 @@ function (_Component) {
     value: function componentDidUpdate(prevProps) {
       var _this2 = this;
 
-      var _this$props3 = this.props,
-          properties = _this$props3.properties,
-          json = _this$props3.json,
-          selected = _this$props3.selected,
-          selectable = _this$props3.selectable,
-          editable = _this$props3.editable,
-          editing = _this$props3.editing;
+      var _this$props2 = this.props,
+          properties = _this$props2.properties,
+          json = _this$props2.json,
+          selected = _this$props2.selected,
+          selectable = _this$props2.selectable,
+          editable = _this$props2.editable,
+          editing = _this$props2.editing;
 
       var needSync = function needSync(name) {
         return !prevProps && name in _this2.props || prevProps && prevProps[name] !== _this2.props[name];
@@ -186,12 +149,9 @@ Graphic.propTypes = {
   json: PropTypes.object,
   // hover related
   hoverable: PropTypes.bool,
-  hoverCursor: PropTypes.string,
-  onHover: PropTypes.func,
   // select related
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
-  onSelect: PropTypes.func,
   // edit related
   editable: PropTypes.bool,
   editing: PropTypes.bool,
@@ -199,11 +159,8 @@ Graphic.propTypes = {
 };
 Graphic.defaultProps = {
   hoverable: true,
-  hoverCursor: 'pointer',
-  onHover: null,
   selectable: true,
   selected: false,
-  onSelect: null,
   editable: true,
   editing: false,
   onEdit: null
@@ -211,9 +168,9 @@ Graphic.defaultProps = {
 Graphic.keyAttribute = KEY_ATTRIBUTE;
 
 Graphic.getKey = function (props) {
-  var _ref4 = props.properties || props.json,
-      _ref4$attributes = _ref4.attributes,
-      attributes = _ref4$attributes === void 0 ? {} : _ref4$attributes;
+  var _ref2 = props.properties || props.json,
+      _ref2$attributes = _ref2.attributes,
+      attributes = _ref2$attributes === void 0 ? {} : _ref2$attributes;
 
   return attributes.key;
 };
