@@ -259,7 +259,7 @@ function (_Component) {
       if (layer) {
         console.log('FeatureLayer render has layer', this);
         return Children.map(children, function (child) {
-          var graphicKey = Graphic.getKey(child.props);
+          var graphicKey = Graphic.key(child.props.properties || child.props.json);
           return React.cloneElement(child, {
             view: view,
             layer: layer,

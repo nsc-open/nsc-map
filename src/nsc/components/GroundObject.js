@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import Graphic from './graphic/Graphic'
+import Graphic from '../../esri/components/graphic/Graphic'
 
 /**
  * GroundObject is a wrapper component of Graphic

@@ -1,5 +1,5 @@
 import { loadModules } from 'esri-module-loader'
-import * as geometryUtils from '../../utils/geometry'
+import * as geometryUtils from '../../../utils/geometry'
 
 
 /**

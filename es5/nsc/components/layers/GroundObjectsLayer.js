@@ -22,10 +22,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
-import GroupLayer from './GroupLayer';
-import FeatureLayer from './FeatureLayer';
-import { GEOMETRY_TYPE } from '../../constants/geometry';
-import * as geometryUtils from '../../utils/geometry';
+import GroupLayer from '../../../esri/components/layers/GroupLayer';
+import FeatureLayer from '../../../esri/components/layers/FeatureLayer';
+import { GEOMETRY_TYPE } from '../../../constants/geometry';
+import * as geometryUtils from '../../../utils/geometry';
 var defaultFeatureLayerProperties = {
   source: [],
   objectIdField: 'ObjectID',

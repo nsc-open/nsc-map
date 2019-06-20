@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
 import Toolbar from 'nsc-map/components/tools/toolbar/Toolbar'
 import SelectOptionsBar from 'nsc-map/components/tools/select/SelectOptions'
-import GraphicsLayer from 'nsc-map/components/layers/GraphicsLayer'
-import Graphic from 'nsc-map/components/graphic/Graphic'
+import GraphicsLayer from 'nsc-map/esri/components/layers/GraphicsLayer'
+import Graphic from 'nsc-map/esri/components/graphic/Graphic'
 import { polygon, polyline } from 'mock/geometry-jsons'
 
 export default class extends Component {

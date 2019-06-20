@@ -21,7 +21,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import StateManager from './state';
-var KEY_ATTRIBUTE = 'key';
 /**
  * usage:
  *  <GraphicsLayer>
@@ -49,7 +48,7 @@ function (_Component) {
       onEdit && onEdit({
         graphic: graphic,
         event: event,
-        key: Graphic.getKey({
+        key: Graphic.key({
           properties: graphic
         })
       });
@@ -165,14 +164,16 @@ Graphic.defaultProps = {
   editing: false,
   onEdit: null
 };
+var KEY_ATTRIBUTE = 'key';
 Graphic.keyAttribute = KEY_ATTRIBUTE;
-
-Graphic.getKey = function (props) {
-  var _ref2 = props.properties || props.json,
-      _ref2$attributes = _ref2.attributes,
-      attributes = _ref2$attributes === void 0 ? {} : _ref2$attributes;
-
-  return attributes.key;
+export var config = function config(_ref2) {
+  var keyAttribute = _ref2.keyAttribute;
+  Graphic.keyAttribute = keyAttribute;
 };
-
+export var key = function key(graphic) {
+  var attributes = graphic.attributes || {};
+  return attributes[Graphic.keyAttribute];
+};
+Graphic.config = config;
+Graphic.key = key;
 export default Graphic;

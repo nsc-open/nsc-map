@@ -2,8 +2,6 @@ import { Component } from 'react'
 import PropTypes from 'prop-types'
 import StateManager from './state'
 
-const KEY_ATTRIBUTE = 'key'
-
 /**
  * usage:
  *  <GraphicsLayer>
@@ -62,7 +60,7 @@ class Graphic extends Component {
 
   editHandler = ({ graphic, event }) => {
     const { onEdit } = this.props
-    onEdit && onEdit({ graphic, event, key: Graphic.getKey({ properties: graphic }) })
+    onEdit && onEdit({ graphic, event, key: Graphic.key({ properties: graphic }) })
   }
 
   render () {
@@ -102,11 +100,19 @@ Graphic.defaultProps = {
   onEdit: null
 }
 
-
+const KEY_ATTRIBUTE = 'key'
 Graphic.keyAttribute = KEY_ATTRIBUTE
-Graphic.getKey = props => {
-  const { attributes = {} } = props.properties || props.json
-  return attributes.key
+
+export const config = ({ keyAttribute }) => {
+  Graphic.keyAttribute = keyAttribute
 }
+
+export const key = (graphic) => {
+  const attributes = graphic.attributes || {}
+  return attributes[Graphic.keyAttribute]
+}
+
+Graphic.config = config
+Graphic.key = key
 
 export default Graphic

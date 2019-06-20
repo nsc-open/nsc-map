@@ -1,5 +1,5 @@
 import { loadModules } from 'esri-module-loader';
-import * as geometryUtils from '../../utils/geometry';
+import * as geometryUtils from '../../../utils/geometry';
 /**
  * due to the reason that highlight GraphicsLayer is only support in SceneView.
  *       https://developers.arcgis.com/javascript/latest/api-reference/esri-views-layers-GraphicsLayerView.html#highlight} graphic 

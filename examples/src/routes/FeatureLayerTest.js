@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Map } from 'react-arcgis'
-import FeatureLayer from 'nsc-map/components/layers/FeatureLayer'
-import Graphic from 'nsc-map/components/graphic/Graphic'
+import FeatureLayer from 'nsc-map/esri/components/layers/FeatureLayer'
+import Graphic from 'nsc-map/esri/components/graphic/Graphic'
 import { polygon1, polygon2 } from 'mock/geometry-jsons'
 
 const geometryJsons = [polygon1, polygon2].map((p, i) => {
@@ -36,7 +36,7 @@ export default class extends Component {
     this.setState({ map, view }, () => {
       window.map = map
       window.view = view
-      setTimeout(() => this.updateGeometry(), 2000)
+      // setTimeout(() => this.updateGeometry(), 2000)
     })
   }
 
