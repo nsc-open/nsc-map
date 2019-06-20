@@ -62,10 +62,10 @@ class SelectOptions extends Component {
         选择方式：
         <ButtonGroup defaultValue={DEFAULT_TOOL} buttonStyle="solid" onChange={this.toolChangeHandler} size="small">
           {SELECT_TOOLS.map(tool => 
-            <RadioButton key={tool.key} icon={tool.icon} value={tool.key} disabled={tool.key === 'box'}>{tool.label}</RadioButton>
+            <RadioButton key={tool.key} icon={tool.icon} value={tool.key}>{tool.label}</RadioButton>
           )}
         </ButtonGroup>
-        <Checkbox disabled checked={enableMultiSelection} onChange={this.multiSelectChangeHandler} style={{marginLeft: '16px'}}>多选</Checkbox>
+        <Checkbox checked={enableMultiSelection} onChange={this.multiSelectChangeHandler} style={{marginLeft: '16px'}}>多选</Checkbox>
       </div>
     )
   }

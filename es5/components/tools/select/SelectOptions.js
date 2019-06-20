@@ -117,11 +117,9 @@ function (_Component) {
         return React.createElement(RadioButton, {
           key: tool.key,
           icon: tool.icon,
-          value: tool.key,
-          disabled: tool.key === 'box'
+          value: tool.key
         }, tool.label);
       })), React.createElement(Checkbox, {
-        disabled: true,
         checked: enableMultiSelection,
         onChange: this.multiSelectChangeHandler,
         style: {

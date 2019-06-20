@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import SelectionManager from '../SelectionManager'
 import PointerSelector from './PointerSelector'
+import BoxSelector from './BoxSelector'
 import { SELECTOR_TYPE } from './constants'
 import { highlight } from '../../utils/highlight'
 
@@ -75,16 +76,17 @@ class GraphicSelectionManager extends EventEmitter {
     }
   }
 
-  activate ({ type = SELECTOR_TYPE.POINTER, multiSelect = false }) {
+  activate ({ type = SELECTOR_TYPE.POINTER, multiSelect }) {
     this.deactivate()
 
     if (type === SELECTOR_TYPE.POINTER) {
       this.selector = new PointerSelector(this)
+      this.selectionManager.mode(multiSelect === true ? SelectionManager.MODE.MULTIPLE : SelectionManager.MODE.SINGLE) // default with single
     } else if (type === SELECTOR_TYPE.BOX) {
-      // TODO 
+      this.selector = new BoxSelector(this)
+      this.selectionManager.mode(multiSelect === false ? SelectionManager.MODE.SINGLE : SelectionManager.MODE.MULTIPLE) // default with multiple
     }
 
-    this.selectionManager.mode(multiSelect ? SelectionManager.MODE.MULTIPLE : SelectionManager.MODE.SINGLE)
     this.selector.activate()
   }
 

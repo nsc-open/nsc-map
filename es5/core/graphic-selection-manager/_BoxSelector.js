@@ -34,6 +34,12 @@ function (_BaseSelector) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(BoxSelector).call(this, args));
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "_dragHandler", function (e) {
+      console.log('drag e', e);
+
+      if (e.action === 'start') {} else if (e.action === 'end') {} else if (e.action === 'update') {}
+    });
+
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "_mapMouseDownHandler", function (e) {
       if (!_this._ready) {
         return;
@@ -97,39 +103,30 @@ function (_BaseSelector) {
     _this._ready = false;
     _this._modules = {};
     _this._handlers = [];
-
-    _this._init();
+    _this._status = ''; // initiating, ready, destroying
 
     return _this;
   }
 
   _createClass(BoxSelector, [{
-    key: "_init",
-    value: function _init() {
-      var _this2 = this;
-
-      loadModules(['GraphicsLayer', 'Color', 'SimpleLineSymbol', 'Graphic', 'Polygon', 'Extent', 'SpatialReference', 'geometryEngine']).then(function (modules) {
-        _this2._modules = modules;
-
-        _this2._createTempGraphicsLayer();
-
-        _this2._ready = true;
-      });
-    }
-  }, {
     key: "_createTempGraphicsLayer",
     value: function _createTempGraphicsLayer() {
-      var map = this.selectionManager.map;
-      var GraphicsLayer = this._modules.GraphicsLayer;
-      var graphicsLayer = new GraphicsLayer({
-        id: '__box_selector_temp_graphics_layer__'
+      var _this2 = this;
+
+      return loadModules('esri/layers/GraphicsLayer').then(function (GraphicsLayer) {
+        var view = _this2.selectionManager.view;
+        var map = view.map;
+        var graphicsLayer = new GraphicsLayer({
+          id: '__box_selector_temp_graphics_layer__'
+        });
+        map.addLayer(_this2._tempGraphicsLayer = graphicsLayer);
+        view.cursor = 'cross';
       });
-      map.addLayer(this._tempGraphicsLayer = graphicsLayer);
     }
   }, {
     key: "_removeTempGraphicsLayer",
     value: function _removeTempGraphicsLayer() {
-      var map = this.selectionManager.map;
+      var map = this.selectionManager.view.map;
 
       if (this._tempGraphicsLayer) {
         map.removeLayer(this._tempGraphicsLayer);
@@ -138,8 +135,11 @@ function (_BaseSelector) {
   }, {
     key: "_bindEvents",
     value: function _bindEvents() {
-      var map = this.selectionManager.map;
-      this._handlers = [map.on('mouse-drag-start', this._mapMouseDownHandler), map.on('mouse-drag', this._mapMouseMoveHandler), map.on('mouse-drag-end', this._mapMouseUpHandler)];
+      var view = this.selectionManager.view;
+      this._handlers = [view.on('drag', this._dragHandler) // map.on('mouse-drag-start', this._mapMouseDownHandler),
+      // map.on('mouse-drag', this._mapMouseMoveHandler),
+      // map.on('mouse-drag-end', this._mapMouseUpHandler)
+      ];
     }
   }, {
     key: "_unbindEvents",
@@ -174,16 +174,18 @@ function (_BaseSelector) {
   }, {
     key: "activate",
     value: function activate() {
-      this._bindEvents();
+      var _this3 = this;
 
-      this.selectionManager.map.disableMapNavigation();
+      this._createTempGraphicsLayer().then(function (_) {
+        _this3._bindEvents(); // this.selectionManager.view.map.disableMapNavigation()
+
+      });
     }
   }, {
     key: "deactivate",
     value: function deactivate() {
-      this._unbindEvents();
+      this._unbindEvents(); // this.selectionManager.map.enableMapNavigation()
 
-      this.selectionManager.map.enableMapNavigation();
     }
   }]);
 

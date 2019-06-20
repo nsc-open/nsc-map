@@ -38,6 +38,7 @@ export default class extends Component {
     ]).then(({ GraphicsLayer, FeatureLayer, Graphic, LabelClass }) => {
       const graphicsLayer = new GraphicsLayer()
       const featureLayer = new FeatureLayer({
+        spatialReference: { wkid: 102100 },
         source: [],
         geometryType: 'polygon',
         objectIdField: 'ObjectID',
@@ -71,6 +72,7 @@ export default class extends Component {
       })
 
       const polylineFeatureLayer = new FeatureLayer({
+        spatialReference: { wkid: 102100 },
         source: [],
         geometryType: 'polyline',
         objectIdField: 'ObjectID',
@@ -175,7 +177,7 @@ export default class extends Component {
         ref={c => window.x = c}
         view={view}
         map={view}
-        sourceLayers={[this.polygonFeatureLayer, this.polylineFeatureLayer]}
+        sourceLayers={[this.polygonFeatureLayer, this.polylineFeatureLayer, this.graphicsLayer]}
         onSelectionChange={e => console.log(e)}
       />
     }] : []

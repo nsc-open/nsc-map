@@ -21,6 +21,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 import EventEmitter from 'eventemitter3';
 import SelectionManager from '../SelectionManager';
 import PointerSelector from './PointerSelector';
+import BoxSelector from './BoxSelector';
 import { SELECTOR_TYPE } from './constants';
 import { highlight as _highlight } from '../../utils/highlight';
 /**
@@ -142,16 +143,17 @@ function (_EventEmitter) {
     value: function activate(_ref3) {
       var _ref3$type = _ref3.type,
           type = _ref3$type === void 0 ? SELECTOR_TYPE.POINTER : _ref3$type,
-          _ref3$multiSelect = _ref3.multiSelect,
-          multiSelect = _ref3$multiSelect === void 0 ? false : _ref3$multiSelect;
+          multiSelect = _ref3.multiSelect;
       this.deactivate();
 
       if (type === SELECTOR_TYPE.POINTER) {
         this.selector = new PointerSelector(this);
-      } else if (type === SELECTOR_TYPE.BOX) {// TODO 
+        this.selectionManager.mode(multiSelect === true ? SelectionManager.MODE.MULTIPLE : SelectionManager.MODE.SINGLE); // default with single
+      } else if (type === SELECTOR_TYPE.BOX) {
+        this.selector = new BoxSelector(this);
+        this.selectionManager.mode(multiSelect === false ? SelectionManager.MODE.SINGLE : SelectionManager.MODE.MULTIPLE); // default with multiple
       }
 
-      this.selectionManager.mode(multiSelect ? SelectionManager.MODE.MULTIPLE : SelectionManager.MODE.SINGLE);
       this.selector.activate();
     }
   }, {
