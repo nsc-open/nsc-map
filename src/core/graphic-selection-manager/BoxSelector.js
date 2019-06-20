@@ -25,13 +25,13 @@ class BoxSelector extends BaseSelector {
       'esri/geometry/geometryEngine', // preload
       'esri/Graphic'
     ]).then(({ GraphicsLayer, Polygon, Graphic }) => {
-      const { view } = this.gsm
+      const { view, layers } = this.gsm
       const { map } = view
       const graphicsLayer = new GraphicsLayer({ id: '__box_selector_temp_graphics_layer__' })
       const boxGraphic = new Graphic({
         geometry: new Polygon({
           rings: [],
-          spatialReference: { wkid: 102100 }
+          spatialReference: { wkid: layers[0].spatialReference.wkid }
         }),
         symbol: {
           type: "simple-fill",
@@ -75,10 +75,11 @@ class BoxSelector extends BaseSelector {
     e.stopPropagation()
     loadModules('esri/geometry/Polygon').then(Polygon => {
       const { x, y } = e
-      this._startPoint = this.gsm.view.toMap({ x, y })
+      const { view, layers } = this.gsm
+      this._startPoint = view.toMap({ x, y })
       this._boxGraphic.geometry = new Polygon({
         rings: [],
-        spatialReference: { wkid: 102100 }
+        spatialReference: { wkid: layers[0].spatialReference.wkid }
       })
       this._tempGraphicsLayer.add(this._boxGraphic)
     })
@@ -92,11 +93,12 @@ class BoxSelector extends BaseSelector {
         'esri/geometry/Extent'
       ]).then(({ Polygon, Extent }) => {
         const { x, y } = e
-        const mapPoint = this.gsm.view.toMap({ x, y })
+        const { view, layers } = this.gsm
+        const mapPoint = view.toMap({ x, y })
         const ext = new Extent({
           xmin: Math.min(this._startPoint.x, mapPoint.x), ymin: Math.min(this._startPoint.y, mapPoint.y),
           xmax: Math.max(this._startPoint.x, mapPoint.x), ymax: Math.max(this._startPoint.y, mapPoint.y),
-          spatialReference: { wkid: 102100 }
+          spatialReference: { wkid: layers[0].spatialReference.wkid }
         })
   
         this._boxGraphic.geometry = Polygon.fromExtent(ext)
@@ -128,16 +130,18 @@ class BoxSelector extends BaseSelector {
         })
       })
 
-      Promise.all(featureLayers.map(layer => {
-        layer.queryFeatures().then(result => {
+      Promise.all(
+        featureLayers.map(layer => layer.queryFeatures())
+      ).then(results => {
+        results.forEach(result => {
           result.features.forEach(g => {
             if (geometryEngine.intersects(boxGeometry, g.geometry)) {
               selectedGraphics.push(g)
             }
           })
-          selectionManager.select(selectedGraphics)
         })
-      }))  
+        selectionManager.select(selectedGraphics)
+      }) 
     })
   }
 

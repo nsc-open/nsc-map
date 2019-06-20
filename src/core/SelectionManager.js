@@ -21,7 +21,6 @@ class SelectionManager extends EventEmitter {
 
   _setSelection ({ selection = [], added = [], removed = [] }) {
     this.selection = selection
-
     if (added.length > 0 || removed.length > 0) {
       this.emit(SELECTION_CHANGE_EVENT, { selection, added, removed })
     }

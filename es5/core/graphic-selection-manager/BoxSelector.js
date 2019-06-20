@@ -51,14 +51,17 @@ function (_BaseSelector) {
       loadModules('esri/geometry/Polygon').then(function (Polygon) {
         var x = e.x,
             y = e.y;
-        _this._startPoint = _this.gsm.view.toMap({
+        var _this$gsm = _this.gsm,
+            view = _this$gsm.view,
+            layers = _this$gsm.layers;
+        _this._startPoint = view.toMap({
           x: x,
           y: y
         });
         _this._boxGraphic.geometry = new Polygon({
           rings: [],
           spatialReference: {
-            wkid: 102100
+            wkid: layers[0].spatialReference.wkid
           }
         });
 
@@ -74,19 +77,20 @@ function (_BaseSelector) {
               Extent = _ref.Extent;
           var x = e.x,
               y = e.y;
-
-          var mapPoint = _this.gsm.view.toMap({
+          var _this$gsm2 = _this.gsm,
+              view = _this$gsm2.view,
+              layers = _this$gsm2.layers;
+          var mapPoint = view.toMap({
             x: x,
             y: y
           });
-
           var ext = new Extent({
             xmin: Math.min(_this._startPoint.x, mapPoint.x),
             ymin: Math.min(_this._startPoint.y, mapPoint.y),
             xmax: Math.max(_this._startPoint.x, mapPoint.x),
             ymax: Math.max(_this._startPoint.y, mapPoint.y),
             spatialReference: {
-              wkid: 102100
+              wkid: layers[0].spatialReference.wkid
             }
           });
           _this._boxGraphic.geometry = Polygon.fromExtent(ext);
@@ -127,7 +131,9 @@ function (_BaseSelector) {
         var GraphicsLayer = _ref2.GraphicsLayer,
             Polygon = _ref2.Polygon,
             Graphic = _ref2.Graphic;
-        var view = _this2.gsm.view;
+        var _this2$gsm = _this2.gsm,
+            view = _this2$gsm.view,
+            layers = _this2$gsm.layers;
         var map = view.map;
         var graphicsLayer = new GraphicsLayer({
           id: '__box_selector_temp_graphics_layer__'
@@ -136,7 +142,7 @@ function (_BaseSelector) {
           geometry: new Polygon({
             rings: [],
             spatialReference: {
-              wkid: 102100
+              wkid: layers[0].spatialReference.wkid
             }
           }),
           symbol: {
@@ -190,15 +196,17 @@ function (_BaseSelector) {
           });
         });
         Promise.all(featureLayers.map(function (layer) {
-          layer.queryFeatures().then(function (result) {
+          return layer.queryFeatures();
+        })).then(function (results) {
+          results.forEach(function (result) {
             result.features.forEach(function (g) {
               if (geometryEngine.intersects(boxGeometry, g.geometry)) {
                 selectedGraphics.push(g);
               }
             });
-            selectionManager.select(selectedGraphics);
           });
-        }));
+          selectionManager.select(selectedGraphics);
+        });
       });
     }
   }, {
