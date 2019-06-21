@@ -196,7 +196,12 @@ function (_BaseSelector) {
           });
         });
         Promise.all(featureLayers.map(function (layer) {
-          return layer.queryFeatures();
+          var query = layer.createQuery();
+          query.outFields = layer.fields.map(function (f) {
+            return f.name;
+          }); // by default, outFields is not all the fields
+
+          return layer.queryFeatures(query);
         })).then(function (results) {
           results.forEach(function (result) {
             result.features.forEach(function (g) {

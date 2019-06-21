@@ -131,7 +131,11 @@ class BoxSelector extends BaseSelector {
       })
 
       Promise.all(
-        featureLayers.map(layer => layer.queryFeatures())
+        featureLayers.map(layer => {
+          const query = layer.createQuery()
+          query.outFields = layer.fields.map(f => f.name) // by default, outFields is not all the fields
+          return layer.queryFeatures(query)
+        })
       ).then(results => {
         results.forEach(result => {
           result.features.forEach(g => {
