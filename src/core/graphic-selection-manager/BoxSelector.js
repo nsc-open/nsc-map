@@ -109,13 +109,13 @@ class BoxSelector extends BaseSelector {
   _dragEndHandler = e => {
     if (this._boxGraphic) {
       e.stopPropagation()
-      this._computeIntersects(this._boxGraphic.geometry)
+      this._computeIntersects(this._boxGraphic.geometry, e)
       this._tempGraphicsLayer.remove(this._boxGraphic)
       this._startPoint = null
     }
   }
 
-  _computeIntersects (boxGeometry) {
+  _computeIntersects (boxGeometry, event) {
     loadModules('esri/geometry/geometryEngine').then(geometryEngine => {
       const { layers, selectionManager } = this.gsm
       const graphicsLayers = layers.filter(l => l.type === 'graphics')
@@ -144,7 +144,7 @@ class BoxSelector extends BaseSelector {
             }
           })
         })
-        selectionManager.select(selectedGraphics)
+        selectionManager.select(selectedGraphics, { event })
       }) 
     })
   }

@@ -40,9 +40,9 @@ class GraphicSelectionManager extends EventEmitter {
     this.selectionManager.on('selectionChange', this._selectionChangeHandler)    
   }
 
-  _selectionChangeHandler = ({ selection, added, removed }) => {
+  _selectionChangeHandler = ({ selection, added, removed, ...rest }) => {
     this.highlight(selection)
-    this.emit('selectionChange', ({ selection, added, removed }))
+    this.emit('selectionChange', ({ selection, added, removed, ...rest }))
   }
 
   clearHighlight () {

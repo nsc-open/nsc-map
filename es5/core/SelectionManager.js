@@ -64,7 +64,7 @@ function (_EventEmitter) {
 
   _createClass(SelectionManager, [{
     key: "_setSelection",
-    value: function _setSelection(_ref) {
+    value: function _setSelection(_ref, meta) {
       var _ref$selection = _ref.selection,
           selection = _ref$selection === void 0 ? [] : _ref$selection,
           _ref$added = _ref.added,
@@ -77,7 +77,8 @@ function (_EventEmitter) {
         this.emit(SELECTION_CHANGE_EVENT, {
           selection: selection,
           added: added,
-          removed: removed
+          removed: removed,
+          meta: meta
         });
       }
     }
@@ -128,7 +129,7 @@ function (_EventEmitter) {
     }
   }, {
     key: "select",
-    value: function select(selection) {
+    value: function select(selection, meta) {
       var _this3 = this;
 
       selection = this._normalizeSelection(selection || []);
@@ -143,7 +144,7 @@ function (_EventEmitter) {
         selection: selection,
         added: toAdd,
         removed: toRemove
-      });
+      }, meta);
     }
   }, {
     key: "clear",
@@ -156,7 +157,7 @@ function (_EventEmitter) {
     }
   }, {
     key: "add",
-    value: function add(selection) {
+    value: function add(selection, meta) {
       var _this4 = this;
 
       var newSelection = _toConsumableArray(this.selection);
@@ -173,11 +174,11 @@ function (_EventEmitter) {
       this._setSelection({
         selection: newSelection,
         added: toAdd
-      });
+      }, meta);
     }
   }, {
     key: "remove",
-    value: function remove(selection) {
+    value: function remove(selection, meta) {
       var _this5 = this;
 
       var toRemove = [];
@@ -194,7 +195,7 @@ function (_EventEmitter) {
       this._setSelection({
         selection: toRemain,
         removed: toRemove
-      });
+      }, meta);
     }
   }]);
 

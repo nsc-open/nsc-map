@@ -102,7 +102,7 @@ function (_BaseSelector) {
       if (_this._boxGraphic) {
         e.stopPropagation();
 
-        _this._computeIntersects(_this._boxGraphic.geometry);
+        _this._computeIntersects(_this._boxGraphic.geometry, e);
 
         _this._tempGraphicsLayer.remove(_this._boxGraphic);
 
@@ -174,7 +174,7 @@ function (_BaseSelector) {
     }
   }, {
     key: "_computeIntersects",
-    value: function _computeIntersects(boxGeometry) {
+    value: function _computeIntersects(boxGeometry, event) {
       var _this3 = this;
 
       loadModules('esri/geometry/geometryEngine').then(function (geometryEngine) {
@@ -210,7 +210,9 @@ function (_BaseSelector) {
               }
             });
           });
-          selectionManager.select(selectedGraphics);
+          selectionManager.select(selectedGraphics, {
+            event: event
+          });
         });
       });
     }

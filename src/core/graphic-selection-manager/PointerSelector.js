@@ -27,13 +27,13 @@ class PointerSelector extends BaseSelector {
           if (this._multipleMode && selectionManager.mode() === MODE.MULTIPLE) {
             selectedGraphics.forEach(graphic => {
               if (selectionManager.includes(graphic)) {
-                selectionManager.remove(graphic)
+                selectionManager.remove(graphic, { event: e })
               } else {
-                selectionManager.add(graphic)
+                selectionManager.add(graphic, { event: e })
               }
             })
           } else {
-            selectionManager.select(selectedGraphics)
+            selectionManager.select(selectedGraphics, { event: e })
           }
         })
       }),

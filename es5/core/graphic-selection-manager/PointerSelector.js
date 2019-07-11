@@ -64,13 +64,19 @@ function (_BaseSelector) {
           if (_this2._multipleMode && selectionManager.mode() === MODE.MULTIPLE) {
             selectedGraphics.forEach(function (graphic) {
               if (selectionManager.includes(graphic)) {
-                selectionManager.remove(graphic);
+                selectionManager.remove(graphic, {
+                  event: e
+                });
               } else {
-                selectionManager.add(graphic);
+                selectionManager.add(graphic, {
+                  event: e
+                });
               }
             });
           } else {
-            selectionManager.select(selectedGraphics);
+            selectionManager.select(selectedGraphics, {
+              event: e
+            });
           }
         });
       }), view.on('key-down', function (e) {

@@ -19,10 +19,10 @@ class SelectionManager extends EventEmitter {
     this.selection = []
   }
 
-  _setSelection ({ selection = [], added = [], removed = [] }) {
+  _setSelection ({ selection = [], added = [], removed = [] }, meta) {
     this.selection = selection
     if (added.length > 0 || removed.length > 0) {
-      this.emit(SELECTION_CHANGE_EVENT, { selection, added, removed })
+      this.emit(SELECTION_CHANGE_EVENT, { selection, added, removed, meta })
     }
   }
 
@@ -58,7 +58,7 @@ class SelectionManager extends EventEmitter {
     return this._includes(this.selection, item)
   }
 
-  select (selection) {
+  select (selection, meta) {
     selection = this._normalizeSelection(selection || [])
     const toAdd = selection.filter(s => !this._includes(this.selection, s))
     const toRemove = this.selection.filter(s => !this._includes(selection, s))
@@ -67,7 +67,7 @@ class SelectionManager extends EventEmitter {
       selection,
       added: toAdd,
       removed: toRemove
-    })
+    }, meta)
   }
 
   clear () {
@@ -76,7 +76,7 @@ class SelectionManager extends EventEmitter {
     }
   }
 
-  add (selection) {
+  add (selection, meta) {
     const newSelection = [...this.selection]
     const toAdd = []
 
@@ -90,10 +90,10 @@ class SelectionManager extends EventEmitter {
     this._setSelection({
       selection: newSelection,
       added: toAdd
-    })
+    }, meta)
   }
 
-  remove (selection) {
+  remove (selection, meta) {
     const toRemove = []
     const toRemain = []
     selection = this._normalizeSelection(selection)
@@ -109,7 +109,7 @@ class SelectionManager extends EventEmitter {
     this._setSelection({
       selection: toRemain,
       removed: toRemove
-    })
+    }, meta)
   }
 }
 
