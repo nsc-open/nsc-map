@@ -15,7 +15,6 @@ const defaultLayerLoader = (map, layer) => {
 
 const setLayerVisibility = (map, layerId, visibility) => {
   const layer = map.findLayerById(layerId)
-  console.log('- setLayerVisibility -', layer)
   layer && (layer.visible = visibility)
 }
 
@@ -38,9 +37,25 @@ class LayerServiceSelector extends Component {
     this.addLayers(this.props.layers)
   }
 
+  componentWillUnmount () {
+    this.removeLayers(this.props.layers)
+  }
+
   addLayers (layers) {
     const { layerLoader, map } = this.props
     layers.forEach(layer => layerLoader(map, layer))
+  }
+
+  removeLayers (layers) {
+    const { map } = this.props
+    const layerInstances = []
+    layers.forEach(l => {
+      const layer = map.findLayerById(l.id)
+      if (layer) {
+        layerInstances.push(layer)
+      }
+    })
+    map.removeMany(layerInstances)
   }
 
   switchHandler = layer => {

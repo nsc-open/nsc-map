@@ -42,7 +42,6 @@ var defaultLayerLoader = function defaultLayerLoader(map, layer) {
 
 var setLayerVisibility = function setLayerVisibility(map, layerId, visibility) {
   var layer = map.findLayerById(layerId);
-  console.log('- setLayerVisibility -', layer);
   layer && (layer.visible = visibility);
 };
 /**
@@ -118,6 +117,11 @@ function (_Component) {
       this.addLayers(this.props.layers);
     }
   }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      this.removeLayers(this.props.layers);
+    }
+  }, {
     key: "addLayers",
     value: function addLayers(layers) {
       var _this$props = this.props,
@@ -126,6 +130,20 @@ function (_Component) {
       layers.forEach(function (layer) {
         return layerLoader(map, layer);
       });
+    }
+  }, {
+    key: "removeLayers",
+    value: function removeLayers(layers) {
+      var map = this.props.map;
+      var layerInstances = [];
+      layers.forEach(function (l) {
+        var layer = map.findLayerById(l.id);
+
+        if (layer) {
+          layerInstances.push(layer);
+        }
+      });
+      map.removeMany(layerInstances);
     }
   }, {
     key: "renderPopoverContent",
