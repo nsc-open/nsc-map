@@ -44,12 +44,13 @@ export const createLayerServiceInstance = ({ id, url = '', type }) => {
     type ? Promise.resolve(type) : inferLayerServiceType(url),
     loadModules([
       'esri/layers/WebTileLayer',
+      'esri/layers/TileLayer',
       'esri/layers/MapImageLayer',
       'esri/identity/IdentityManager'
     ])
   ]).then(([
     layerServiceType,
-    { WebTileLayer, MapImageLayer, IdentityManager }
+    { WebTileLayer, TileLayer, MapImageLayer, IdentityManager }
   ]) => {
     if (isPBS(url)) {
       return new WebTileLayer({ id, urlTemplate: url + '/tile/{level}/{row}/{col}' })
@@ -65,7 +66,7 @@ export const createLayerServiceInstance = ({ id, url = '', type }) => {
       }
 
       return layerServiceType === LAYER_TYPE.TILE
-        ? new WebTileLayer({ id, url })
+        ? new TileLayer({ id, url })
         : new MapImageLayer({ id, url })
     }
   })
