@@ -1,12 +1,16 @@
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -14,15 +18,19 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -53,19 +61,19 @@ var setLayerVisibility = function setLayerVisibility(map, layerId, visibility) {
  */
 
 
-var LayerServiceSelector =
-/*#__PURE__*/
-function (_Component) {
+var LayerServiceSelector = /*#__PURE__*/function (_Component) {
   _inherits(LayerServiceSelector, _Component);
+
+  var _super = _createSuper(LayerServiceSelector);
 
   function LayerServiceSelector(props) {
     var _this;
 
     _classCallCheck(this, LayerServiceSelector);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(LayerServiceSelector).call(this, props));
+    _this = _super.call(this, props);
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "switchHandler", function (layer) {
+    _defineProperty(_assertThisInitialized(_this), "switchHandler", function (layer) {
       var map = _this.props.map;
       var selectedLayerIds = _this.state.selectedLayerIds;
       var newSelectedLayerIds;
@@ -88,7 +96,7 @@ function (_Component) {
       setLayerVisibility(map, layer.id, checked);
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "locateHandler", function (layer) {
+    _defineProperty(_assertThisInitialized(_this), "locateHandler", function (layer) {
       var map = _this.props.map;
       var selectedLayerIds = _this.state.selectedLayerIds;
 
@@ -160,25 +168,25 @@ function (_Component) {
       });
 
       if (matched.length === 0) {
-        return React.createElement("div", {
+        return /*#__PURE__*/React.createElement("div", {
           style: {
             fontSize: '12px',
             color: 'rgba(0,0,0,.4)'
           }
         }, "\u8BE5\u5206\u7C7B\u4E0B\u65E0\u56FE\u5C42");
       } else {
-        return React.createElement(List, {
+        return /*#__PURE__*/React.createElement(List, {
           size: "small",
           bordered: true,
           dataSource: matched,
           renderItem: function renderItem(item) {
-            return React.createElement(List.Item, {
-              actions: [React.createElement(Switch, {
+            return /*#__PURE__*/React.createElement(List.Item, {
+              actions: [/*#__PURE__*/React.createElement(Switch, {
                 checked: selectedLayerIds.includes(item.id),
                 onChange: function onChange() {
                   return _this2.switchHandler(item);
                 }
-              }), React.createElement(LayerLocator, {
+              }), /*#__PURE__*/React.createElement(LayerLocator, {
                 map: map,
                 view: view,
                 layerId: item.id,
@@ -201,13 +209,13 @@ function (_Component) {
       if (categories.length === 0) {
         return null;
       } else {
-        return React.createElement(ButtonGroup, null, categories.map(function (category, index) {
-          return React.createElement(Popover, {
+        return /*#__PURE__*/React.createElement(ButtonGroup, null, categories.map(function (category, index) {
+          return /*#__PURE__*/React.createElement(Popover, {
             key: index,
             content: _this3.renderPopoverContent(category.id),
             title: category.name,
             placement: "bottomRight"
-          }, React.createElement(Button, null, category.name));
+          }, /*#__PURE__*/React.createElement(Button, null, category.name));
         }));
       }
     }

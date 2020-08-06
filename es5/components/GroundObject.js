@@ -20,7 +20,7 @@ var GroundObject = function GroundObject(props) {
 
   if (geometryJson) {
     geometryJson.attributes = attributesMapper(bizData, geometryJson.attributes);
-    return React.createElement(Graphic, _extends({}, restProps, {
+    return /*#__PURE__*/React.createElement(Graphic, _extends({}, restProps, {
       geometryJson: geometryJson
     }));
   } else {

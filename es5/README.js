@@ -1,6 +1,7 @@
-React.createElement(Map, null, React.createElement(GroundObjectLayer, null, groundObjects.map(function (data) {
-  return React.createElement(GroundObject, {
+/*#__PURE__*/
+React.createElement(Map, null, /*#__PURE__*/React.createElement(GroundObjectLayer, null, groundObjects.map(function (data) {
+  return /*#__PURE__*/React.createElement(GroundObject, {
     key: data.id,
     geometryJson: data.geometryJson
   });
-})), React.createElement(SketchTools, null), React.createElement(MeasureTools, null), React.createElement(DynamicLayerSelector, null), React.createElement(BaseMapSelector, null));
+})), /*#__PURE__*/React.createElement(SketchTools, null), /*#__PURE__*/React.createElement(MeasureTools, null), /*#__PURE__*/React.createElement(DynamicLayerSelector, null), /*#__PURE__*/React.createElement(BaseMapSelector, null));

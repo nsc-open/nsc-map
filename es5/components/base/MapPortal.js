@@ -9,7 +9,7 @@ var MapPortal = function MapPortal(_ref) {
       view = _ref.view;
   // in 3.x api, map container is map.root
   // in 4.x api, map container is mapView.container
-  return createPortal(children, view.container || map.root);
+  return /*#__PURE__*/createPortal(children, view.container || map.root);
 };
 
 export default MapPortal;

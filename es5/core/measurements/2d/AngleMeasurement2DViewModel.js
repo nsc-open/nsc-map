@@ -15,9 +15,7 @@ var angleFormatter = function angleFormatter(value) {
   return value.toFixed(1) + '°';
 };
 
-var AngleMeasurement2DViewModel =
-/*#__PURE__*/
-function () {
+var AngleMeasurement2DViewModel = /*#__PURE__*/function () {
   function AngleMeasurement2DViewModel(_ref) {
     var view = _ref.view;
 

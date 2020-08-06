@@ -1,4 +1,4 @@
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6,15 +6,19 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -59,19 +63,19 @@ var styles = {
   }
 };
 
-var Toolbar =
-/*#__PURE__*/
-function (_Component) {
+var Toolbar = /*#__PURE__*/function (_Component) {
   _inherits(Toolbar, _Component);
+
+  var _super = _createSuper(Toolbar);
 
   function Toolbar(props) {
     var _this;
 
     _classCallCheck(this, Toolbar);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Toolbar).call(this, props));
+    _this = _super.call(this, props);
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "clickHandler", function (toolKey) {
+    _defineProperty(_assertThisInitialized(_this), "clickHandler", function (toolKey) {
       var activeToolKey = _this.state.activeToolKey;
       var active = false;
 
@@ -114,29 +118,29 @@ function (_Component) {
       var activeTool = tools.find(function (t) {
         return t.key === activeToolKey;
       });
-      return React.createElement("div", null, React.createElement(MapDraggable, {
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(MapDraggable, {
         map: map,
         view: view,
         defaultPosition: defaultPosition,
         direction: direction
-      }, React.createElement("div", {
+      }, /*#__PURE__*/React.createElement("div", {
         style: styles.bar
-      }, React.createElement("div", {
+      }, /*#__PURE__*/React.createElement("div", {
         style: styles.tools
       }, tools.map(function (tool, index) {
-        return tool.render ? tool.render() : React.createElement("div", {
+        return tool.render ? tool.render() : /*#__PURE__*/React.createElement("div", {
           key: index,
           style: activeToolKey === tool.key ? styles.activeTool : styles.tool,
           onClick: function onClick() {
             return _this2.clickHandler(tool.key);
           }
-        }, React.createElement(Tooltip, {
+        }, /*#__PURE__*/React.createElement(Tooltip, {
           title: tool.label,
           placement: "right"
-        }, React.createElement(Icon, {
+        }, /*#__PURE__*/React.createElement(Icon, {
           type: tool.icon
         })));
-      })))), activeTool && activeTool.optionsBar ? React.createElement(MapWidget, {
+      })))), activeTool && activeTool.optionsBar ? /*#__PURE__*/React.createElement(MapWidget, {
         map: map,
         view: view,
         draggable: true,
