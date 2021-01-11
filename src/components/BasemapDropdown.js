@@ -13,7 +13,7 @@ const LAYERS = {
   }, */
   // 20210111 google banned since today, use tianditu instead
   GOOGLE_MAP: {
-    urlTemplate: `http://t{subDomain}.tianditu.com/DataServer?tk=${TIANDITU_TOKEN}&T=vec_w&x={col}&y={row}&l={level}`,
+    urlTemplate: `http://t{subDomain}.tianditu.com/DataServer?tk=${TIANDITU_TOKEN}&T=img_w&x={col}&y={row}&l={level}`,
     subDomains: '01234567'.split('')
   },
 
