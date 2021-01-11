@@ -6,10 +6,18 @@ import BasemapManager from '../core/BasemapManager'
 const TIANDITU_TOKEN = 'e2b08de0708e5136fff0fccaf21dd9bd'
 
 const LAYERS = {
-  GOOGLE_MAP: {
+  
+  /* GOOGLE_MAP: {
     urlTemplate: 'http://mt{subDomain}.google.cn/vt/lyrs=s&x={col}&y={row}&z={level}&s=Gali',
     subDomains: '0123'.split('')
+  }, */
+  // 20210111 google banned since today, use tianditu instead
+  GOOGLE_MAP: {
+    urlTemplate: `http://t{subDomain}.tianditu.com/DataServer?tk=${TIANDITU_TOKEN}&T=vec_w&x={col}&y={row}&l={level}`,
+    subDomains: '01234567'.split('')
   },
+
+
   TIANDITU_MAP: {
     urlTemplate: `http://t{subDomain}.tianditu.com/DataServer?tk=${TIANDITU_TOKEN}&T=vec_w&x={col}&y={row}&l={level}`,
     subDomains: '01234567'.split('')
